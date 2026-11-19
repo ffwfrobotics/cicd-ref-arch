@@ -161,12 +161,13 @@ def scan_source(args) -> int:
 
     # secrets: the files as they are at this commit. History is the push hook's job.
     gl = out / "gitleaks.json"
-    run(["gitleaks", "dir", str(app), "--redact", "--no-banner", "--exit-code", "0", "-f", "json", "-r", str(gl),
-         "--gitleaks-ignore-path", str(app)], expect=gl, stdout=subprocess.DEVNULL)
+    # run from the app's directory, so fingerprints are repo-relative (file:rule:line) and match
+    # .gitleaksignore entries written by the hooks and by people
+    run(["gitleaks", "dir", ".", "--redact", "--no-banner", "--exit-code", "0", "-f", "json", "-r", str(gl),
+         "--gitleaks-ignore-path", ".gitleaksignore" if (app / ".gitleaksignore").exists() else "."],
+        expect=gl, stdout=subprocess.DEVNULL, cwd=app)
     if gl.exists():
-        findings += [dict(f, location=os.path.relpath(f["location"].rsplit(":", 1)[0], app) + ":" + f["location"].rsplit(":", 1)[1],
-                          fingerprint=os.path.relpath(f["fingerprint"].split(":", 1)[0], app) + ":" + f["fingerprint"].split(":", 1)[1])
-                     for f in parse_gitleaks(gl)]
+        findings += parse_gitleaks(gl)
         tools["gitleaks"] = tool_version(["gitleaks", "version"]); evidence["gitleaks"] = gl.name
 
     # code: platform rules, plus the app's own if it has any
