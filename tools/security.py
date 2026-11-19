@@ -155,7 +155,7 @@ def parse_grype(path: Path) -> list[dict]:
 
 def scan_source(args) -> int:
     app = Path(args.app).resolve()
-    out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
+    out = Path(args.out).resolve(); out.mkdir(parents=True, exist_ok=True)
     cicd = Path(__file__).resolve().parent.parent
     findings, tools, evidence = [], {}, {}
 
@@ -201,7 +201,7 @@ def scan_source(args) -> int:
 
 
 def scan_image(args) -> int:
-    out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
+    out = Path(args.out).resolve(); out.mkdir(parents=True, exist_ok=True)
     src = f"oci-archive:{args.oci_archive}" if args.oci_archive else f"registry:{args.image}"
     env = dict(os.environ)
     if args.insecure_registry:
