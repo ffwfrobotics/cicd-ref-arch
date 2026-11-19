@@ -1,16 +1,17 @@
 {
   "schema": "security-findings/v1",
   "app": "hello",
-  "image": "localhost:5000/hello@sha256:da9e1aa15fe9c5fb94624947e0f5dfe9bffd3b61b8ba9d652f0e685872c72b13",
-  "commit": "1a0a70bd6365cceefdec8472e7cd2808c93679c8",
-  "generated": "2026-11-19T19:10:36Z",
+  "image": "localhost:5000/hello@sha256:b4727cd0bf8af110f78bbfa8b95e9e22529e03d8c6281de85e7604d3373581cd",
+  "commit": "a1a4f164115093ee2c0034751fe9c725270e3a33",
+  "generated": "2026-11-19T19:11:51Z",
   "scans": {
     "source": {
-      "generated": "2026-11-19T19:10:31Z",
-      "commit": "1a0a70bd6365cceefdec8472e7cd2808c93679c8",
+      "generated": "2026-11-19T19:11:47Z",
+      "commit": "a1a4f164115093ee2c0034751fe9c725270e3a33",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
+        "opengrep": "1.33.1",
         "checkov": "3.4.6"
       },
       "evidence": {
@@ -18,16 +19,20 @@
           "file": "gitleaks.json",
           "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
         },
+        "opengrep": {
+          "file": "opengrep.sarif",
+          "sha256": "97177250346d2198b7942c91747106eac54e89198ee7d131172784ab1aa533ba"
+        },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "e095b8dae3295a7bf0e14f1b4838a5cb33f823eb59480df967f62ac6d2df4051"
+          "sha256": "030936b4a97aadda70e9a3a1383001a702b3e388954184b3d6da795e3ff5ab16"
         }
       }
     },
     "image": {
-      "generated": "2026-11-19T19:10:36Z",
-      "commit": "1a0a70bd6365cceefdec8472e7cd2808c93679c8",
-      "image": "localhost:5000/hello@sha256:da9e1aa15fe9c5fb94624947e0f5dfe9bffd3b61b8ba9d652f0e685872c72b13",
+      "generated": "2026-11-19T19:11:51Z",
+      "commit": "a1a4f164115093ee2c0034751fe9c725270e3a33",
+      "image": "localhost:5000/hello@sha256:b4727cd0bf8af110f78bbfa8b95e9e22529e03d8c6281de85e7604d3373581cd",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -36,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "68c0ba627b07ee9d22b5fcd03af595af241d1e3d25f256569410bc6f0d7dcd62"
+          "sha256": "1f07d955d767a19c24fe9fc665b480744efca229daad43a55b156cdce3bd32c2"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "85a5a4d6b2bf53a805dfb2670148906b02735716c31b674f75cfe0f9c2c032ce"
+          "sha256": "2dfb90560d7d781c621e0adbb577fe10d5dbffb1e7e5dd66940d33a98c164892"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "1b815b479a2adffe756258222c8db19d61627f59ecd3bebbb7e06184abec2fe0"
+          "sha256": "c7cf388bcc5810948cbe1d833a5f15761eb0894ea4256f01f0aa2041f4b4629a"
         }
       }
     }
@@ -55,24 +60,14 @@
     "status": "warn",
     "blocking": 0,
     "counts": {
-      "fail": 2,
       "suppressed": 7,
       "no-fix-available": 77,
-      "below-threshold": 154
+      "below-threshold": 154,
+      "fail": 1
     },
     "notes": []
   },
   "findings": [
-    {
-      "id": "083b59ae7329",
-      "category": "tooling",
-      "tool": "opengrep",
-      "rule": "missing-output",
-      "severity": "high",
-      "location": "opengrep",
-      "message": "opengrep produced no output, so its category was not checked",
-      "outcome": "fail"
-    },
     {
       "id": "18599d09b12b",
       "category": "config",
@@ -80,7 +75,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "examples/hello/Dockerfile:4",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/0f25c0c868fd3c1b/hostexecutor/examples/hello/Dockerfile.FROM)",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/030884f2dc22bec1/hostexecutor/examples/hello/Dockerfile.FROM)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (app)",
