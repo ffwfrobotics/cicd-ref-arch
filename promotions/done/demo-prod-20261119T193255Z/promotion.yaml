@@ -10,3 +10,6 @@ commit: 764b299441f775bf019b3d2ba1f57b3236ff76d7
 notBefore: '2026-11-19T19:32:55Z'
 requestedBy: ffwfbot
 reason: first prod release of the guestbook (0.2.0, Werkzeug fixed)
+appliedAt: '2026-11-19T19:38:48Z'
+approval: 'PR #3 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8)

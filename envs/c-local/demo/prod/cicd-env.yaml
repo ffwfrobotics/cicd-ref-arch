@@ -1,0 +1,15 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: demo
+env: prod
+dir: prod
+namespace: demo
+branch: null
+hosts:
+- demo.c-local.k.ffwf.net
+image: localhost:5000/demo@sha256:c5e63c0c241aad3d071f718b359e451741f0eaddbbfc9a15a235c999653d5be3
+commit: 764b299441f775bf019b3d2ba1f57b3236ff76d7
+promotion: demo-prod-20261119T193255Z
+approval: 'PR #3 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8)
+renderedAt: '2026-11-19T19:38:48Z'
