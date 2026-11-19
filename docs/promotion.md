@@ -20,11 +20,14 @@ request ──▶ PR "Promote hello to prod (id)" ──▶ approve + merge ─�
    - the app's `cicd.yaml`.
 
    A later dev build doesn't change what was approved.
+
+   The request also re-scans the pinned image and puts the prod gate's result in the PR, together with the diff between the suppressions running in prod and the ones this promotion carries. A request that already fails is titled `[security: fail]`. It can still be approved, but it won't be applied until a re-scan passes.
 2. **Approve.** A reviewer reads the PR, which shows the manifests and digest that will run in prod, then approves and merges it.
 3. **Apply.** The `environments` workflow runs every 5 minutes and on each merge into `promotions/pending/`. It applies a request only if all of these hold:
    - `notBefore` has passed;
    - the request reached `master` through a merged PR (found through the merge commit, or the commit itself for a squash or rebase merge);
-   - someone other than the PR's author and the requester authorized it, either with an approving review or by merging it.
+   - someone other than the PR's author and the requester authorized it, either with an approving review or by merging it;
+   - the pinned image, re-scanned now with today's vulnerability data, passes the prod security gate. The code and config findings come from its build, and the suppressions are the ones in the request. See [security.md](security.md).
 
    It then renders `envs/<cluster>/<app>/prod/`, moves the request to `promotions/done/<id>/` with `appliedAt` and the authorization it relied on, and commits. Flux applies the change within a minute. A request that is due but fails these checks turns the run red, and stays pending until it is fixed or removed.
 4. **Roll back.** Promote an earlier build: request a promotion from a `promotions/done/<id>` entry, or revert the prod commit through a PR.
@@ -37,11 +40,11 @@ request ──▶ PR "Promote hello to prod (id)" ──▶ approve + merge ─�
    - merging limited to people allowed to approve.
 2. **The workflow's own check.** It is a second check, and it covers the case where protection is misconfigured or an admin bypasses it.
 
-**Set up once, in Forgejo** (not done yet; see decisions D-5):
+**Set up once, in Forgejo** (done for `ffwf/cicd-ref-arch` except required approvals; see decisions D-5):
 - Protect `master`:
   - required approvals 1;
   - dismiss stale approvals;
-  - a push whitelist with only the `cicd-bot` user, which CI uses to write dev and branch environments.
+  - a push whitelist with the bot user (`ffwfbot` here), which CI uses to write dev and branch environments.
 - Repo variable `CICD_BOT_USER`, secret `CICD_BOT_TOKEN`. The token must be able to:
   - push to this repo;
   - read pull requests and reviews;

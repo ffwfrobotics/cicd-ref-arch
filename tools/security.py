@@ -52,10 +52,19 @@ def finding(category, tool, rule, severity, location, message, **extra) -> dict:
             "rule": rule, "severity": severity, "location": location, "message": message[:300], **extra}
 
 
-def run(cmd: list[str], **kw) -> int:
-    """Run a scanner. Its exit code means 'found something' for most of them, so it is only logged."""
+def run(cmd: list[str], expect: Path | None = None, **kw) -> int:
+    """Run a scanner. Its exit code means 'found something' for most of them, so it is only logged.
+    If it was meant to write `expect` and didn't, its stderr goes to the job log (stdout)."""
     print("+", " ".join(cmd), file=sys.stderr)
-    return subprocess.run(cmd, **kw).returncode
+    kw.setdefault("stderr", subprocess.PIPE)
+    r = subprocess.run(cmd, **kw)
+    err = (r.stderr or b"").decode(errors="replace") if isinstance(r.stderr, bytes) else (r.stderr or "")
+    if expect is not None and not expect.exists():
+        print(f"{cmd[0]} exited {r.returncode} without writing {expect.name}:")
+        print("\n".join("  " + line for line in err.strip().splitlines()[-30:]))
+    elif err:
+        sys.stderr.write(err)
+    return r.returncode
 
 
 def tool_version(cmd: list[str]) -> str:
@@ -79,7 +88,15 @@ def parse_gitleaks(path: Path) -> list[dict]:
     return out
 
 
-def parse_opengrep(path: Path) -> list[dict]:
+def rule_ids(dirs: list[Path]) -> list[str]:
+    ids = []
+    for d in dirs:
+        for f in sorted(d.glob("*.y*ml")):
+            ids += [r["id"] for r in (yaml.safe_load(f.read_text()) or {}).get("rules", []) if "id" in r]
+    return ids
+
+
+def parse_opengrep(path: Path, known: list[str] | None = None) -> list[dict]:
     level = {"error": "high", "warning": "medium", "note": "low", "none": "info"}
     out = []
     for run_ in json.loads(path.read_text()).get("runs", []):
@@ -87,7 +104,9 @@ def parse_opengrep(path: Path) -> list[dict]:
         for r in run_.get("results", []):
             rid = r.get("ruleId", "?")
             lvl = r.get("level") or rules.get(rid, {}).get("defaultConfiguration", {}).get("level", "warning")
-            short = rid.split(".rules.", 1)[-1]  # opengrep prefixes the rule file's path
+            # opengrep prefixes the rule's id with the rule file's directory
+            short = next((k for k in sorted(known or [], key=len, reverse=True) if rid == k or rid.endswith("." + k)),
+                         rid.split(".rules.", 1)[-1])
             pl = r["locations"][0]["physicalLocation"]
             loc = f"{pl['artifactLocation']['uri']}:{pl.get('region', {}).get('startLine', 0)}"
             out.append(finding("sast", "opengrep", short, level.get(lvl, "medium"), loc,
@@ -143,7 +162,7 @@ def scan_source(args) -> int:
     # secrets: the files as they are at this commit. History is the push hook's job.
     gl = out / "gitleaks.json"
     run(["gitleaks", "dir", str(app), "--redact", "--no-banner", "--exit-code", "0", "-f", "json", "-r", str(gl),
-         "--gitleaks-ignore-path", str(app)], stdout=subprocess.DEVNULL)
+         "--gitleaks-ignore-path", str(app)], expect=gl, stdout=subprocess.DEVNULL)
     if gl.exists():
         findings += [dict(f, location=os.path.relpath(f["location"].rsplit(":", 1)[0], app) + ":" + f["location"].rsplit(":", 1)[1],
                           fingerprint=os.path.relpath(f["fingerprint"].split(":", 1)[0], app) + ":" + f["fingerprint"].split(":", 1)[1])
@@ -152,13 +171,13 @@ def scan_source(args) -> int:
 
     # code: platform rules, plus the app's own if it has any
     og = out / "opengrep.sarif"
-    cfg = ["--config", str(cicd / "security" / "rules")]
-    if (app / "security" / "rules").is_dir():
-        cfg += ["--config", str(app / "security" / "rules")]
+    rule_dirs = [cicd / "security" / "rules"] + ([app / "security" / "rules"] if (app / "security" / "rules").is_dir() else [])
+    cfg = [x for d in rule_dirs for x in ("--config", str(d))]
     run(["opengrep", "scan", *cfg, "--sarif-output", str(og), "--quiet", "--disable-version-check",
-         "--exclude", ".git", "--exclude", ".venv", str(app)], stdout=subprocess.DEVNULL, cwd=app)
+         "--exclude", ".git", "--exclude", ".venv", str(app)], expect=og, stdout=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL, cwd=app)
     if og.exists():
-        findings += parse_opengrep(og)
+        findings += parse_opengrep(og, rule_ids(rule_dirs))
         tools["opengrep"] = tool_version(["opengrep", "--version"]); evidence["opengrep"] = og.name
 
     # config: the Dockerfile and the app's built deploy base
@@ -189,7 +208,7 @@ def scan_image(args) -> int:
         env["SYFT_REGISTRY_INSECURE_USE_HTTP"] = "true"
     cdx, spdx = out / "sbom.cdx.json", out / "sbom.spdx.json"
     run(["syft", "scan", src, "-q", "-o", f"cyclonedx-json={cdx}", "-o", f"spdx-json={spdx}",
-         "--source-name", args.name or "app"], env=env)
+         "--source-name", args.name or "app"], expect=cdx, env=env)
     findings, tools, evidence = [], {}, {}
     if cdx.exists():
         tools["syft"] = tool_version(["syft", "version"]); evidence["sbom-cyclonedx"] = cdx.name
@@ -199,7 +218,7 @@ def scan_image(args) -> int:
         for v in args.vex or []:
             if v and Path(v).exists():
                 vex += ["--vex", v]
-        run(["grype", f"sbom:{cdx}", *vex, "-q", "-o", "json", "--file", str(gr)], env=env)
+        run(["grype", f"sbom:{cdx}", *vex, "-q", "-o", "json", "--file", str(gr)], expect=gr, env=env)
         if gr.exists():
             findings += parse_grype(gr)
             tools["grype"] = tool_version(["grype", "version"])

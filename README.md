@@ -12,11 +12,17 @@ The demo story, end to end:
 3. **Scale to zero.**
    - After 15 minutes with no requests, the app's pods scale to zero.
    - The next request is held at the gateway while one pod starts, then answered. The user sees a short delay, not a 502 or "no available server", and doesn't need to reload.
-4. **Security slots.** The pipeline has steps for an SBOM, a Dockerfile lint, an image scan and a signature. Today they only report and never block. Each is a stub to be replaced once the tooling is chosen (see [docs/security.md](docs/security.md)).
+4. **Security.**
+   - Every build is scanned: secrets, code, config, an SBOM, and known vulnerabilities in the image.
+   - Dev and branch deploys report findings and go ahead. A secret is the exception: it stops any deploy, and a forge hook refuses it at push.
+   - A prod promotion is re-scanned and refused if it fails the policy.
+   - False positives are records with a reason and an expiry, never code changes, and the promotion PR shows them. See [docs/security.md](docs/security.md).
 5. **Approved, scheduled promotion.**
    - A person requests promotion of a dev build to `<app>.<cluster>.<zone>` and/or a custom domain, with a not-before time.
    - A different person approves the pull request.
    - A scheduled job applies the promotion once it is due.
+
+6. **Apps in their own repos.** An admin enrolls an app ([docs/enroll.md](docs/enroll.md)). Its developers then push code and get all of the above, without access to the platform. Example: [ffwf/cicd-demo-app](https://forge.goblincorps.com/ffwf/cicd-demo-app).
 
 Agents that turn CI results into pull requests are out of scope. They come next, in `ffwf/agentic-ref-arch`.
 
@@ -24,14 +30,18 @@ Agents that turn CI results into pull requests are out of scope. They come next,
 
 | Path | What it holds |
 |---|---|
-| [`docs/`](docs/) | [architecture](docs/architecture.md), [the app contract](docs/contract.md), [promotion](docs/promotion.md), [security slots](docs/security.md), [demo runbook](docs/demo.md), [decisions and open questions](docs/decisions.md) |
+| [`docs/`](docs/) | [architecture](docs/architecture.md), [the app contract](docs/contract.md), [promotion](docs/promotion.md), [security](docs/security.md), [enrolling an app](docs/enroll.md), [demo runbook](docs/demo.md), [decisions and open questions](docs/decisions.md) |
 | `platform/` | Cluster add-ons the pipeline relies on: Gateway API with Traefik, KEDA with the HTTP add-on, BuildKit. Applied by Flux. |
 | `clusters/<name>/` | Flux entry points for one cluster: the platform, plus the environments CI writes. |
 | `envs/<cluster>/<app>/<env>/` | **Written by CI, never by hand.** One directory per running environment. Deleting one removes the environment (Flux prune). |
-| `promotions/` | Promotion requests. Each arrives through an approved pull request and is applied by `promote-due`. |
-| `templates/` | What an app repo copies: `cicd.yaml`, a `deploy/` base, a Dockerfile, a CI workflow. |
-| `actions/` | Composite actions the workflows use: setup, test, build, sbom, scan, sign, deploy-env. |
+| `promotions/` | Promotion requests. Each arrives through an approved pull request and is applied by the `environments` workflow once due, approved and through the security gate. |
+| `templates/` | What an app repo starts from: `cicd.yaml`, a `deploy/` base, `security/` records, a pre-commit hook; and the CI workflow enrollment installs. |
+| `tenants/` | One file per enrolled app: its repo and clusters. Written by an admin with `tools/enroll.py`. |
+| `security/` | The platform's security policy floor and its opengrep rules. |
+| `forge/` | The forge-side pre-receive hook that refuses secrets at push. |
+| `actions/` | Composite actions the workflows use: setup, test, build, security, sign, deploy-env. |
 | `tools/cicd.py` | Renders environments, sanitises branch names, queues and applies promotions. Python with PyYAML. |
+| `tools/security.py` | Runs the scanners, normalises findings, gates them by policy. |
 | `examples/hello/` | The demo app. Its pipeline is `.forgejo/workflows/hello.yaml`. |
 
 ## Quick reference

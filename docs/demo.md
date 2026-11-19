@@ -11,7 +11,9 @@ Run each step from a machine on the tailnet. The browser must trust the cluster 
 | 5 | Leave dev idle for 15 minutes (or set `idleSeconds: 60` for the demo), then run `curl -sw '%{http_code} %{time_total}s\n' -D- https://hello-dev.c-local.k.ffwf.net/api/info`. | `kubectl -n hello-dev get deploy` shows `0/0` before the request. The request waits, then returns `200` with `X-KEDA-HTTP-Cold-Start: true`. There is no error and no reload. |
 | 6 | Actions → `request-promotion` → app `hello`, from `dev`, `not_before` a few minutes ahead. | A PR whose files are exactly the dev manifests and digest. |
 | 7 | A second person approves and merges it. | At or after `not_before`, the `environments` workflow commits `envs/c-local/hello/prod/`, and `https://hello.c-local.k.ffwf.net/` serves that build. `promotions/done/<id>/promotion.yaml` records who approved it. |
-| 8 | Open the `deliver` artifact. | `security/summary.json`, `sbom.spdx.json` and `signature.json` (`signed: false`): the report-only security slots. |
+| 8 | Open the `deliver` run's summary, or its artifact. | The security gate's table (`warn` in dev), and `build/security/`: SBOMs, each scanner's output, `security.json`, `ci-result-security.json`. |
+
+The same story for an app in its own repo, operated by someone without access to the platform, is in [Demo: an enrolled app](#demo-an-enrolled-app) below.
 
 Checks for the operator:
 
