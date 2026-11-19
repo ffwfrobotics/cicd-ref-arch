@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "demo",
-  "image": "localhost:5000/demo@sha256:b9a78ae4f3ea2854eb8e4e8c911eaa81b9de70f8f1c8297ff1827e406882a0dc",
-  "commit": "50f38f167804a2d42952a7737de0a8f3e63e3055",
-  "generated": "2026-11-19T19:21:31Z",
+  "image": "localhost:5000/demo@sha256:c5e63c0c241aad3d071f718b359e451741f0eaddbbfc9a15a235c999653d5be3",
+  "commit": "764b299441f775bf019b3d2ba1f57b3236ff76d7",
+  "generated": "2026-11-19T19:32:03Z",
   "scans": {
     "source": {
-      "generated": "2026-11-19T19:21:27Z",
-      "commit": "50f38f167804a2d42952a7737de0a8f3e63e3055",
+      "generated": "2026-11-19T19:31:58Z",
+      "commit": "764b299441f775bf019b3d2ba1f57b3236ff76d7",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -25,14 +25,14 @@
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "f5f3bb94200a175cd0ff525d7cb56382bf8b8e4d6eb292e33fdc29c520474a5d"
+          "sha256": "30c1ab6aaa5575a846dcf940c40fe3c619542dd36997b1a0e0c768290ef66e3f"
         }
       }
     },
     "image": {
-      "generated": "2026-11-19T19:21:31Z",
-      "commit": "50f38f167804a2d42952a7737de0a8f3e63e3055",
-      "image": "localhost:5000/demo@sha256:b9a78ae4f3ea2854eb8e4e8c911eaa81b9de70f8f1c8297ff1827e406882a0dc",
+      "generated": "2026-11-19T19:32:03Z",
+      "commit": "764b299441f775bf019b3d2ba1f57b3236ff76d7",
+      "image": "localhost:5000/demo@sha256:c5e63c0c241aad3d071f718b359e451741f0eaddbbfc9a15a235c999653d5be3",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "d225bd34f953ef18150a0df0987c4b608fa2b65b14e68f0649c21ff3bac0638d"
+          "sha256": "c25fb244942ebdd990fbf47c22265b47b62b0da042b8228fa5a147c66ba66d19"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "f98e8da7d7c34e6597fbe41fc36975890d48e3445fc5c26f64b3c522542692fc"
+          "sha256": "7238ec4a2a66fc393ecf98d35bc65a532501221661a051e9d8ce90f714380970"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "d11eae0287ef8e7cebeac51bc11b84ef6924d4a600f289cde49c4ed906d6fd73"
+          "sha256": "93181d1e70106f992bed5f2528de11672dc151b80e5df03516da03923b57b1e1"
         }
       }
     }
@@ -57,12 +57,11 @@
   "gate": {
     "env": "dev",
     "mode": "report",
-    "status": "warn",
+    "status": "pass",
     "blocking": 0,
     "counts": {
       "suppressed": 8,
-      "fail": 1,
-      "below-threshold": 15
+      "below-threshold": 8
     },
     "notes": []
   },
@@ -74,7 +73,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/685839ad3bf6c6a6/hostexecutor/Dockerfile.FROM)",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/7589e0c32f308ca5/hostexecutor/Dockerfile.FROM)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (app)",
@@ -89,7 +88,7 @@
       "rule": "CKV_DOCKER_2",
       "severity": "high",
       "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/685839ad3bf6c6a6/hostexecutor/Dockerfile.)",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/7589e0c32f308ca5/hostexecutor/Dockerfile.)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (platform)",
@@ -186,22 +185,6 @@
         "reason": "the platform renders a default-deny NetworkPolicy for every environment",
         "expires": ""
       }
-    },
-    {
-      "id": "67f1d49a695b",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "GHSA-2g68-c3qc-8985",
-      "severity": "high",
-      "location": "pkg:pypi/werkzeug@3.0.1",
-      "message": "werkzeug 3.0.1 (python): Werkzeug debugger vulnerable to remote execution when interacting with attacker controlled domain",
-      "package": "werkzeug",
-      "version": "3.0.1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "3.0.3"
-      ],
-      "outcome": "fail"
     }
   ]
 }
