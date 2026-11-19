@@ -1,0 +1,198 @@
+{
+  "schema": "security-findings/v1",
+  "app": "hello",
+  "image": "localhost:5000/hello@sha256:e2a1989b57fdbbbb1b0d8e834ad1ff7829547e5d37e0f57c8382c5f6a6cdd62a",
+  "commit": "63e89b70ea5683f09500d5d23f217f61110b0a07",
+  "generated": "2026-11-19T19:07:42Z",
+  "scans": {
+    "source": {
+      "generated": "2026-11-19T19:06:30Z",
+      "commit": "63e89b70ea5683f09500d5d23f217f61110b0a07",
+      "image": null,
+      "tools": {
+        "gitleaks": "8.30.1",
+        "checkov": "3.4.6"
+      },
+      "evidence": {
+        "gitleaks": {
+          "file": "gitleaks.json",
+          "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        },
+        "checkov": {
+          "file": "checkov.json",
+          "sha256": "710efbb9ef491089697a1d05f0a2305b97ad0e5293bb71ac49cfde0d70e3b02d"
+        }
+      }
+    },
+    "image": {
+      "generated": "2026-11-19T19:07:42Z",
+      "commit": "63e89b70ea5683f09500d5d23f217f61110b0a07",
+      "image": "localhost:5000/hello@sha256:e2a1989b57fdbbbb1b0d8e834ad1ff7829547e5d37e0f57c8382c5f6a6cdd62a",
+      "tools": {
+        "syft": "16.1.13",
+        "grype": "6",
+        "grype-db": "2026-11-19T06:23:17Z"
+      },
+      "evidence": {
+        "sbom-cyclonedx": {
+          "file": "sbom.cdx.json",
+          "sha256": "d76747e6fc16a126c2e2a419de966553f41500f14e0e488e3da95485b33ac23b"
+        },
+        "sbom-spdx": {
+          "file": "sbom.spdx.json",
+          "sha256": "e3e1fda50d8fe05e406b7942f528b2c27cb509b15424f208724b76a309c88c6f"
+        },
+        "grype": {
+          "file": "grype.json",
+          "sha256": "96ff584bf081c8ee81ebcf831de42d3f5e6d41fbf6de8e4106e32f8623499342"
+        }
+      }
+    }
+  },
+  "gate": {
+    "env": "dev",
+    "mode": "report",
+    "status": "warn",
+    "blocking": 0,
+    "counts": {
+      "fail": 2,
+      "suppressed": 7,
+      "no-fix-available": 77,
+      "below-threshold": 154
+    },
+    "notes": []
+  },
+  "findings": [
+    {
+      "id": "083b59ae7329",
+      "category": "tooling",
+      "tool": "opengrep",
+      "rule": "missing-output",
+      "severity": "high",
+      "location": "opengrep",
+      "message": "opengrep produced no output, so its category was not checked",
+      "outcome": "fail"
+    },
+    {
+      "id": "18599d09b12b",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_7",
+      "severity": "high",
+      "location": "examples/hello/Dockerfile:4",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/6ccdd02b4d9da35f/hostexecutor/examples/hello/Dockerfile.FROM)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (app)",
+        "reason": "false positive: FROM ${BASE} is an ARG pinned by digest, which checkov cannot resolve",
+        "expires": "2027-05-19"
+      }
+    },
+    {
+      "id": "b9b77e041ed9",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_21",
+      "severity": "high",
+      "location": "build/app.yaml:1",
+      "message": "The default namespace should not be used (Service.default.hello)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform sets the namespace when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "52a7b84f5cda",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_11",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "CPU limits should be set (Deployment.default.hello)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (app)",
+        "reason": "no CPU limit on purpose: a throttled cold start is slower, and requests already reserve CPU",
+        "expires": "2027-05-19"
+      }
+    },
+    {
+      "id": "9a99e240c143",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_43",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Image should use digest (Deployment.default.hello)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform pins the image by digest when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "cbf3f491bc56",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_14",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Image Tag should be fixed - not latest or blank (Deployment.default.hello)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform pins the image by digest when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "5a34b7c50fd9",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_21",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "The default namespace should not be used (Deployment.default.hello)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform sets the namespace when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "e6cbf5b0a8ee",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV2_K8S_6",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Minimize the admission of pods which lack an associated NetworkPolicy (Pod.default.hello.app-hello)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform renders a default-deny NetworkPolicy for every environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "08c38d34a38c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-85091",
+      "severity": "high",
+      "location": "pkg:deb/debian/zlib1g@1%3A1.3.dfsg%2Breally1.3.1-1%2Bb1?arch=amd64&distro=debian-13.7&upstream=zlib%401%3A1.3.dfsg%2Breally1.3.1-1",
+      "message": "zlib1g 1:1.3.dfsg+really1.3.1-1+b1 (deb): zlib 1.2.11 through 1.3.2 contains a heap buffer overflow: after an underlying write() fails, gz_write() returns without resetting strm.next_in, leaving it pointed at the caller's buffer. A later gz* write call then derives a position from the stale pointer ",
+      "package": "zlib1g",
+      "version": "1:1.3.dfsg+really1.3.1-1+b1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "1:1.3.dfsg+really1.3.1-1+deb13u1"
+      ],
+      "outcome": "fail"
+    }
+  ]
+}
