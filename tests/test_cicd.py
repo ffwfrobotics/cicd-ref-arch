@@ -129,6 +129,47 @@ class Render(unittest.TestCase):
         self.assertFalse((self.root / "envs/c-local/hello/prod").exists())
 
 
+class Routing(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+        (self.root / "tenants").mkdir()
+        for name in ("hello", "other"):
+            (self.root / f"tenants/{name}.yaml").write_text(yaml.safe_dump({
+                "apiVersion": cicd.API, "kind": "Tenant", "metadata": {"name": name},
+                "spec": {"tenant": "t1", "repo": f"o/{name}", "clusters": ["c-local"]}}))
+        (self.root / "tenants/_limits.yaml").write_text("t1: {branchLimit: 2}\n")
+        self.app = cicd.load_app(str(REPO / "examples/hello/cicd.yaml"))
+
+    def env(self, app, d):
+        p = self.root / f"envs/c-local/{app}/{d}"
+        p.mkdir(parents=True)
+        (p / "kustomization.yaml").write_text("{}")
+
+    def test_limit_counts_the_whole_tenant(self):
+        self.assertEqual(cicd.route(self.root, self.app, "feat/a", "c-local"), "branch")
+        self.env("hello", "branch-feat-a")
+        self.env("other", "branch-x")
+        self.assertEqual(cicd.route(self.root, self.app, "feat/b", "c-local"), "skip-limit")
+        self.assertEqual(cicd.route(self.root, self.app, "feat/a", "c-local"), "branch")   # already has one
+        self.assertEqual(cicd.route(self.root, self.app, "master", "c-local"), "dev")       # dev always
+
+    def test_pause_resume_remove(self):
+        self.env("hello", "branch-feat-a")
+        class A:
+            action, app, app_config, branch, cluster, by = "pause", "hello", str(REPO / "examples/hello/cicd.yaml"), "feat/a", "c-local", "ada"
+        cicd.manage(self.root, A)
+        self.assertFalse((self.root / "envs/c-local/hello/branch-feat-a").exists())
+        self.assertEqual(cicd.route(self.root, self.app, "feat/a", "c-local"), "skip-paused")
+        A.action = "resume"
+        cicd.manage(self.root, A)
+        self.assertEqual(cicd.route(self.root, self.app, "feat/a", "c-local"), "branch")
+        self.assertFalse(cicd.paused_file(self.root, "c-local", "hello").exists())
+        self.env("hello", "branch-feat-a")
+        A.action = "remove-env"
+        cicd.manage(self.root, A)
+        self.assertFalse((self.root / "envs/c-local/hello/branch-feat-a").exists())
+
+
 class Tenants(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())

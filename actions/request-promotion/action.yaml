@@ -1,0 +1,57 @@
+name: request-promotion
+description: >
+  Open a promotion pull request on the state repo, pinned to what the source environment runs now,
+  re-scanned under the prod policy, with the suppressions it carries. Used by the platform's
+  request-promotion workflow and by an enrolled app's own pipeline (dispatched by a user with write
+  on the app repo; that user is recorded as the requester).
+inputs:
+  app: {required: true}
+  from: {default: dev}
+  not-before: {default: ""}
+  reason: {default: ""}
+  requested-by: {required: true}
+  cluster: {required: true}
+  token: {description: token that can push branches to and open PRs on the state repo, required: true}
+  user: {description: the token's user, required: true}
+  state-repo: {description: "owner/name (default: this repo)", default: ""}
+outputs:
+  url: {value: "${{ steps.req.outputs.url }}"}
+runs:
+  using: composite
+  steps:
+  - id: req
+    shell: bash
+    env:
+      TOKEN: ${{ inputs.token }}
+      REASON: ${{ inputs.reason }}
+      WHO: ${{ inputs.requested-by }}
+      NB: ${{ inputs.not-before }}
+    run: |
+      set -eu
+      repo='${{ inputs.state-repo }}'; [ -n "$repo" ] || repo='${{ github.repository }}'
+      server='${{ github.server_url }}'; api="$server/api/v1/repos/$repo"
+      cicd=$(cd '${{ github.action_path }}/../..' && pwd)
+      auth="AUTHORIZATION: basic $(printf '%s:%s' '${{ inputs.user }}' "$TOKEN" | base64 -w0)"
+      state=$(mktemp -d); git -c http.extraHeader="$auth" clone -q --depth 5 "$server/$repo.git" "$state"; cd "$state"
+      app='${{ inputs.app }}'; cluster='${{ inputs.cluster }}'; nb="$NB"; who="$WHO"
+      dir=$(python3 "$cicd/tools/cicd.py" request-promotion --app "$app" --cluster "$cluster" \
+        --from '${{ inputs.from }}' ${nb:+--not-before "$nb"} --requested-by "$who" --reason "$REASON")
+      id=$(basename "$dir")
+      # re-scan the pinned image with today's vulnerability data and gate it as prod will
+      sec_rc=0; sec=$(python3 "$cicd/tools/cicd.py" check-security "$dir" --cluster "$cluster") || sec_rc=$?
+      echo "$sec"
+      sec_md=$(python3 "$cicd/tools/security.py" summary "$dir/security-record.json" 2>/dev/null || echo "no security record")
+      prod="envs/$cluster/$app/prod/suppressions"
+      sup_diff=$(diff -ruN "$prod" "$(realpath --relative-to=. "$dir")/suppressions" 2>/dev/null | grep -v '^diff -ruN' || true)
+      git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
+      git checkout -q -b "promote/$id"
+      git add "$dir"
+      git commit -q -m "promote $app ${{ inputs.from }} -> prod ($id)" -m "requested by $who: $REASON"
+      git -c http.extraHeader="$auth" push -q origin "promote/$id"
+      body=$(jq -n --arg id "$id" --arg p "$(cat "$dir/promotion.yaml")" --arg sec "$sec_md" --arg diff "${sup_diff:-no changes}" --arg who "$who" \
+        '"Promotion request `\($id)`, requested by **\($who)**.\n\n```yaml\n\($p)\n```\n\nApproving and merging this queues it; the `environments` workflow applies it at or after `notBefore`. The approval or the merge must come from someone other than \($who).\n\n`app.yaml` in this PR is exactly what will run in prod.\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\n\nThe `environments` workflow scans the image again when it applies the promotion, and refuses it if the gate fails then.\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
+      title="Promote $app to prod ($id)"; [ "$sec_rc" = 0 ] || title="[security: fail] $title"
+      url=$(jq -n --arg head "promote/$id" --arg title "$title" --argjson body "$body" \
+        '{head: $head, base: "master", title: $title, body: $body}' \
+        | curl -fsS -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' -d @- "$api/pulls" | jq -r .html_url)
+      echo "opened $url"; echo "url=$url" >> "$GITHUB_OUTPUT"

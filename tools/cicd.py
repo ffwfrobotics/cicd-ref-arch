@@ -562,9 +562,85 @@ def gc(root: Path, args) -> int:
 def load_tenants(root: Path) -> dict[str, dict]:
     out = {}
     for p in sorted((root / "tenants").glob("*.yaml")):
+        if p.name.startswith("_"):
+            continue  # tenants/_limits.yaml and the like
         t = load_yaml(p)
         out[t["metadata"]["name"]] = t
     return out
+
+
+DEFAULT_BRANCH_LIMIT = 16
+
+
+def branch_limit(root: Path, tenant: str) -> int:
+    """Branch environments a tenant may have in CI/CD at once (tenants/_limits.yaml, default 16)."""
+    p = root / "tenants" / "_limits.yaml"
+    limits = (load_yaml(p) or {}) if p.exists() else {}
+    return int((limits.get(tenant) or {}).get("branchLimit", limits.get("default", DEFAULT_BRANCH_LIMIT)))
+
+
+def paused_file(root: Path, cluster: str, app: str) -> Path:
+    return root / "envs" / cluster / app / "paused.yaml"
+
+
+def paused_branches(root: Path, cluster: str, app: str) -> dict:
+    p = paused_file(root, cluster, app)
+    return ((load_yaml(p) or {}).get("branches") or {}) if p.exists() else {}
+
+
+def route(root: Path, app: dict, branch: str, cluster: str) -> str:
+    """dev, branch, skip (excluded), skip-paused or skip-limit: whether this push goes through CI/CD.
+    The dev branch, and a branch that already has an environment, always count as active."""
+    name = app["metadata"]["name"]
+    if branch == app["spec"]["environments"]["dev"]["branch"]:
+        return "dev"
+    if not branch_wanted(app, branch):
+        return "skip"
+    if branch in paused_branches(root, cluster, name):
+        return "skip-paused"
+    tenants = load_tenants(root)
+    t = tenants.get(name)
+    if t is None:
+        return "branch"
+    env_dir, _ = env_id(app, "branch", branch)
+    if (root / "envs" / cluster / name / env_dir).exists():
+        return "branch"
+    tenant = t["spec"].get("tenant", "default")
+    apps = [a for a, x in tenants.items() if x["spec"].get("tenant", "default") == tenant]
+    active = sum(len(list((root / "envs" / cluster / a).glob("branch-*/kustomization.yaml"))) for a in apps)
+    return "skip-limit" if active >= branch_limit(root, tenant) else "branch"
+
+
+def manage(root: Path, args) -> str:
+    """Self-service changes to an app's environments, made on behalf of a user with write on its repo."""
+    app = load_app(args.app_config) if args.app_config else None
+    name = args.app
+    env_dir = None
+    if app is not None and args.branch:
+        if args.branch == app["spec"]["environments"]["dev"]["branch"]:
+            env_dir = "dev"
+        else:
+            env_dir, _ = env_id(app, "branch", args.branch)
+    p = paused_file(root, args.cluster, name)
+    if args.action in ("pause", "resume"):
+        data = (load_yaml(p) or {}) if p.exists() else {}
+        branches = data.setdefault("branches", {})
+        if args.action == "pause":
+            branches[args.branch] = {"by": args.by, "at": now_utc().isoformat().replace("+00:00", "Z")}
+        else:
+            branches.pop(args.branch, None)
+        if branches:
+            write(p, "# Branches of this app that don't go through CI/CD (tools/cicd.py manage)\n" + dump_yaml(data))
+        elif p.exists():
+            p.unlink()
+    if args.action in ("pause", "remove-env") and env_dir and env_dir != "dev":
+        d = root / "envs" / args.cluster / name / env_dir
+        if d.exists():
+            shutil.rmtree(d)
+    if args.action == "remove-env" and env_dir == "dev":
+        sys.exit("the dev environment can't be removed from here")
+    build_index(root, args.cluster)
+    return f"{args.action} {name} {args.branch} by {args.by}"
 
 
 def check_tenant(root: Path, app: dict, repo: str, cluster: str):
@@ -600,6 +676,15 @@ def main():
     w = sub.add_parser("which-env", help="print dev, branch or skip for a branch name")
     w.add_argument("app")
     w.add_argument("--branch", required=True)
+    w.add_argument("--cluster", help="with --root: also apply pauses and the tenant's branch limit")
+
+    mg = sub.add_parser("manage", help="pause, resume or remove a branch environment for a user")
+    mg.add_argument("action", choices=["pause", "resume", "remove-env"])
+    mg.add_argument("--app", required=True)
+    mg.add_argument("--app-config", help="the app's cicd.yaml (to name its environment directories)")
+    mg.add_argument("--branch", required=True)
+    mg.add_argument("--cluster", required=True)
+    mg.add_argument("--by", required=True, help="who asked (the user who dispatched it)")
 
     r = sub.add_parser("render")
     r.add_argument("app")
@@ -646,12 +731,16 @@ def main():
         print("\n".join(hosts_for(app, args.env, args.branch, args.cluster, args.zone)))
     elif args.cmd == "which-env":
         app = load_app(args.app)
-        if args.branch == app["spec"]["environments"]["dev"]["branch"]:
+        if args.cluster:
+            print(route(root, app, args.branch, args.cluster))
+        elif args.branch == app["spec"]["environments"]["dev"]["branch"]:
             print("dev")
         elif branch_wanted(app, args.branch):
             print("branch")
         else:
             print("skip")
+    elif args.cmd == "manage":
+        print(manage(root, args))
     elif args.cmd == "render":
         app = load_app(args.app)
         cl = load_cluster(root, args.cluster)
