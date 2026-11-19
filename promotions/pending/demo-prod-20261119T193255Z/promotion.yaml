@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: demo-prod-20261119T193255Z
+app: demo
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/demo@sha256:c5e63c0c241aad3d071f718b359e451741f0eaddbbfc9a15a235c999653d5be3
+commit: 764b299441f775bf019b3d2ba1f57b3236ff76d7
+notBefore: '2026-11-19T19:32:55Z'
+requestedBy: ffwfbot
+reason: first prod release of the guestbook (0.2.0, Werkzeug fixed)
