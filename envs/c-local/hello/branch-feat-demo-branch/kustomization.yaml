@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hello-feat-demo-branch
+labels:
+- pairs:
+    cicd.ffwf.net/app: hello
+    cicd.ffwf.net/env: branch-feat-demo-branch
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/hello
+  digest: sha256:c5fa539125fe16fcb58ac2485a5edd383e8dc5ccb3ceffcd1ed6a0424cd43e1b
