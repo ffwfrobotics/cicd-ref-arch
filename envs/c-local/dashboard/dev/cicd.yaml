@@ -19,5 +19,8 @@ spec:
     coldStartTimeout: 60s
     maxReplicas: 1            # one replica: its short-lived cache is per pod
     targetConcurrency: 100
+  # the forge only, but in-cluster DNS answers forge.goblincorps.com with either its tailnet or its
+  # public address, so both: the tailnet address, and public HTTPS (as the CI runners have)
   egress:
-  - {cidr: 100.64.0.2/32, ports: [443]}   # the forge (forge.goblincorps.com resolves to its tailnet address in-cluster)
+  - {cidr: 100.64.0.2/32, ports: [443]}
+  - {cidr: 0.0.0.0/0, except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16, 127.0.0.0/8], ports: [443]}
