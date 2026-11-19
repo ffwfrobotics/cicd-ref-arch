@@ -1,0 +1,13 @@
+# Enrolled by an admin with tools/enroll.py (docs/enroll.md).
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata:
+  name: demo
+spec:
+  repo: ffwf/cicd-demo-app
+  path: .
+  clusters:
+  - c-local
+  owners:
+  - john
+  enrolled: '2026-11-19'
