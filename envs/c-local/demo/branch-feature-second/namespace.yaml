@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: demo-feature-second
-  labels:
-    cicd.ffwf.net/app: demo
-    cicd.ffwf.net/env: branch-feature-second
-    pod-security.kubernetes.io/enforce: restricted
-    pod-security.kubernetes.io/warn: restricted
