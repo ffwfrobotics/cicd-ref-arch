@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: demo-feature-dark-mode
+labels:
+- pairs:
+    cicd.ffwf.net/app: demo
+    cicd.ffwf.net/env: branch-feature-dark-mode
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/demo
+  digest: sha256:ce4935a243798cbbddf1695d950668af49b1a9e727c1e71ca9fa5ff3168d8e0a
