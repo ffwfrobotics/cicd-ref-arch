@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: hello-prod-20261119T174142Z
+app: hello
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/hello@sha256:6755a66d9518f865c7a08a78641158ff092bc7ee1e45cb4ffbdf5cb10bf1f135
+commit: ff36faa87bf49c4255a5049a58878f8012a68753
+notBefore: '2026-11-19T17:51:00Z'
+requestedBy: ffwfbot
+reason: 'demo: first promotion of hello to prod'
