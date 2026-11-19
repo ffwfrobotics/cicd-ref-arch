@@ -12,6 +12,7 @@ inputs:
   token: {description: token that can push to the state repo, required: true}
   user: {description: the token's user, required: true}
   state-repo: {description: "owner/name of the state repo (default: this repo)", default: ""}
+  security-dir: {description: "actions/security output, kept with the environment", default: build/security}
 outputs:
   hosts: {value: "${{ steps.deploy.outputs.hosts }}"}
 runs:
@@ -31,6 +32,7 @@ runs:
       auth="AUTHORIZATION: basic $(printf '%s:%s' '${{ inputs.user }}' "$TOKEN" | base64 -w0)"
       git -c http.extraHeader="$auth" clone -q --depth 20 "$url" "$state"
       cp '${{ inputs.manifests }}' "$state/.manifests.yaml"
+      sec='${{ inputs.security-dir }}'; case "$sec" in /*) ;; *) sec="$GITHUB_WORKSPACE/$sec" ;; esac
       cd "$state"
       git config user.name 'cicd-bot'; git config user.email 'cicd-bot@noreply.invalid'
       app_cfg="$GITHUB_WORKSPACE/${{ inputs.app }}/cicd.yaml"
@@ -39,7 +41,7 @@ runs:
         git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
         python3 "$cicd/tools/cicd.py" render "$app_cfg" --env '${{ inputs.env }}' \
           --branch '${{ inputs.branch }}' --cluster '${{ inputs.cluster }}' --image '${{ inputs.image }}' \
-          --manifests .manifests.yaml --commit '${{ github.sha }}' --repo '${{ github.repository }}' --run-url "$run_url" >/dev/null
+          --manifests .manifests.yaml --commit '${{ github.sha }}' --repo '${{ github.repository }}' --run-url "$run_url" --security-dir "$sec" >/dev/null
         git add -A envs
         if git diff --cached --quiet; then echo "environment unchanged"; break; fi
         git commit -q -m "deploy ${{ inputs.env }}: $(basename '${{ inputs.app }}') ${{ inputs.image }}" \

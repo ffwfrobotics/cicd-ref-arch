@@ -20,4 +20,5 @@ spec:
     coldStartTimeout: 60s     # how long the interceptor holds a request while a pod starts
     maxReplicas: 3
     targetConcurrency: 50
-  security: {mode: report}    # report | enforce (docs/security.md)
+  # security: the platform policy decides (report in dev and branch, enforce for prod); this app's
+  # own suppressions and stricter settings are in security/policy.yaml (docs/security.md)

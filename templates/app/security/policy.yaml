@@ -1,0 +1,11 @@
+# The app's security records (docs/security.md): suppressions with a reason and an expiry date, and
+# anything it wants stricter than the platform's floor. It can never loosen the floor.
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: SecurityPolicy
+# environments: {dev: {mode: enforce}}     # stricter: block dev deploys on findings too
+# categories: {vuln: {fail_at: medium}}    # stricter: medium CVEs gate prod
+ignore: []
+# - rule: CKV_K8S_11                        # the finding's rule id (glob)
+#   path: "deploy/*"                        # optional: only where (glob over the finding's location)
+#   reason: "why this is a false positive or an accepted risk"
+#   expires: 2027-05-19                     # required: an expired ignore gates again

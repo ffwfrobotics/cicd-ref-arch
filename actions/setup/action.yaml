@@ -1,15 +1,24 @@
 name: setup
-description: Pinned CI tools (buildctl, syft, grype, hadolint, kustomize, kubeconform) and PyYAML, cached.
+description: Pinned CI tools (buildctl, syft, grype, gitleaks, opengrep, checkov, kustomize, kubeconform, jq) and PyYAML, cached.
 runs:
   using: composite
   steps:
   - id: key
     shell: bash
-    run: echo "key=cicd-tools-$(sha256sum '${{ github.action_path }}/tools.txt' | cut -c1-16)" >> "$GITHUB_OUTPUT"
+    run: echo "key=cicd-tools-$(cat '${{ github.action_path }}/tools.txt' '${{ github.action_path }}/install.sh' | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
   - uses: actions/cache@v4
     with:
       path: ~/.cicd
       key: ${{ steps.key.outputs.key }}
+  # grype's vulnerability database, refreshed once a day (grype also updates a stale one itself)
+  - id: day
+    shell: bash
+    run: echo "day=$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+  - uses: actions/cache@v4
+    with:
+      path: ~/.cache/grype
+      key: grype-db-${{ steps.day.outputs.day }}
+      restore-keys: grype-db-
   - shell: bash
     run: |
       '${{ github.action_path }}/install.sh' "$HOME/.cicd"

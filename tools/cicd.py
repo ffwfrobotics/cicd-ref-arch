@@ -8,7 +8,8 @@ Subcommands:
   render            write envs/<cluster>/<app>/<env>/ from an app's cicd.yaml, a built deploy base and an image digest
   index             regenerate envs/<cluster>/kustomization.yaml from the env directories present
   request-promotion write promotions/pending/<id>/ pinned to what the source environment runs now
-  apply-due         apply pending promotions whose notBefore has passed and whose PR was approved
+  check-security    re-scan a pending promotion's image and gate it under the prod policy
+  apply-due         apply pending promotions that are due, approved, and pass the prod security gate
   gc                remove branch environments whose branch no longer exists
 
 Needs Python 3.10+ and PyYAML (actions/setup installs it).
@@ -223,8 +224,33 @@ def edge_objects(app: dict, cl: dict, ns: str, env_dir: str, extra: list[str]) -
                                              "port": keda["interceptor"]["port"]}]}]}}]
 
 
+SUPPRESSION_FILES = ("security/policy.yaml", "security/vex.openvex.json", ".gitleaksignore")
+
+
+def keep_security(out: Path, security_dir: Path | None, app_dir: Path | None):
+    """Next to an environment: the build's security summary and source findings (small; the image
+    is re-scanned at promotion), and copies of the app's suppression records, so a promotion
+    pull request shows exactly which suppressions it carries to prod."""
+    if security_dir is not None:
+        rec = security_dir / "security.json"
+        if rec.exists():
+            r = json.loads(rec.read_text())
+            small = {k: r.get(k) for k in ("schema", "app", "image", "commit", "generated", "scans", "gate")}
+            small["findings"] = [f for f in r.get("findings", []) if f["outcome"] in ("fail", "suppressed")]
+            write(out / "security-record.json", json.dumps(small, indent=2) + "\n")
+        src = security_dir / "findings-source.json"
+        if src.exists():
+            shutil.copy(src, out / "findings-source.json")
+    if app_dir is not None:
+        for rel in SUPPRESSION_FILES:
+            if (app_dir / rel).exists():
+                (out / "suppressions").mkdir(parents=True, exist_ok=True)
+                shutil.copy(app_dir / rel, out / "suppressions" / Path(rel).name)
+
+
 def render_env(root: Path, app: dict, cl: dict, env: str, branch: str | None, image: str,
-               app_manifests: str, meta: dict, app_config_text: str | None = None) -> Path:
+               app_manifests: str, meta: dict, app_config_text: str | None = None,
+               security_dir: Path | None = None, app_dir: Path | None = None) -> Path:
     name = app["metadata"]["name"]
     zone, cluster = cl["zone"], cl["cluster"]
     env_dir, ns = env_id(app, env, branch)
@@ -264,6 +290,7 @@ def render_env(root: Path, app: dict, cl: dict, env: str, branch: str | None, im
         write(out / "edge" / "kustomization.yaml", dump_yaml({
             "apiVersion": "kustomize.config.k8s.io/v1beta1", "kind": "Kustomization",
             "resources": ["routes.yaml"]}))
+    keep_security(out, security_dir, app_dir)
     write(out / "cicd-env.yaml", dump_yaml({
         "apiVersion": API, "kind": "Environment",
         "app": name, "env": env, "dir": env_dir, "namespace": ns, "branch": branch,
@@ -314,6 +341,11 @@ def request_promotion(root: Path, args) -> Path:
     out.mkdir(parents=True)
     shutil.copy(src / "app.yaml", out / "app.yaml")  # the exact manifests running in the source env
     shutil.copy(src / "cicd.yaml", out / "cicd.yaml")
+    for extra in ("findings-source.json", "security-record.json"):
+        if (src / extra).exists():
+            shutil.copy(src / extra, out / ("dev-" + extra if extra == "security-record.json" else extra))
+    if (src / "suppressions").is_dir():
+        shutil.copytree(src / "suppressions", out / "suppressions")
     write(out / "promotion.yaml", dump_yaml({
         "apiVersion": API, "kind": "Promotion",
         "id": pid, "app": args.app, "cluster": args.cluster,
@@ -387,6 +419,46 @@ def approval_of(root: Path, promo_dir: Path, promo: dict) -> tuple[bool, str]:
     return True, f"PR #{pr['number']} " + ", ".join(how)
 
 
+def security_of(root: Path, promo_dir: Path, promo: dict, cl: dict) -> tuple[bool, str]:
+    """Re-scan the pinned image and gate it, with the source findings recorded at build time,
+    under the prod policy (enforce). Writes security-record.json into the promotion directory."""
+    if os.environ.get("CICD_SKIP_SECURITY_CHECK") == "1":
+        return True, "security check skipped (CICD_SKIP_SECURITY_CHECK=1)"
+    tools = Path(__file__).resolve().parent / "security.py"
+    image = promo["image"]
+    pull, push = cl["registry"]["pull"], cl["registry"]["push"]
+    scan_ref = push + image[len(pull):] if image.startswith(pull + "/") else image
+    work = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / f"security-{promo['id']}"
+    shutil.rmtree(work, ignore_errors=True)
+    sup = promo_dir / "suppressions"
+    subprocess.run([sys.executable, str(tools), "scan-image", "--image", scan_ref, "--digest", image,
+                    "--insecure-registry", "--name", promo["app"], "--vex", str(sup / "vex.openvex.json"),
+                    "--out", str(work)], stdout=sys.stderr)
+    findings = []
+    for name in ("findings-source.json",):
+        if (promo_dir / name).exists():
+            findings += ["--findings", str(promo_dir / name)]
+    if (work / "findings-image.json").exists():
+        findings += ["--findings", str(work / "findings-image.json")]
+    if not findings:
+        return False, "no security findings could be produced"
+    rc = subprocess.run([sys.executable, str(tools), "gate", "--env", promo["to"], *findings,
+                         "--policy", str(root / "security" / "policy.yaml"),
+                         "--app-policy", str(sup / "policy.yaml"), "--app-name", promo["app"],
+                         "--image", image, "--commit", str(promo.get("commit") or ""),
+                         "--out", str(work / "security.json")], stdout=sys.stderr).returncode
+    rec = json.loads((work / "security.json").read_text())
+    small = {k: rec.get(k) for k in ("schema", "app", "image", "commit", "generated", "scans", "gate")}
+    small["findings"] = [f for f in rec["findings"] if f["outcome"] in ("fail", "suppressed")]
+    write(promo_dir / "security-record.json", json.dumps(small, indent=2) + "\n")
+    g = rec["gate"]
+    counts = ", ".join(f"{k} {v}" for k, v in sorted(g["counts"].items()))
+    if rc != 0:
+        bad = [f"{f['category']}/{f['rule']}" for f in rec["findings"] if f["outcome"] == "fail"][:5]
+        return False, f"security gate {g['status']} ({g['blocking']} blocking: {', '.join(bad)})"
+    return True, f"security gate {g['status']} ({counts})"
+
+
 def apply_due(root: Path, args) -> tuple[int, int]:
     """Returns (applied, refused). A refused promotion is one that is due but failed a check."""
     pending = sorted((root / "promotions" / "pending").glob("*/promotion.yaml"))
@@ -411,18 +483,30 @@ def apply_due(root: Path, args) -> tuple[int, int]:
             refused += 1
             continue
         cl = load_cluster(root, args.cluster)
+        sec_ok, sec_why = security_of(root, d, promo, cl)
+        if not sec_ok:
+            print(f"{promo['id']}: NOT applied: {sec_why}")
+            refused += 1
+            continue
         render_env(root, app, cl, promo["to"], None, promo["image"], (d / "app.yaml").read_text(), {
-            "commit": promo.get("commit"), "promotion": promo["id"], "approval": why,
+            "commit": promo.get("commit"), "promotion": promo["id"], "approval": why, "security": sec_why,
             "renderedAt": now_utc().isoformat().replace("+00:00", "Z")},
             app_config_text=(d / "cicd.yaml").read_text())
+        out_env = root / "envs" / args.cluster / promo["app"] / promo["to"]
+        for extra in ("findings-source.json", "security-record.json"):
+            if (d / extra).exists():
+                shutil.copy(d / extra, out_env / extra)
+        if (d / "suppressions").is_dir():
+            shutil.copytree(d / "suppressions", out_env / "suppressions")
         done = root / "promotions" / "done" / d.name
         done.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(d), str(done))
         rec = load_yaml(done / "promotion.yaml")
         rec["appliedAt"] = now_utc().isoformat().replace("+00:00", "Z")
         rec["approval"] = why
+        rec["security"] = sec_why
         write(done / "promotion.yaml", dump_yaml(rec))
-        print(f"{promo['id']}: applied ({why})")
+        print(f"{promo['id']}: applied ({why}; {sec_why})")
         applied += 1
     build_index(root, args.cluster)
     return applied, refused
@@ -431,21 +515,71 @@ def apply_due(root: Path, args) -> tuple[int, int]:
 # ---------------------------------------------------------------- gc
 
 
+def live_branches(remote: str) -> set[str] | None:
+    """Branch names of a git remote, or None if it can't be read (then nothing of it is removed)."""
+    env = dict(os.environ, GIT_TERMINAL_PROMPT="0")
+    auth = []
+    if os.environ.get("FORGEJO_TOKEN") and os.environ.get("BOT"):
+        import base64
+        tok = base64.b64encode(f"{os.environ['BOT']}:{os.environ['FORGEJO_TOKEN']}".encode()).decode()
+        auth = ["-c", f"http.extraHeader=AUTHORIZATION: basic {tok}"]
+    r = subprocess.run(["git", *auth, "ls-remote", "--heads", remote], capture_output=True, text=True, env=env)
+    if r.returncode != 0:
+        print(f"cannot list branches of {remote}: {r.stderr.strip()[:200]}", file=sys.stderr)
+        return None
+    return {line.split("refs/heads/", 1)[1] for line in r.stdout.splitlines() if "refs/heads/" in line}
+
+
 def gc(root: Path, args) -> int:
-    heads = subprocess.run(["git", "-C", str(root), "ls-remote", "--heads", args.remote],
-                           capture_output=True, text=True, check=True).stdout
-    live = {line.split("refs/heads/", 1)[1] for line in heads.splitlines() if "refs/heads/" in line}
+    """Remove branch environments whose branch is gone, for this repo and every enrolled app's repo."""
     removed = 0
+    cache: dict[str, set[str] | None] = {}
     for meta in sorted((root / "envs" / args.cluster).glob("*/branch-*/cicd-env.yaml")):
         m = load_yaml(meta)
-        if m.get("repo", args.repo) != args.repo:
-            continue  # another repo's branch environment
+        repo = m.get("repo") or args.repo
+        if repo == args.repo:
+            remote = args.remote
+        elif args.server:
+            remote = f"{args.server.rstrip('/')}/{repo}.git"
+        else:
+            continue
+        if remote not in cache:
+            cache[remote] = live_branches(remote)
+        live = cache[remote]
+        if live is None:
+            continue  # unreachable: keep its environments rather than guess
         if m.get("branch") not in live:
-            print(f"removing {meta.parent} (branch {m.get('branch')!r} is gone)")
+            print(f"removing {meta.parent} (branch {m.get('branch')!r} of {repo} is gone)")
             shutil.rmtree(meta.parent)
             removed += 1
     build_index(root, args.cluster)
     return removed
+
+
+# ---------------------------------------------------------------- tenants
+
+
+def load_tenants(root: Path) -> dict[str, dict]:
+    out = {}
+    for p in sorted((root / "tenants").glob("*.yaml")):
+        t = load_yaml(p)
+        out[t["metadata"]["name"]] = t
+    return out
+
+
+def check_tenant(root: Path, app: dict, repo: str, cluster: str):
+    """An app deploys only if an admin enrolled it (tenants/<app>.yaml) from this repo, on this cluster.
+    This stops one repo from claiming another app's name; it is not a sandbox."""
+    name = app["metadata"]["name"]
+    tenants = load_tenants(root)
+    t = tenants.get(name)
+    if t is None:
+        sys.exit(f"app {name!r} is not enrolled: an admin adds tenants/{name}.yaml (docs/enroll.md)")
+    spec = t["spec"]
+    if repo and spec["repo"] != repo:
+        sys.exit(f"app {name!r} is enrolled for {spec['repo']}, not {repo}")
+    if cluster not in spec.get("clusters", [cluster]):
+        sys.exit(f"app {name!r} is not enrolled on cluster {cluster!r}")
 
 
 # ---------------------------------------------------------------- cli
@@ -477,6 +611,7 @@ def main():
     r.add_argument("--commit", default="")
     r.add_argument("--repo", default="")
     r.add_argument("--run-url", default="")
+    r.add_argument("--security-dir", help="build/security from actions/security (kept with the environment)")
 
     i = sub.add_parser("index")
     i.add_argument("--cluster", required=True)
@@ -490,13 +625,18 @@ def main():
     q.add_argument("--requested-by")
     q.add_argument("--reason")
 
+    c = sub.add_parser("check-security", help="re-scan and gate a pending promotion now (prod policy)")
+    c.add_argument("promotion", help="promotions/pending/<id>")
+    c.add_argument("--cluster", required=True)
+
     a = sub.add_parser("apply-due")
     a.add_argument("--cluster", required=True)
 
     g = sub.add_parser("gc")
     g.add_argument("--cluster", required=True)
     g.add_argument("--remote", default="origin", help="git remote (or URL) whose branches count")
-    g.add_argument("--repo", default="", help="only collect environments recorded with this repo")
+    g.add_argument("--repo", default="", help="this repo (owner/name); its branches come from --remote")
+    g.add_argument("--server", default="", help="forge URL, to list other enrolled repos' branches")
 
     args = ap.parse_args()
     root = Path(args.root).resolve()
@@ -515,16 +655,25 @@ def main():
     elif args.cmd == "render":
         app = load_app(args.app)
         cl = load_cluster(root, args.cluster)
+        if (root / "tenants").is_dir():
+            check_tenant(root, app, args.repo, args.cluster)
         out = render_env(root, app, cl, args.env, args.branch, args.image, Path(args.manifests).read_text(), {
             "repo": args.repo, "commit": args.commit, "runUrl": args.run_url,
             "renderedAt": now_utc().isoformat().replace("+00:00", "Z")},
-            app_config_text=Path(args.app).read_text())
+            app_config_text=Path(args.app).read_text(),
+            security_dir=Path(args.security_dir) if args.security_dir else None,
+            app_dir=Path(args.app).resolve().parent)
         build_index(root, args.cluster)
         print(out)
     elif args.cmd == "index":
         print(build_index(root, args.cluster))
     elif args.cmd == "request-promotion":
         request_promotion(root, args)
+    elif args.cmd == "check-security":
+        d = Path(args.promotion).resolve()
+        ok, why = security_of(root, d, load_yaml(d / "promotion.yaml"), load_cluster(root, args.cluster))
+        print(why)
+        sys.exit(0 if ok else 3)
     elif args.cmd == "apply-due":
         applied, refused = apply_due(root, args)
         print(f"applied {applied}, refused {refused}")

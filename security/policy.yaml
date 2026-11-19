@@ -1,0 +1,20 @@
+# The platform's security floor (tools/security.py). An app's own security/policy.yaml may tighten
+# any of this and add ignores; it can never loosen it. docs/security.md explains each part.
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: SecurityPolicy
+environments:
+  dev:    {mode: report}     # findings are recorded and shown; the deploy goes ahead
+  branch: {mode: report}
+  prod:   {mode: enforce}    # a promotion with a failing finding is refused
+categories:
+  secrets: {fail_at: low, always_enforce: true}   # a secret in the tree stops every deploy, even in report mode
+  vuln:    {fail_at: high, require_fix: true}     # high and critical CVEs that have a fixed version
+  sast:    {fail_at: high}                        # opengrep rule severity ERROR
+  config:  {fail_at: high}                        # checkov: every failed check counts as high
+  tooling: {fail_at: low}                         # a scanner that produced no output
+# Checks the platform satisfies itself when it renders an environment, so an app never has to.
+ignore:
+- {category: config, rule: CKV_K8S_21, reason: "the platform sets the namespace when it renders the environment"}
+- {category: config, rule: CKV_K8S_14, reason: "the platform pins the image by digest when it renders the environment"}
+- {category: config, rule: CKV_K8S_43, reason: "the platform pins the image by digest when it renders the environment"}
+- {category: config, rule: CKV2_K8S_6, reason: "the platform renders a default-deny NetworkPolicy for every environment"}

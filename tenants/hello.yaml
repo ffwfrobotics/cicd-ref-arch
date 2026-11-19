@@ -1,0 +1,11 @@
+# Enrolled by an admin (docs/enroll.md). Deploys of this app are accepted only from this repo and
+# on these clusters.
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata: {name: hello}
+spec:
+  repo: ffwf/cicd-ref-arch
+  path: examples/hello
+  clusters: [c-local]
+  owners: [john]
+  enrolled: 2026-11-19

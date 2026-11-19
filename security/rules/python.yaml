@@ -1,0 +1,50 @@
+# Starter rules owned by the platform, written for this repo (MIT, like the rest of it). Semgrep's
+# registry rules are under a proprietary license, so none are copied here. severity ERROR = high,
+# WARNING = medium, INFO = low in the gate (tools/security.py).
+rules:
+- id: ffwf.python.flask-debug
+  languages: [python]
+  severity: ERROR
+  message: Flask debug mode exposes an interactive debugger (remote code execution). Turn it off outside a laptop.
+  pattern-either:
+  - pattern: $APP.run(..., debug=True, ...)
+  - pattern: $APP.debug = True
+  metadata: {cwe: "CWE-489", category: sast}
+- id: ffwf.python.subprocess-shell
+  languages: [python]
+  severity: ERROR
+  message: A shell command built at runtime is an injection risk. Pass an argument list without shell=True.
+  pattern: subprocess.$F(..., shell=True, ...)
+  metadata: {cwe: "CWE-78", category: sast}
+- id: ffwf.python.eval
+  languages: [python]
+  severity: ERROR
+  message: eval/exec on data runs arbitrary code.
+  pattern-either:
+  - pattern: eval(...)
+  - pattern: exec(...)
+  metadata: {cwe: "CWE-95", category: sast}
+- id: ffwf.python.yaml-unsafe-load
+  languages: [python]
+  severity: ERROR
+  message: yaml.load without SafeLoader can construct arbitrary objects. Use yaml.safe_load.
+  patterns:
+  - pattern: yaml.load(...)
+  - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
+  - pattern-not: yaml.load(..., Loader=SafeLoader, ...)
+  metadata: {cwe: "CWE-502", category: sast}
+- id: ffwf.python.tls-verify-off
+  languages: [python]
+  severity: WARNING
+  message: TLS certificate verification is turned off.
+  pattern: requests.$F(..., verify=False, ...)
+  metadata: {cwe: "CWE-295", category: sast}
+- id: ffwf.python.markup-from-input
+  languages: [python]
+  severity: WARNING
+  message: Marking request data as safe HTML lets a user inject script (XSS). Let the template escape it.
+  pattern-either:
+  - pattern: markupsafe.Markup(flask.request.$X.get(...))
+  - pattern: Markup(request.$X.get(...))
+  - pattern: flask.Markup(request.$X.get(...))
+  metadata: {cwe: "CWE-79", category: sast}

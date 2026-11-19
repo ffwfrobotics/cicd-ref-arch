@@ -90,14 +90,20 @@ class Render(unittest.TestCase):
         class B:
             cluster = "c-local"
         os.environ["CICD_SKIP_APPROVAL_CHECK"] = "1"
+        real_security_of = cicd.security_of
         try:
             self.assertEqual(cicd.apply_due(self.root, B), (0, 0))     # not due
             p = next((self.root / "promotions/pending").glob("*/promotion.yaml"))
             d = yaml.safe_load(p.read_text())
             d["notBefore"] = "2000-01-01T00:00:00Z"
             p.write_text(yaml.safe_dump(d))
+            cicd.security_of = lambda *a: (False, "security gate fail (1 blocking: vuln/CVE-X)")
+            self.assertEqual(cicd.apply_due(self.root, B), (0, 1))     # due, approved, fails the gate
+            self.assertTrue(p.exists())                                # stays pending
+            cicd.security_of = lambda *a: (True, "security gate pass")
             self.assertEqual(cicd.apply_due(self.root, B), (1, 0))
         finally:
+            cicd.security_of = real_security_of
             del os.environ["CICD_SKIP_APPROVAL_CHECK"]
         meta = yaml.safe_load((self.root / "envs/c-local/hello/prod/cicd-env.yaml").read_text())
         self.assertEqual(meta["image"], "localhost:5000/hello@" + DIGEST)
@@ -121,6 +127,28 @@ class Render(unittest.TestCase):
         finally:
             del os.environ["FORGEJO_API"], os.environ["FORGEJO_TOKEN"]
         self.assertFalse((self.root / "envs/c-local/hello/prod").exists())
+
+
+class Tenants(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+        (self.root / "tenants").mkdir()
+        (self.root / "tenants/hello.yaml").write_text(yaml.safe_dump({
+            "apiVersion": cicd.API, "kind": "Tenant", "metadata": {"name": "hello"},
+            "spec": {"repo": "ffwf/cicd-ref-arch", "clusters": ["c-local"]}}))
+        self.app = cicd.load_app(str(REPO / "examples/hello/cicd.yaml"))
+
+    def test_enrolled_repo_and_cluster(self):
+        cicd.check_tenant(self.root, self.app, "ffwf/cicd-ref-arch", "c-local")
+        with self.assertRaises(SystemExit):
+            cicd.check_tenant(self.root, self.app, "someone/else", "c-local")
+        with self.assertRaises(SystemExit):
+            cicd.check_tenant(self.root, self.app, "ffwf/cicd-ref-arch", "c-other")
+
+    def test_not_enrolled(self):
+        app = dict(self.app, metadata={"name": "stranger"})
+        with self.assertRaises(SystemExit):
+            cicd.check_tenant(self.root, app, "ffwf/x", "c-local")
 
 
 if __name__ == "__main__":

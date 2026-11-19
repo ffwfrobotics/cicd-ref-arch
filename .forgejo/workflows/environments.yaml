@@ -1,6 +1,7 @@
 # Housekeeping for the state this repo holds:
 #  - apply promotions that are approved and due (every 5 minutes, and when one is merged)
-#  - remove branch environments whose branch was deleted (on delete, and every 5 minutes)
+#  - remove branch environments whose branch was deleted, here or in an enrolled app's repo
+#    (on delete, every 5 minutes, and when an app's pipeline dispatches it after a branch delete)
 name: environments
 on:
   schedule: [{cron: "*/5 * * * *"}]
@@ -33,7 +34,7 @@ jobs:
         for attempt in 1 2 3 4 5; do
           git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
           rc=0; python3 tools/cicd.py apply-due --cluster "$CLUSTER" > promote.log || rc=$?; cat promote.log
-          python3 tools/cicd.py gc --cluster "$CLUSTER" --repo '${{ github.repository }}' | tee gc.log
+          python3 tools/cicd.py gc --cluster "$CLUSTER" --repo '${{ github.repository }}' --server '${{ github.server_url }}' | tee gc.log
           git add -A envs promotions
           if git diff --cached --quiet; then echo "nothing to do"; break; fi
           git commit -q -m "environments: $(grep -c ': applied' promote.log || true) promoted, $(grep -c '^removing' gc.log || true) removed" \

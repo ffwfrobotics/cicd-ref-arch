@@ -1,0 +1,36 @@
+#!/bin/sh
+# Forge-side pre-receive hook: refuse a push that adds a commit containing a secret, so it never
+# enters history (or the public mirrors). Same gitleaks as CI and the client hook.
+#
+# False positives: the pushed tip's .gitleaksignore is honoured, so a developer adds the fingerprint
+# gitleaks printed, without its commit part (`file:rule:line`, which CI's scan honours too), with a
+# comment, and pushes the same commits again: no code change and no history rewrite. Every entry is visible in review and in the
+# promotion PR's suppression diff.
+#
+# Install (an instance change: needs the forge admin): gitleaks on the forge's PATH, and this file
+# as a pre-receive hook for the enrolled repos (docs/enroll.md#secrets-at-push).
+set -u
+zero=0000000000000000000000000000000000000000
+status=0
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+while read -r old new ref; do
+  [ "$new" = "$zero" ] && continue                       # a delete adds nothing
+  case "$ref" in refs/heads/*|refs/tags/*) ;; *) continue ;; esac
+  if [ "$old" = "$zero" ]; then range="$new --not --all"  # a new ref: only commits the repo doesn't have yet
+  else range="$old..$new"; fi
+  : > "$tmp/ignore"
+  git show "$new:.gitleaksignore" > "$tmp/ignore" 2>/dev/null || :
+  if ! gitleaks git --log-opts="$range" --redact --no-banner --verbose --no-color --exit-code 1 \
+       --gitleaks-ignore-path "$tmp/ignore" . > "$tmp/out" 2>&1; then
+    echo "push refused: possible secret in ${ref#refs/heads/}" >&2
+    grep -E "^(Finding|Secret|RuleID|File|Line|Commit|Fingerprint):" "$tmp/out" >&2 || cat "$tmp/out" >&2
+    sed -n 's/^Fingerprint: *[0-9a-f]*:\(.*\)/\1/p' "$tmp/out" | sort -u > "$tmp/fp"
+    if [ -s "$tmp/fp" ]; then
+      echo "If this is a false positive: add these lines to .gitleaksignore, with a comment saying why, commit, and push again:" >&2
+      sed 's/^/    /' "$tmp/fp" >&2
+    fi
+    echo "If it is a real secret: rotate it, then remove it from these commits." >&2
+    status=1
+  fi
+done
+exit $status
