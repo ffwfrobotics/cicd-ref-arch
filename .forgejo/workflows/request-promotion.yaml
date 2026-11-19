@@ -36,14 +36,14 @@ jobs:
         echo "$sec"
         sec_md=$(python3 tools/security.py summary "$dir/security-record.json" 2>/dev/null || echo "no security record")
         prod="envs/$CLUSTER/${{ inputs.app }}/prod/suppressions"
-        sup_diff=$(diff -ruN "$prod" "$dir/suppressions" 2>/dev/null | grep -v '^diff -ruN' || true)
+        sup_diff=$(diff -ruN "$prod" "$(realpath --relative-to=. "$dir")/suppressions" 2>/dev/null | grep -v '^diff -ruN' || true)
         git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
         git checkout -q -b "promote/$id"
         git add "$dir"
         git commit -q -m "promote ${{ inputs.app }} ${{ inputs.from }} -> prod ($id)" -m "requested by ${{ github.actor }}: ${{ inputs.reason }}"
         git -c http.extraHeader="$auth" push -q origin "promote/$id"
         body=$(jq -n --arg id "$id" --arg p "$(cat "$dir/promotion.yaml")" --arg sec "$sec_md" --arg diff "${sup_diff:-no changes}" \
-          '"Promotion request `\($id)`.\n\n```yaml\n\($p)\n```\n\nApproving and merging this queues it; the `environments` workflow applies it at or after `notBefore`. The approver must not be the requester.\n\n`app.yaml` in this PR is exactly what will run in prod.\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\nThe `environments` workflow scans the image again when it applies the promotion, and refuses it if the gate fails then.\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
+          '"Promotion request `\($id)`.\n\n```yaml\n\($p)\n```\n\nApproving and merging this queues it; the `environments` workflow applies it at or after `notBefore`. The approver must not be the requester.\n\n`app.yaml` in this PR is exactly what will run in prod.\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\n\nThe `environments` workflow scans the image again when it applies the promotion, and refuses it if the gate fails then.\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
         title="Promote ${{ inputs.app }} to prod ($id)"; [ "$sec_rc" = 0 ] || title="[security: fail] $title"
         jq -n --arg head "promote/$id" --arg title "$title" --argjson body "$body" \
           '{head: $head, base: "master", title: $title, body: $body}' \
