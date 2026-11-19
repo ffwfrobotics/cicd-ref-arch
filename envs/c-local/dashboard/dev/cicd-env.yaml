@@ -1,0 +1,14 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: dashboard
+env: dev
+dir: dev
+namespace: dashboard-dev
+branch: main
+hosts:
+- dashboard-dev.c-local.k.ffwf.net
+image: localhost:5000/dashboard@sha256:ba774a458577b639347943e8e9f83924dd74fc4350f66a00fcf9e00fa4d2d0f4
+repo: ffwf/cicd-dashboard
+commit: 5ac12e89879cc8675756295e2e9de89e59227235
+runUrl: https://forge.goblincorps.com/ffwf/cicd-dashboard/actions/runs/1
+renderedAt: '2026-11-19T20:45:11Z'
