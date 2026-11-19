@@ -1,0 +1,2 @@
+# Branch environments a tenant may have in CI/CD at once (default 16).
+ffwf: {branchLimit: 1}   # TEMPORARY: limit test, 2026-11-19
