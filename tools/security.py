@@ -405,6 +405,8 @@ def print_summary(rec: dict):
             extra = f"  [fixed in {', '.join(f['fixed_in'])}]"
         if f.get("expired_ignore"):
             extra += f"  [ignore expired {f['expired_ignore']['expired']}]"
+        if f["outcome"] == "fail" and f.get("fingerprint"):
+            extra += f"  [false positive? add to .gitleaksignore: {f['fingerprint']}]"
         loc = f["location"] if len(f["location"]) < 70 else f"{f.get('package')} {f.get('version')}"
         print(f"  {f['outcome']:<17} {f['severity']:<8} {f['category']:<7} {f['rule']:<28} {loc}{extra}")
     if hidden:
