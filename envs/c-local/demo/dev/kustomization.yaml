@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: demo-dev
+labels:
+- pairs:
+    cicd.ffwf.net/app: demo
+    cicd.ffwf.net/env: dev
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/demo
+  digest: sha256:2391e258a285a7136f2792a561c78b3802f65b6b4962b09300a7a427b17fc014

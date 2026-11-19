@@ -1,0 +1,202 @@
+{
+  "schema": "security-findings/v1",
+  "app": "demo",
+  "image": "localhost:5000/demo@sha256:2391e258a285a7136f2792a561c78b3802f65b6b4962b09300a7a427b17fc014",
+  "commit": "40f0c71e721044941e037daaa9974fe404cb65b8",
+  "generated": "2026-11-19T19:11:17Z",
+  "scans": {
+    "source": {
+      "generated": "2026-11-19T19:11:12Z",
+      "commit": "40f0c71e721044941e037daaa9974fe404cb65b8",
+      "image": null,
+      "tools": {
+        "gitleaks": "8.30.1",
+        "opengrep": "1.33.1",
+        "checkov": "3.4.6"
+      },
+      "evidence": {
+        "gitleaks": {
+          "file": "gitleaks.json",
+          "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        },
+        "opengrep": {
+          "file": "opengrep.sarif",
+          "sha256": "f9777916c570b463564a9c5cc17095769c5cd7efe23bf547df985dfcfa688453"
+        },
+        "checkov": {
+          "file": "checkov.json",
+          "sha256": "33da4ef1987de7920cc59664b57e5de8dca37b1195ccda399cd80a9257a46c24"
+        }
+      }
+    },
+    "image": {
+      "generated": "2026-11-19T19:11:17Z",
+      "commit": "40f0c71e721044941e037daaa9974fe404cb65b8",
+      "image": "localhost:5000/demo@sha256:2391e258a285a7136f2792a561c78b3802f65b6b4962b09300a7a427b17fc014",
+      "tools": {
+        "syft": "16.1.13",
+        "grype": "6",
+        "grype-db": "2026-11-19T06:23:17Z"
+      },
+      "evidence": {
+        "sbom-cyclonedx": {
+          "file": "sbom.cdx.json",
+          "sha256": "54651e83fef1a61010d0608dc1b34d75803dc10c15b0c76a0ea07d9bd62f49be"
+        },
+        "sbom-spdx": {
+          "file": "sbom.spdx.json",
+          "sha256": "1ffa1b6b9b838e624ac53bada898e9d6176cdec2bda6c8c378dc61757a2e2095"
+        },
+        "grype": {
+          "file": "grype.json",
+          "sha256": "4fb74d231d095ff366cbb531850ef477e669c41ff2ea9c8ab72b306ad39fd07b"
+        }
+      }
+    }
+  },
+  "gate": {
+    "env": "dev",
+    "mode": "report",
+    "status": "warn",
+    "blocking": 0,
+    "counts": {
+      "suppressed": 7,
+      "fail": 2,
+      "below-threshold": 15
+    },
+    "notes": []
+  },
+  "findings": [
+    {
+      "id": "f075791847fe",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_7",
+      "severity": "high",
+      "location": "Dockerfile:7",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/57371855e0c261b5/hostexecutor/Dockerfile.FROM)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (app)",
+        "reason": "false positive: FROM ${BUILD}/${BASE} are ARGs pinned by digest, which checkov cannot resolve",
+        "expires": "2027-05-19"
+      }
+    },
+    {
+      "id": "fc1a7d0c6c20",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/57371855e0c261b5/hostexecutor/Dockerfile.)",
+      "outcome": "fail"
+    },
+    {
+      "id": "b9b77e041ed9",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_21",
+      "severity": "high",
+      "location": "build/app.yaml:1",
+      "message": "The default namespace should not be used (Service.default.demo)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform sets the namespace when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "52a7b84f5cda",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_11",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "CPU limits should be set (Deployment.default.demo)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (app)",
+        "reason": "no CPU limit on purpose: a throttled cold start is slower, and requests already reserve CPU",
+        "expires": "2027-05-19"
+      }
+    },
+    {
+      "id": "9a99e240c143",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_43",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Image should use digest (Deployment.default.demo)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform pins the image by digest when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "cbf3f491bc56",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_14",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Image Tag should be fixed - not latest or blank (Deployment.default.demo)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform pins the image by digest when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "5a34b7c50fd9",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_21",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "The default namespace should not be used (Deployment.default.demo)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform sets the namespace when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "e6cbf5b0a8ee",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV2_K8S_6",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Minimize the admission of pods which lack an associated NetworkPolicy (Pod.default.demo.app-demo)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform renders a default-deny NetworkPolicy for every environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "67f1d49a695b",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "GHSA-2g68-c3qc-8985",
+      "severity": "high",
+      "location": "pkg:pypi/werkzeug@3.0.1",
+      "message": "werkzeug 3.0.1 (python): Werkzeug debugger vulnerable to remote execution when interacting with attacker controlled domain",
+      "package": "werkzeug",
+      "version": "3.0.1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.0.3"
+      ],
+      "outcome": "fail"
+    }
+  ]
+}
