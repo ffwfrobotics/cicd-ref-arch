@@ -44,6 +44,27 @@ Run it again to update the workflow or rotate the token.
 - **Every run:** a test record and a security record, shown in the run's summary. Dev and branch deploys go ahead on findings; a secret stops them.
 - **Prod:** `request-promotion` in this repo, approved by someone else. See [promotion.md](promotion.md) and [security.md](security.md).
 
+## Self-service
+
+After enrollment, anyone with **write on the app repo** helps themselves. There are two ways:
+- **Dashboard:** `cicd-dashboard`, signed in through the forge.
+- **Forge:** Actions → `cicd` → Run workflow.
+
+Either way the request is dispatched to the app's own pipeline, which carries it out and records who asked:
+
+| Action | Effect |
+|---|---|
+| `pause` (branch) | The branch's environment is removed. Its pushes skip CI/CD until it is resumed. Recorded in `envs/<cluster>/<app>/paused.yaml`. |
+| `resume` (branch) | Its next push goes through CI/CD again. |
+| `remove-env` (branch) | Removes the environment now. The next push brings it back. |
+| `request-promotion` | Opens the promotion PR, with you as the requester. Someone else approves it. |
+
+**Tenant limit.** At most **16 branch environments per tenant** are in CI/CD at once (`tenants/_limits.yaml`).
+- A push to a branch with no environment, while the tenant is at its limit, is routed out: no tests, no build, no deploy. The run says why, and the branch waits for a free slot.
+- The dev branch, and branches that already have an environment, always go through.
+- Branches themselves are unlimited.
+- The limit is checked when a push is routed, so pushes that arrive together can briefly exceed it.
+
 ## Secrets at push
 
 The forge-side hook `forge/pre-receive-gitleaks` refuses pushes that add a secret. It is an instance change, made by the forge admin:
