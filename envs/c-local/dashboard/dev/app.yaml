@@ -32,6 +32,10 @@ spec:
           value: ffwf/cicd-ref-arch
         - name: CLUSTER
           value: c-local
+        envFrom:
+        - secretRef:
+            name: dashboard-oauth
+            optional: true
         image: app-image
         livenessProbe:
           httpGet:
