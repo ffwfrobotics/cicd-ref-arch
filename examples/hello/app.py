@@ -12,7 +12,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 STARTED = time.time()
 COMMIT = os.environ.get("APP_COMMIT", "unknown")
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 served = 0
 
 
