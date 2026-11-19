@@ -44,7 +44,7 @@ runs:
           --manifests .manifests.yaml --commit '${{ github.sha }}' --repo '${{ github.repository }}' --run-url "$run_url" --security-dir "$sec" >/dev/null
         git add -A envs
         if git diff --cached --quiet; then echo "environment unchanged"; break; fi
-        git commit -q -m "deploy ${{ inputs.env }}: $(basename '${{ inputs.app }}') ${{ inputs.image }}" \
+        git commit -q -m "deploy ${{ inputs.env }}: $(python3 -c "import yaml,sys;print(yaml.safe_load(open(sys.argv[1]))['metadata']['name'])" "$app_cfg") ${{ inputs.image }}" \
           -m "branch ${{ inputs.branch }}, commit ${{ github.sha }}" -m "$run_url"
         if git -c http.extraHeader="$auth" push -q origin HEAD:master; then echo "pushed"; break; fi
         [ "$attempt" = 5 ] && { echo "push failed 5 times" >&2; exit 1; }

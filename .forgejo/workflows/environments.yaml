@@ -18,8 +18,9 @@ jobs:
   reconcile:
     runs-on: ffwf-k8s
     steps:
+    # no persisted job token: pushes to master must come from the bot, which is on its push whitelist
     - uses: actions/checkout@v4
-      with: {fetch-depth: 0}
+      with: {fetch-depth: 0, persist-credentials: false}
     - uses: ./actions/setup
     - name: promote due, collect gone branches
       env:
