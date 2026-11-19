@@ -2,7 +2,7 @@
 """enroll: an admin puts an app repo onto the platform (docs/enroll.md).
 
   FORGEJO_TOKEN=<admin token for the app repo> CICD_BOT_USER=... CICD_BOT_TOKEN=... \\
-    tools/enroll.py --repo ffwf/cicd-demo-app --app demo --cluster c-local --owner alice
+    tools/enroll.py --tenant ffwf --repo ffwf/cicd-demo-app --app demo --cluster c-local --owner alice
 
 1. writes tenants/<app>.yaml here (commit and push it: deploys of the app are refused until then)
 2. sets the app repo's Actions variables CICD_BOT_USER, CICD_CLUSTER and secret CICD_BOT_TOKEN
@@ -49,6 +49,7 @@ def main():
     ap.add_argument("--path", default=".", help="where the app's cicd.yaml is in its repo")
     ap.add_argument("--cluster", action="append", required=True)
     ap.add_argument("--owner", action="append", default=[], help="people responsible for the app")
+    ap.add_argument("--tenant", required=True, help="the tenant (team or organisation) the app belongs to")
     ap.add_argument("--branch", help="branch to commit the workflow to (default: the repo's default)")
     ap.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
     a = ap.parse_args()
@@ -66,7 +67,7 @@ def main():
 
     # 1. the tenant record
     tenant = {"apiVersion": "cicd.ffwf.net/v1alpha1", "kind": "Tenant", "metadata": {"name": a.app},
-              "spec": {"repo": a.repo, "path": a.path, "clusters": a.cluster, "owners": a.owner,
+              "spec": {"tenant": a.tenant, "repo": a.repo, "path": a.path, "clusters": a.cluster, "owners": a.owner,
                        "enrolled": dt.date.today().isoformat()}}
     path = ROOT / "tenants" / f"{a.app}.yaml"
     path.parent.mkdir(exist_ok=True)

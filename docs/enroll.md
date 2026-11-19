@@ -26,7 +26,7 @@ From a checkout of this repo, with a token that is an admin of the app repo:
 
 ```sh
 FORGEJO_TOKEN=<admin token> CICD_BOT_USER=ffwfbot CICD_BOT_TOKEN=<bot token> \
-  python3 tools/enroll.py --repo ffwf/cicd-demo-app --app demo --cluster c-local --owner alice
+  python3 tools/enroll.py --tenant ffwf --repo ffwf/cicd-demo-app --app demo --cluster c-local --owner alice
 git add tenants/demo.yaml && git commit -m "enroll demo" && git push
 ```
 

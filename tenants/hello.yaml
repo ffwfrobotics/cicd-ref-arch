@@ -4,6 +4,7 @@ apiVersion: cicd.ffwf.net/v1alpha1
 kind: Tenant
 metadata: {name: hello}
 spec:
+  tenant: ffwf
   repo: ffwf/cicd-ref-arch
   path: examples/hello
   clusters: [c-local]

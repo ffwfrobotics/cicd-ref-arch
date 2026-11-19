@@ -4,6 +4,7 @@ kind: Tenant
 metadata:
   name: demo
 spec:
+  tenant: ffwf
   repo: ffwf/cicd-demo-app
   path: .
   clusters:
