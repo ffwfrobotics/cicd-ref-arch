@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: demo-feature-second
+labels:
+- pairs:
+    cicd.ffwf.net/app: demo
+    cicd.ffwf.net/env: branch-feature-second
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/demo
+  digest: sha256:9a97474ba833f2c0f3563967c4c7c31a3b1e99f81b66aaf642e6c60d66b36d8c
