@@ -7,8 +7,8 @@ namespace: hello-dev
 branch: master
 hosts:
 - hello-dev.c-local.k.ffwf.net
-image: localhost:5000/hello@sha256:e2a1989b57fdbbbb1b0d8e834ad1ff7829547e5d37e0f57c8382c5f6a6cdd62a
+image: localhost:5000/hello@sha256:da9e1aa15fe9c5fb94624947e0f5dfe9bffd3b61b8ba9d652f0e685872c72b13
 repo: ffwf/cicd-ref-arch
-commit: 63e89b70ea5683f09500d5d23f217f61110b0a07
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/42
-renderedAt: '2026-11-19T19:07:43Z'
+commit: 1a0a70bd6365cceefdec8472e7cd2808c93679c8
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/45
+renderedAt: '2026-11-19T19:10:37Z'

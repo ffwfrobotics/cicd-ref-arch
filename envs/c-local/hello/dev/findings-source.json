@@ -1,8 +1,8 @@
 {
   "schema": "security-findings/v1",
   "scope": "source",
-  "generated": "2026-11-19T19:06:30Z",
-  "commit": "63e89b70ea5683f09500d5d23f217f61110b0a07",
+  "generated": "2026-11-19T19:10:31Z",
+  "commit": "1a0a70bd6365cceefdec8472e7cd2808c93679c8",
   "image": null,
   "tools": {
     "gitleaks": "8.30.1",
@@ -15,7 +15,7 @@
     },
     "checkov": {
       "file": "checkov.json",
-      "sha256": "710efbb9ef491089697a1d05f0a2305b97ad0e5293bb71ac49cfde0d70e3b02d"
+      "sha256": "e095b8dae3295a7bf0e14f1b4838a5cb33f823eb59480df967f62ac6d2df4051"
     }
   },
   "findings": [
@@ -26,7 +26,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "examples/hello/Dockerfile:4",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/6ccdd02b4d9da35f/hostexecutor/examples/hello/Dockerfile.FROM)"
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/0f25c0c868fd3c1b/hostexecutor/examples/hello/Dockerfile.FROM)"
     },
     {
       "id": "b9b77e041ed9",
