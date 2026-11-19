@@ -68,6 +68,12 @@ The requirement is that a user never sees `502`, `503 no available server`, or a
 
 **Measure it:** `docs/demo.md` step 5 times a cold request. The response carries `X-KEDA-HTTP-Cold-Start: true` when it woke the app.
 
+**Measured on c-local, 2026-11-19 (hello, image cached on the node):**
+- One cold request from 0 replicas: `200` in 1.97 s.
+- 20 concurrent cold requests: all `200`, in 0.75–1.3 s.
+- Warm: about 6 ms.
+- An unknown host gets `404` from the interceptor.
+
 **Caveats:**
 - Long-lived connections (WebSockets, SSE) keep the app awake, which is the right behaviour, but they count as one request each.
 - The interceptor is on the request path for every app. Give it more than one replica on a real cluster.

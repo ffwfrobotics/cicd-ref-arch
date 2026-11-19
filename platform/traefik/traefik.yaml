@@ -26,12 +26,12 @@ spec:
     gateway: {enabled: false}
     gatewayClass: {enabled: true, name: traefik}
     ingressClass: {enabled: false}
-    service: {type: ClusterIP}  # exposure is the cluster's job: tailnet proxy, LoadBalancer, NodePort
+    service:
+      spec: {type: ClusterIP}   # exposure is the cluster's job: tailnet proxy, LoadBalancer, NodePort
     ports:
       web: {port: 8000, exposedPort: 80}
       websecure: {port: 8443, exposedPort: 443}
-    logs:
-      access: {enabled: true}
+    accessLog: {enabled: true}  # common log format to stdout
     resources:
       requests: {cpu: 50m, memory: 64Mi}
       limits: {memory: 256Mi}
