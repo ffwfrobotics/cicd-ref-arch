@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hello
+labels:
+- pairs:
+    cicd.ffwf.net/app: hello
+    cicd.ffwf.net/env: prod
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/hello
+  digest: sha256:6755a66d9518f865c7a08a78641158ff092bc7ee1e45cb4ffbdf5cb10bf1f135

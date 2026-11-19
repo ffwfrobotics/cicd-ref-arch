@@ -10,3 +10,5 @@ commit: ff36faa87bf49c4255a5049a58878f8012a68753
 notBefore: '2026-11-19T17:51:00Z'
 requestedBy: ffwfbot
 reason: 'demo: first promotion of hello to prod'
+appliedAt: '2026-11-19T18:00:47Z'
+approval: 'PR #1 merged by john'

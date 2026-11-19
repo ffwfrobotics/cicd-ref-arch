@@ -1,0 +1,14 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: hello
+env: prod
+dir: prod
+namespace: hello
+branch: null
+hosts:
+- hello.c-local.k.ffwf.net
+image: localhost:5000/hello@sha256:6755a66d9518f865c7a08a78641158ff092bc7ee1e45cb4ffbdf5cb10bf1f135
+commit: ff36faa87bf49c4255a5049a58878f8012a68753
+promotion: hello-prod-20261119T174142Z
+approval: 'PR #1 merged by john'
+renderedAt: '2026-11-19T18:00:47Z'
