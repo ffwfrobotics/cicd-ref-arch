@@ -18,3 +18,4 @@ ignore:
 - {category: config, rule: CKV_K8S_14, reason: "the platform pins the image by digest when it renders the environment"}
 - {category: config, rule: CKV_K8S_43, reason: "the platform pins the image by digest when it renders the environment"}
 - {category: config, rule: CKV2_K8S_6, reason: "the platform renders a default-deny NetworkPolicy for every environment"}
+- {category: config, rule: CKV_DOCKER_2, reason: "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe"}
