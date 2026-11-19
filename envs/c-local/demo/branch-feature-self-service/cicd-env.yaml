@@ -1,0 +1,14 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: demo
+env: branch
+dir: branch-feature-self-service
+namespace: demo-feature-self-service
+branch: feature/self-service
+hosts:
+- demo-feature-self-service.c-local.k.ffwf.net
+image: localhost:5000/demo@sha256:916677607fb38d0afa1b6f618891f83b3ac3f39c4a0d0a7235918d9c7d0151a3
+repo: ffwf/cicd-demo-app
+commit: b3d7debaaf5d626bf7adcd1dbc494bdbe5e04fd1
+runUrl: https://forge.goblincorps.com/ffwf/cicd-demo-app/actions/runs/15
+renderedAt: '2026-11-19T21:30:46Z'
