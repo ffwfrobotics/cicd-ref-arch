@@ -1,0 +1,15 @@
+# How people reach this cluster's Gateway: over the tailnet (exposure/). Another cluster would
+# use a LoadBalancer Service or a NodePort here instead; nothing else in the pipeline changes.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: cicd-exposure, namespace: flux-system}
+spec:
+  dependsOn: [{name: traefik}]
+  interval: 10m
+  retryInterval: 30s
+  path: ./clusters/c-local/exposure
+  prune: true
+  wait: false
+  sourceRef: {kind: GitRepository, name: cicd-ref-arch}
+  postBuild:
+    substituteFrom: [{kind: ConfigMap, name: cluster-vars}]   # the private fleet's: CLUSTER

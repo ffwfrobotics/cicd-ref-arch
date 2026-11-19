@@ -1,0 +1,34 @@
+# One Gateway per cluster for every app environment: *.${CLUSTER}.${ZONE} on 80 and 443.
+# Listener ports are Traefik's entryPoint ports (8000/8443); the Service maps 80/443 to them.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: {name: apps-wildcard, namespace: gateway-system}
+spec:
+  secretName: apps-wildcard-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: ${CLUSTER_ISSUER}
+  dnsNames: ["*.${CLUSTER}.${ZONE}"]
+  privateKey: {algorithm: ECDSA, size: 256}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata: {name: edge, namespace: gateway-system}
+spec:
+  gatewayClassName: traefik
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 8000
+    hostname: "*.${CLUSTER}.${ZONE}"
+    allowedRoutes: {namespaces: {from: All}}
+  - name: https
+    protocol: HTTPS
+    port: 8443
+    hostname: "*.${CLUSTER}.${ZONE}"
+    tls:
+      mode: Terminate
+      certificateRefs: [{name: apps-wildcard-tls}]
+    allowedRoutes: {namespaces: {from: All}}
+  # Custom domains (prod extraHosts) get a listener per domain here, with its own certificate.
+  # Stub until the first one: see docs/promotion.md#custom-domains.

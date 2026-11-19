@@ -1,0 +1,17 @@
+name: setup
+description: Pinned CI tools (buildctl, syft, grype, hadolint, kustomize, kubeconform) and PyYAML, cached.
+runs:
+  using: composite
+  steps:
+  - id: key
+    shell: bash
+    run: echo "key=cicd-tools-$(sha256sum '${{ github.action_path }}/tools.txt' | cut -c1-16)" >> "$GITHUB_OUTPUT"
+  - uses: actions/cache@v4
+    with:
+      path: ~/.cicd
+      key: ${{ steps.key.outputs.key }}
+  - shell: bash
+    run: |
+      '${{ github.action_path }}/install.sh' "$HOME/.cicd"
+      echo "$HOME/.cicd/bin" >> "$GITHUB_PATH"
+      echo "$HOME/.cicd/venv/bin" >> "$GITHUB_PATH"

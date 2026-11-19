@@ -1,0 +1,62 @@
+# Tailnet exposure for the Gateway: a tailnet proxy forwards its 100.64 address to Traefik, and
+# publishes *.${CLUSTER}.k.ffwf.net -> that address through ExternalDNS. Generated with the private
+# fleet's fleet/infrastructure/tailnet/mk-ingress.sh (wildcard name quoted by hand). Uses that
+# fleet's tailnet namespace, ServiceAccount ts-proxy and Secret ts-authkey.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-gateway
+  namespace: tailnet
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: ingress-gateway}}
+  template:
+    metadata:
+      labels: {app: ingress-gateway}
+    spec:
+      serviceAccountName: ts-proxy
+      containers:
+      - name: tailscale
+        image: tailscale/tailscale@sha256:8eb8b450a85856807e8a216c4697333e15f8701cb6d344bed851bf6aa6a9605c  # v1.90.6
+        command:
+        - sh
+        - -ec
+        - |
+          until TS_DEST_IP=$(getent hosts traefik.gateway-system.svc.cluster.local | awk '{print $1; exit}') && [ -n "$TS_DEST_IP" ]; do
+            echo "waiting for traefik.gateway-system.svc.cluster.local"; sleep 3
+          done
+          export TS_DEST_IP
+          exec /usr/local/bin/containerboot
+        env:
+        - {name: TS_KUBE_SECRET, value: ts-state-ingress-gateway}
+        - name: TS_AUTHKEY
+          valueFrom: {secretKeyRef: {name: ts-authkey, key: TS_AUTHKEY}}
+        - {name: TS_USERSPACE, value: "false"}
+        - {name: TS_HOSTNAME, value: "${CLUSTER}-gateway"}
+        - {name: TS_EXTRA_ARGS, value: "--login-server=https://headscale.ffwf.net"}
+        - {name: TS_ACCEPT_DNS, value: "false"}
+        - name: POD_IP
+          valueFrom: {fieldRef: {fieldPath: status.podIP}}
+        securityContext: {privileged: true}
+        resources:
+          requests: {cpu: 10m, memory: 32Mi}
+      - name: publish
+        image: alpine/k8s@sha256:7a82aeefea3d554a43a8676b137f2b88bae6c1fe11c13862b191b3a086cc28c0  # 1.37.2
+        command:
+        - sh
+        - -c
+        - |
+          last=""
+          while :; do
+            ip=$(kubectl -n tailnet get secret ts-state-ingress-gateway -o jsonpath='{.data.device_ips}' 2>/dev/null | base64 -d 2>/dev/null | jq -r '[.[] | select(test("^100\\."))][0] // empty' 2>/dev/null)
+            if [ -n "$ip" ] && [ "$ip" != "$last" ]; then
+              printf '%s\n' "apiVersion: externaldns.k8s.io/v1alpha1" "kind: DNSEndpoint" \
+                "metadata: {name: ingress-gateway, namespace: tailnet}" \
+                "spec: {endpoints: [{dnsName: \"*.${CLUSTER}.k.ffwf.net\", recordType: A, recordTTL: 60, targets: [$ip]}]}" \
+                | kubectl apply -f - && last=$ip && echo "published *.${CLUSTER}.k.ffwf.net -> $ip"
+            fi
+            sleep 20
+          done
+        resources:
+          requests: {cpu: 5m, memory: 32Mi}

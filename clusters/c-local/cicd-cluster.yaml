@@ -1,0 +1,13 @@
+# What tools/cicd.py and the CI actions need to know about this cluster.
+# Flux's copy of the same facts is cicd-vars.yaml (postBuild substitution).
+cluster: c-local
+zone: k.ffwf.net
+registry:
+  push: registry.buildkit.svc.cluster.local:5000   # BuildKit pushes here (proxy to the node's registry)
+  pull: localhost:5000            # what pods pull from (containerd mirror on the node)
+gateway: {name: edge, namespace: gateway-system, httpsListener: https}
+keda:
+  namespace: keda
+  scaler: keda-add-ons-http-external-scaler.keda:9090
+  interceptor: {service: keda-add-ons-http-interceptor-proxy, port: 8080}
+buildkit: tcp://buildkitd.buildkit.svc.cluster.local:1234

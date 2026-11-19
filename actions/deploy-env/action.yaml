@@ -1,0 +1,55 @@
+name: deploy-env
+description: >
+  Write the app's environment into the state repo (envs/<cluster>/<app>/<env>/) and push. Flux
+  applies it. Retries on a concurrent push by re-rendering on top of the new head.
+inputs:
+  app: {required: true}
+  cluster: {required: true}
+  env: {description: dev or branch, required: true}
+  branch: {required: true}
+  image: {required: true}
+  manifests: {required: true}
+  token: {description: token that can push to the state repo, required: true}
+  user: {description: the token's user, required: true}
+  state-repo: {description: "owner/name of the state repo (default: this repo)", default: ""}
+outputs:
+  hosts: {value: "${{ steps.deploy.outputs.hosts }}"}
+runs:
+  using: composite
+  steps:
+  - id: deploy
+    shell: bash
+    env:
+      TOKEN: ${{ inputs.token }}
+    run: |
+      set -eu
+      repo='${{ inputs.state-repo }}'; [ -n "$repo" ] || repo='${{ github.repository }}'
+      server='${{ github.server_url }}'
+      cicd=$(cd '${{ github.action_path }}/../..' && pwd)   # tools/ and clusters/ of cicd-ref-arch
+      state=$(mktemp -d)
+      url="${server%/}/$repo.git"
+      auth="AUTHORIZATION: basic $(printf '%s:%s' '${{ inputs.user }}' "$TOKEN" | base64 -w0)"
+      git -c http.extraHeader="$auth" clone -q --depth 20 "$url" "$state"
+      cp '${{ inputs.manifests }}' "$state/.manifests.yaml"
+      cd "$state"
+      git config user.name 'cicd-bot'; git config user.email 'cicd-bot@noreply.invalid'
+      app_cfg="$GITHUB_WORKSPACE/${{ inputs.app }}/cicd.yaml"
+      run_url="$server/${{ github.repository }}/actions/runs/${{ github.run_number }}"
+      for attempt in 1 2 3 4 5; do
+        git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
+        python3 "$cicd/tools/cicd.py" render "$app_cfg" --env '${{ inputs.env }}' \
+          --branch '${{ inputs.branch }}' --cluster '${{ inputs.cluster }}' --image '${{ inputs.image }}' \
+          --manifests .manifests.yaml --commit '${{ github.sha }}' --repo '${{ github.repository }}' --run-url "$run_url" >/dev/null
+        git add -A envs
+        if git diff --cached --quiet; then echo "environment unchanged"; break; fi
+        git commit -q -m "deploy ${{ inputs.env }}: $(basename '${{ inputs.app }}') ${{ inputs.image }}" \
+          -m "branch ${{ inputs.branch }}, commit ${{ github.sha }}" -m "$run_url"
+        if git -c http.extraHeader="$auth" push -q origin HEAD:master; then echo "pushed"; break; fi
+        [ "$attempt" = 5 ] && { echo "push failed 5 times" >&2; exit 1; }
+        sleep $((attempt * 3))
+      done
+      hosts=$(python3 "$cicd/tools/cicd.py" hosts "$app_cfg" --env '${{ inputs.env }}' \
+        --branch '${{ inputs.branch }}' --cluster '${{ inputs.cluster }}' \
+        --zone "$(python3 -c "import yaml;print(yaml.safe_load(open('$cicd/clusters/${{ inputs.cluster }}/cicd-cluster.yaml'))['zone'])")" | paste -sd' ')
+      echo "hosts=$hosts" >> "$GITHUB_OUTPUT"
+      for h in $hosts; do echo "environment: https://$h/"; done

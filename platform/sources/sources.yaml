@@ -1,0 +1,21 @@
+# Upstream sources for the platform layer. Versions are pinned here and nowhere else.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata: {name: gateway-api, namespace: flux-system}
+spec:
+  interval: 24h
+  url: https://github.com/kubernetes-sigs/gateway-api
+  ref: {tag: v1.6.3}          # the version Traefik 3.7 is built against
+  ignore: |
+    /*
+    !/config/crd/standard/
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata: {name: traefik, namespace: flux-system}
+spec: {interval: 12h, url: https://traefik.github.io/charts}
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata: {name: kedacore, namespace: flux-system}
+spec: {interval: 12h, url: https://kedacore.github.io/charts}

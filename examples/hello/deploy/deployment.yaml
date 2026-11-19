@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: hello}
+spec:
+  # no replicas: KEDA owns the replica count (0 when idle)
+  selector: {matchLabels: {app: hello}}
+  template:
+    metadata:
+      labels: {app: hello}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+      - name: hello
+        image: app-image
+        ports: [{name: http, containerPort: 8080}]
+        readinessProbe:
+          httpGet: {path: /healthz, port: http}
+          periodSeconds: 1        # a cold start is only as fast as the first passing probe
+          failureThreshold: 3
+        livenessProbe:
+          httpGet: {path: /healthz, port: http}
+          periodSeconds: 10
+        resources:
+          requests: {cpu: 10m, memory: 32Mi}
+          limits: {memory: 128Mi}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}

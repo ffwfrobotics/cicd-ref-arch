@@ -1,0 +1,31 @@
+name: scan
+description: >
+  SECURITY SLOT (docs/security.md): lint the Dockerfile (hadolint) and scan the SBOM for known
+  vulnerabilities (grype). mode=report never fails the job; mode=enforce fails it on findings at
+  or above fail-on. The scanners are placeholders for whatever is chosen (Tenable, a hardened-base
+  pipeline, ...): keep the inputs and the summary.json shape, swap the commands.
+inputs:
+  dockerfile: {required: true}
+  sbom: {required: true}
+  mode: {default: report}
+  fail-on: {default: critical}
+  out: {default: security}
+runs:
+  using: composite
+  steps:
+  - shell: bash
+    run: |
+      set -u; out='${{ inputs.out }}'; mkdir -p "$out"
+      hadolint --format json '${{ inputs.dockerfile }}' > "$out/hadolint.json"; hl=$?
+      grype "sbom:${{ inputs.sbom }}" -o json --file "$out/grype.json" -q; gr=$?
+      jq -n --slurpfile h "$out/hadolint.json" --slurpfile g "$out/grype.json" --arg mode '${{ inputs.mode }}' '{
+        schema: "cicd-security/v1", mode: $mode,
+        dockerfile: {findings: ($h[0] | length), by_level: ($h[0] | group_by(.level) | map({(.[0].level): length}) | add // {})},
+        image: {vulnerabilities: ($g[0].matches | length),
+                by_severity: ($g[0].matches | group_by(.vulnerability.severity) | map({(.[0].vulnerability.severity): length}) | add // {})}
+      }' | tee "$out/summary.json"
+      if [ '${{ inputs.mode }}' = enforce ]; then
+        grype "sbom:${{ inputs.sbom }}" --fail-on '${{ inputs.fail-on }}' -q -o table || exit 1
+        [ "$hl" = 0 ] || exit 1
+      fi
+      exit 0

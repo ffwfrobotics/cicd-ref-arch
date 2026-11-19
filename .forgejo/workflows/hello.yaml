@@ -1,0 +1,70 @@
+# The demo pipeline for examples/hello. An app in its own repo uses templates/ci/app.yaml, which
+# is the same pipeline pointed at this repo's actions.
+#
+#   push to master        -> test, build, deploy dev     https://hello-dev.<cluster>.<zone>/
+#   push to another branch -> test, build, deploy branch https://hello-<branch>.<cluster>.<zone>/
+#   promote/* branches     -> test only (promotion PRs carry manifests, not code)
+name: hello
+on:
+  push:
+    paths: [examples/hello/**, actions/**, tools/**, clusters/*/cicd-cluster.yaml, .forgejo/workflows/hello.yaml]
+  workflow_dispatch:
+
+env:
+  APP: examples/hello
+  CLUSTER: ${{ vars.CICD_CLUSTER || 'c-local' }}
+
+jobs:
+  test:
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./actions/setup
+    - uses: ./actions/test
+      with: {app: "${{ env.APP }}"}
+    - if: always()
+      uses: actions/upload-artifact@v3
+      with: {name: ci-result-test, path: ci-result/}
+
+  deliver:
+    needs: test
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./actions/setup
+    - id: env
+      run: |
+        echo "env=$(python3 tools/cicd.py which-env $APP/cicd.yaml --branch '${{ github.ref_name }}')" >> "$GITHUB_OUTPUT"
+        echo "security=$(python3 -c "import yaml;print(yaml.safe_load(open('$APP/cicd.yaml'))['spec'].get('security',{}).get('mode','report'))")" >> "$GITHUB_OUTPUT"
+    - id: build
+      if: steps.env.outputs.env != 'skip'
+      uses: ./actions/build
+      with: {app: "${{ env.APP }}", cluster: "${{ env.CLUSTER }}"}
+
+    # --- security slots: report-only until docs/security.md decides otherwise ---------------
+    - if: steps.env.outputs.env != 'skip'
+      uses: ./actions/sbom
+      with: {image-tar: build/image.oci.tar}
+    - if: steps.env.outputs.env != 'skip'
+      uses: ./actions/scan
+      with: {dockerfile: "${{ env.APP }}/Dockerfile", sbom: security/sbom.spdx.json, mode: "${{ steps.env.outputs.security }}"}
+    - if: steps.env.outputs.env != 'skip'
+      uses: ./actions/sign
+      with: {image: "${{ steps.build.outputs.image }}"}
+    # ------------------------------------------------------------------------------------------
+
+    - id: deploy
+      if: steps.env.outputs.env != 'skip'
+      uses: ./actions/deploy-env
+      with:
+        app: ${{ env.APP }}
+        cluster: ${{ env.CLUSTER }}
+        env: ${{ steps.env.outputs.env }}
+        branch: ${{ github.ref_name }}
+        image: ${{ steps.build.outputs.image }}
+        manifests: build/app.yaml
+        token: ${{ secrets.CICD_BOT_TOKEN }}
+        user: ${{ vars.CICD_BOT_USER }}
+    - if: always() && steps.env.outputs.env != 'skip'
+      uses: actions/upload-artifact@v3
+      with: {name: deliver, path: "security/\nbuild/app.yaml\nbuild/build-metadata.json"}

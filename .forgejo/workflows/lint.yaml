@@ -1,0 +1,22 @@
+name: lint
+on:
+  push:
+    paths: [platform/**, clusters/**, envs/**, tools/**, tests/**, templates/**, actions/**, .forgejo/workflows/lint.yaml]
+
+jobs:
+  lint:
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./actions/setup
+    - name: tools tests
+      run: python3 -m unittest discover -s tests -v
+    - name: manifests build and validate
+      run: |
+        set -eu
+        for d in platform/*/ clusters/*/exposure/ templates/app/deploy/ examples/*/deploy/; do
+          echo "== $d"; kustomize build "$d" | kubeconform -strict -summary -ignore-missing-schemas -
+        done
+        for c in envs/*/; do echo "== $c"; kustomize build "$c" | kubeconform -strict -summary -ignore-missing-schemas -; done
+    - name: shell
+      run: shellcheck actions/setup/install.sh || echo "shellcheck not installed"

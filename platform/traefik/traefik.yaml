@@ -1,0 +1,37 @@
+# Traefik as the Gateway API controller. Only the Gateway provider is on: no Ingress, no
+# IngressRoute. The Gateway itself is ours (platform/gateway), not the chart's default.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway-system
+  labels: {pod-security.kubernetes.io/enforce: baseline}
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata: {name: traefik, namespace: gateway-system}
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: traefik
+      version: 42.4.1          # Traefik v3.7.19
+      sourceRef: {kind: HelmRepository, name: traefik, namespace: flux-system}
+  install: {crds: Skip}        # the chart's CRDs are Traefik's own and Hub's; we use neither
+  upgrade: {crds: Skip}
+  values:
+    providers:
+      kubernetesGateway: {enabled: true}
+      kubernetesIngress: {enabled: false}
+      kubernetesCRD: {enabled: false}
+    gateway: {enabled: false}
+    gatewayClass: {enabled: true, name: traefik}
+    ingressClass: {enabled: false}
+    service: {type: ClusterIP}  # exposure is the cluster's job: tailnet proxy, LoadBalancer, NodePort
+    ports:
+      web: {port: 8000, exposedPort: 80}
+      websecure: {port: 8443, exposedPort: 443}
+    logs:
+      access: {enabled: true}
+    resources:
+      requests: {cpu: 50m, memory: 64Mi}
+      limits: {memory: 256Mi}

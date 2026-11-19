@@ -1,0 +1,21 @@
+# Bootstrap, applied once by hand (it is not in any Flux path, so nothing prunes or reverts it):
+#   kubectl apply -f clusters/c-local/flux-entry.yaml
+# Needs Secret flux-system/cicd-ref-arch-deploy-key (identity, known_hosts): a read-only deploy key.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata: {name: cicd-ref-arch, namespace: flux-system}
+spec:
+  interval: 1m
+  url: ssh://git@forge.goblincorps.com:42222/ffwf/cicd-ref-arch.git
+  ref: {branch: master}
+  secretRef: {name: cicd-ref-arch-deploy-key}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: cicd, namespace: flux-system}
+spec:
+  interval: 10m
+  retryInterval: 30s
+  path: ./clusters/c-local
+  prune: true
+  sourceRef: {kind: GitRepository, name: cicd-ref-arch}

@@ -1,0 +1,64 @@
+# The cicd-ref-arch pipeline for an app in its own repo. Copy to .forgejo/workflows/cicd.yaml.
+# Needs, on the app repo (or its org):
+#   variable CICD_BOT_USER, secret CICD_BOT_TOKEN  - may push to the state repo
+#   variable CICD_CLUSTER (default c-local)
+# The app's cicd.yaml is at the repo root here; set APP if it lives in a subdirectory.
+name: cicd
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  APP: .
+  CLUSTER: ${{ vars.CICD_CLUSTER || 'c-local' }}
+  CICD_REPO: ffwf/cicd-ref-arch
+  CICD_REF: master          # pin a tag once the repo has releases
+
+jobs:
+  test:
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with: {repository: "${{ env.CICD_REPO }}", ref: "${{ env.CICD_REF }}", path: .cicd, token: "${{ secrets.CICD_BOT_TOKEN }}"}
+    - uses: ./.cicd/actions/setup
+    - uses: ./.cicd/actions/test
+      with: {app: "${{ env.APP }}"}
+
+  deliver:
+    needs: test
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with: {repository: "${{ env.CICD_REPO }}", ref: "${{ env.CICD_REF }}", path: .cicd, token: "${{ secrets.CICD_BOT_TOKEN }}"}
+    - uses: ./.cicd/actions/setup
+    - id: env
+      run: |
+        echo "env=$(python3 .cicd/tools/cicd.py which-env $APP/cicd.yaml --branch '${{ github.ref_name }}')" >> "$GITHUB_OUTPUT"
+        echo "security=$(python3 -c "import yaml;print(yaml.safe_load(open('$APP/cicd.yaml'))['spec'].get('security',{}).get('mode','report'))")" >> "$GITHUB_OUTPUT"
+    - id: build
+      if: steps.env.outputs.env != 'skip'
+      uses: ./.cicd/actions/build
+      with: {app: "${{ env.APP }}", cluster: "${{ env.CLUSTER }}"}
+    - if: steps.env.outputs.env != 'skip'
+      uses: ./.cicd/actions/sbom
+      with: {image-tar: build/image.oci.tar}
+    - if: steps.env.outputs.env != 'skip'
+      uses: ./.cicd/actions/scan
+      with: {dockerfile: "${{ env.APP }}/Dockerfile", sbom: security/sbom.spdx.json, mode: "${{ steps.env.outputs.security }}"}
+    - if: steps.env.outputs.env != 'skip'
+      uses: ./.cicd/actions/sign
+      with: {image: "${{ steps.build.outputs.image }}"}
+    - if: steps.env.outputs.env != 'skip'
+      uses: ./.cicd/actions/deploy-env
+      with:
+        app: ${{ env.APP }}
+        cluster: ${{ env.CLUSTER }}
+        env: ${{ steps.env.outputs.env }}
+        branch: ${{ github.ref_name }}
+        image: ${{ steps.build.outputs.image }}
+        manifests: build/app.yaml
+        token: ${{ secrets.CICD_BOT_TOKEN }}
+        user: ${{ vars.CICD_BOT_USER }}
+        state-repo: ${{ env.CICD_REPO }}

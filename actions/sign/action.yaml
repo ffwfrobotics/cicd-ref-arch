@@ -1,0 +1,16 @@
+name: sign
+description: >
+  SECURITY SLOT (docs/security.md): sign the image digest. Not configured yet: it records that the
+  image is unsigned so the promotion check can report it. Fill in with cosign (key or keyless) once
+  the signing identity is decided.
+inputs:
+  image: {required: true}
+  out: {default: security}
+runs:
+  using: composite
+  steps:
+  - shell: bash
+    run: |
+      mkdir -p '${{ inputs.out }}'
+      jq -n --arg image '${{ inputs.image }}' '{schema: "cicd-signature/v1", image: $image, signed: false, reason: "signing not configured"}' \
+        | tee '${{ inputs.out }}/signature.json'

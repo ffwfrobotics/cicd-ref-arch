@@ -1,0 +1,23 @@
+name: test
+description: >
+  Run the app's tests (cicd.yaml spec.test.run) and write a ci-result/v1 record. The job fails if
+  the tests fail; the record is written either way.
+inputs:
+  app: {description: path to the app's directory (holds cicd.yaml), required: true}
+  out: {description: where to write the result record, default: ci-result}
+runs:
+  using: composite
+  steps:
+  - shell: bash
+    run: |
+      set -u
+      cd '${{ inputs.app }}'
+      cmd=$(python3 -c "import yaml;print(yaml.safe_load(open('cicd.yaml'))['spec']['test']['run'])")
+      mkdir -p "$GITHUB_WORKSPACE/${{ inputs.out }}"
+      start=$(date -u +%Y-%m-%dT%H:%M:%SZ); t0=$(date +%s)
+      set +e; bash -c "$cmd" 2>&1 | tee "$GITHUB_WORKSPACE/${{ inputs.out }}/test.log"; rc=${PIPESTATUS[0]}; set -e
+      python3 "$(cd '${{ github.action_path }}/../..' && pwd)/tools/ci_result.py" test \
+        --log "$GITHUB_WORKSPACE/${{ inputs.out }}/test.log" --rc "$rc" --started "$start" \
+        --duration $(( $(date +%s) - t0 )) > "$GITHUB_WORKSPACE/${{ inputs.out }}/test.json"
+      cat "$GITHUB_WORKSPACE/${{ inputs.out }}/test.json"
+      exit "$rc"

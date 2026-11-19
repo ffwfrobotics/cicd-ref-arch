@@ -1,0 +1,43 @@
+# Ask for a promotion from the Forgejo UI (Actions -> request-promotion -> Run workflow).
+# Opens a pull request that pins the exact manifests and image digest running in the source
+# environment. Someone other than the requester approves and merges it; the environments
+# workflow applies it once notBefore has passed.
+name: request-promotion
+on:
+  workflow_dispatch:
+    inputs:
+      app: {description: "app (directory under examples/)", required: true, default: hello}
+      from: {description: "source environment", required: true, default: dev}
+      not_before: {description: "earliest UTC time, e.g. 2026-11-20T15:00:00Z (blank = as soon as approved)", required: false}
+      reason: {description: "why", required: false}
+
+jobs:
+  request:
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./actions/setup
+    - env:
+        TOKEN: ${{ secrets.CICD_BOT_TOKEN }}
+        BOT: ${{ vars.CICD_BOT_USER }}
+        API: ${{ github.server_url }}/api/v1/repos/${{ github.repository }}
+        CLUSTER: ${{ vars.CICD_CLUSTER || 'c-local' }}
+      run: |
+        set -eu
+        auth="AUTHORIZATION: basic $(printf '%s:%s' "$BOT" "$TOKEN" | base64 -w0)"
+        nb='${{ inputs.not_before }}'
+        dir=$(python3 tools/cicd.py request-promotion --app '${{ inputs.app }}' --cluster "$CLUSTER" \
+          --from '${{ inputs.from }}' ${nb:+--not-before "$nb"} \
+          --requested-by '${{ github.actor }}' --reason '${{ inputs.reason }}')
+        id=$(basename "$dir")
+        git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
+        git checkout -q -b "promote/$id"
+        git add "$dir"
+        git commit -q -m "promote ${{ inputs.app }} ${{ inputs.from }} -> prod ($id)" -m "requested by ${{ github.actor }}: ${{ inputs.reason }}"
+        git -c http.extraHeader="$auth" push -q origin "promote/$id"
+        body=$(jq -n --arg id "$id" --arg p "$(cat "$dir/promotion.yaml")" \
+          '"Promotion request `\($id)`.\n\n```yaml\n\($p)\n```\n\nApproving and merging this queues it; the `environments` workflow applies it at or after `notBefore`. The approver must not be the requester.\n\n`app.yaml` in this PR is exactly what will run in prod."')
+        jq -n --arg head "promote/$id" --arg title "Promote ${{ inputs.app }} to prod ($id)" --argjson body "$body" \
+          '{head: $head, base: "master", title: $title, body: $body}' \
+          | curl -fsS -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' -d @- "$API/pulls" \
+          | jq -r '"opened " + .html_url'

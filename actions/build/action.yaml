@@ -1,0 +1,48 @@
+name: build
+description: >
+  Build the app's image with the cluster's BuildKit and push it as <registry>/<app>:<sha7>. Also
+  builds the app's deploy/ base into one manifest file, and keeps an OCI tarball of the image for
+  the SBOM and scan steps. Outputs the digest; deploys always use the digest, never the tag.
+inputs:
+  app: {description: path to the app's directory (holds cicd.yaml), required: true}
+  cluster: {description: cluster name (clusters/<cluster>/cicd-cluster.yaml), required: true}
+  out: {description: output directory, default: build}
+outputs:
+  digest: {description: "sha256:...", value: "${{ steps.build.outputs.digest }}"}
+  image: {description: "<pull registry>/<app>@sha256:... (what the cluster runs)", value: "${{ steps.build.outputs.image }}"}
+  name: {description: app name, value: "${{ steps.build.outputs.name }}"}
+runs:
+  using: composite
+  steps:
+  - id: build
+    shell: bash
+    run: |
+      set -eu
+      root=$GITHUB_WORKSPACE; app="$root/${{ inputs.app }}"; out="$root/${{ inputs.out }}"; mkdir -p "$out"
+      cicd=$(cd '${{ github.action_path }}/../..' && pwd)   # this repo: tools/ and clusters/
+      eval "$(python3 - "$cicd/clusters/${{ inputs.cluster }}/cicd-cluster.yaml" "$app/cicd.yaml" <<'PY'
+      import sys, yaml, shlex
+      cl = yaml.safe_load(open(sys.argv[1])); app = yaml.safe_load(open(sys.argv[2]))
+      b = app["spec"].get("build", {})
+      for k, v in {"NAME": app["metadata"]["name"], "PUSH": cl["registry"]["push"], "PULL": cl["registry"]["pull"],
+                   "BUILDKIT": cl["buildkit"], "CONTEXT": b.get("context", "."), "DOCKERFILE": b.get("dockerfile", "Dockerfile"),
+                   "DEPLOY": app["spec"].get("deploy", {}).get("path", "deploy")}.items():
+          print(f"{k}={shlex.quote(str(v))}")
+      PY
+      )"
+      sha7=$(git -C "$app" rev-parse --short=7 HEAD)
+      kustomize build "$app/$DEPLOY" > "$out/app.yaml"
+      kubeconform -strict -summary -ignore-missing-schemas "$out/app.yaml"
+      # one build, two outputs: pushed to the cluster registry, and an OCI tarball for sbom/scan
+      buildctl --addr "$BUILDKIT" build --frontend dockerfile.v0 \
+        --local context="$app/$CONTEXT" --local dockerfile="$app/$(dirname "$DOCKERFILE")" \
+        --opt filename="$(basename "$DOCKERFILE")" --opt build-arg:APP_COMMIT="$sha7" \
+        --output "type=image,name=$PUSH/$NAME:$sha7,push=true,registry.insecure=true" \
+        --output "type=oci,dest=$out/image.oci.tar" \
+        --metadata-file "$out/build-metadata.json"
+      digest=$(jq -r '."containerimage.digest"' "$out/build-metadata.json")
+      case "$digest" in sha256:*) ;; *) echo "no digest in build metadata" >&2; exit 1 ;; esac
+      echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      echo "image=$PULL/$NAME@$digest" >> "$GITHUB_OUTPUT"
+      echo "name=$NAME" >> "$GITHUB_OUTPUT"
+      echo "built $PUSH/$NAME:$sha7 = $digest"

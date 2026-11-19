@@ -1,0 +1,23 @@
+# What the pipeline needs to know about this app. Everything cluster-specific (zone, registry,
+# gateway) comes from clusters/<cluster>/cicd-cluster.yaml instead.
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: App
+metadata: {name: myapp}
+spec:
+  build: {context: ., dockerfile: Dockerfile}
+  deploy: {path: deploy}              # kustomize base; its container image is the name `app-image`
+  service: {name: myapp, port: 80}    # where the gateway sends traffic
+  workload: {kind: Deployment, name: myapp}
+  test: {run: python3 -m unittest discover -s tests -v}
+  environments:
+    # {app} {cluster} {zone} {branch} are filled in; {branch} is a DNS-safe slug of the branch name
+    dev:    {branch: master, host: "{app}-dev.{cluster}.{zone}"}
+    branch: {host: "{app}-{branch}.{cluster}.{zone}", exclude: ["promote/*", "renovate/*"]}
+    prod:   {host: "{app}.{cluster}.{zone}", extraHosts: []}   # e.g. [myapp.example.com]
+  scaleToZero:
+    enabled: true
+    idleSeconds: 900          # 15 minutes without requests -> 0 pods
+    coldStartTimeout: 60s     # how long the interceptor holds a request while a pod starts
+    maxReplicas: 3
+    targetConcurrency: 50
+  security: {mode: report}    # report | enforce (docs/security.md)

@@ -1,0 +1,16 @@
+# Every host under the cluster zone goes to the KEDA HTTP interceptor. The interceptor picks the
+# app environment by Host header (each environment's InterceptorRoute lists its hosts), holds the
+# request while a scaled-to-zero app starts, then forwards it. Unknown hosts get the
+# interceptor's 404. An app that opts out of scale-to-zero writes its own HTTPRoute for its
+# exact host, which wins over this wildcard.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata: {name: apps-wildcard, namespace: keda}
+spec:
+  parentRefs:
+  - {name: edge, namespace: gateway-system, sectionName: http}
+  - {name: edge, namespace: gateway-system, sectionName: https}
+  hostnames: ["*.${CLUSTER}.${ZONE}"]
+  rules:
+  - backendRefs: [{name: keda-add-ons-http-interceptor-proxy, port: 8080}]
+    timeouts: {request: 0s}    # no gateway-side limit: the interceptor's cold-start timeout governs
