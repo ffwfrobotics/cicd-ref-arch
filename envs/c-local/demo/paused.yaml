@@ -1,5 +1,0 @@
-# Branches of this app that don't go through CI/CD (tools/cicd.py manage)
-branches:
-  feature/self-service:
-    by: ffwfbot
-    at: '2026-11-19T21:26:15Z'
