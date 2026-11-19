@@ -336,10 +336,30 @@ def forgejo(method: str, path: str):
         return json.load(r)
 
 
+def merged_pr_for(root: Path, sha: str):
+    """The merged PR that brought commit `sha` into the current branch. Forgejo answers
+    /commits/<sha>/pull only for the commit that landed on the base branch: the merge commit for
+    a merge, the commit itself for a rebase or squash. So ask about the commit, then about each
+    merge commit that has it as an ancestor, oldest first."""
+    merges = subprocess.run(["git", "-C", str(root), "log", "--merges", "--ancestry-path", "--reverse",
+                             "--format=%H", f"{sha}..HEAD"], capture_output=True, text=True, check=True).stdout.split()
+    errors = []
+    for candidate in [sha] + merges:
+        try:
+            pr = forgejo("GET", f"/commits/{candidate}/pull")
+        except Exception as e:  # 404: this commit didn't land through a PR
+            errors.append(f"{candidate[:7]}: {e}")
+            continue
+        if pr.get("merged"):
+            return pr, ""
+    return None, "; ".join(errors) or "no candidate commits"
+
+
 def approval_of(root: Path, promo_dir: Path, promo: dict) -> tuple[bool, str]:
-    """A promotion counts only if it reached master through a merged PR that someone other than
-    the requester (and the PR's author) approved. Branch protection should already enforce this;
-    this is the second check, done by the job that actually changes prod."""
+    """A promotion counts only if it reached the branch through a merged PR that someone other
+    than the PR's author and the requester authorized: an approving review, or the merge itself.
+    Branch protection (required approvals) should already enforce this; this is the second check,
+    done by the job that actually changes prod."""
     if os.environ.get("CICD_SKIP_APPROVAL_CHECK") == "1":
         return True, "approval check skipped (CICD_SKIP_APPROVAL_CHECK=1)"
     rel = str((promo_dir / "promotion.yaml").relative_to(root))
@@ -347,25 +367,30 @@ def approval_of(root: Path, promo_dir: Path, promo: dict) -> tuple[bool, str]:
                          capture_output=True, text=True, check=True).stdout.strip()
     if not sha:
         return False, f"{rel} is not committed"
-    try:
-        pr = forgejo("GET", f"/commits/{sha}/pull")
-    except Exception as e:  # 404: the commit came in without a PR
-        return False, f"commit {sha[:7]} is not from a merged pull request ({e})"
-    if not pr.get("merged"):
-        return False, f"PR #{pr.get('number')} is not merged"
+    pr, err = merged_pr_for(root, sha)
+    if pr is None:
+        return False, f"commit {sha[:7]} did not arrive through a merged pull request ({err})"
     author = pr["user"]["login"]
+    excluded = {author, promo.get("requestedBy")}
     reviews = forgejo("GET", f"/pulls/{pr['number']}/reviews")
     approvers = {r["user"]["login"] for r in reviews
-                 if r.get("state") == "APPROVED" and not r.get("dismissed") and not r.get("stale")}
-    approvers -= {author, promo.get("requestedBy")}
-    if not approvers:
-        return False, f"PR #{pr['number']} has no approval from anyone but its author/requester"
-    return True, f"PR #{pr['number']} approved by {', '.join(sorted(approvers))}"
+                 if r.get("state") == "APPROVED" and not r.get("dismissed") and not r.get("stale")} - excluded
+    merger = (pr.get("merged_by") or {}).get("login")
+    how = []
+    if approvers:
+        how.append("approved by " + ", ".join(sorted(approvers)))
+    if merger and merger not in excluded:
+        how.append(f"merged by {merger}")
+    if not how:
+        return False, (f"PR #{pr['number']} was approved and merged only by its author/requester "
+                       f"({', '.join(sorted(x for x in excluded if x))})")
+    return True, f"PR #{pr['number']} " + ", ".join(how)
 
 
-def apply_due(root: Path, args) -> int:
+def apply_due(root: Path, args) -> tuple[int, int]:
+    """Returns (applied, refused). A refused promotion is one that is due but failed a check."""
     pending = sorted((root / "promotions" / "pending").glob("*/promotion.yaml"))
-    applied = 0
+    applied = refused = 0
     for p in pending:
         promo = load_yaml(p)
         d = p.parent
@@ -378,10 +403,12 @@ def apply_due(root: Path, args) -> int:
         ok, why = approval_of(root, d, promo)
         if not ok:
             print(f"{promo['id']}: NOT applied: {why}")
+            refused += 1
             continue
         app = load_app(str(d / "cicd.yaml"))
         if app["metadata"]["name"] != promo["app"]:
             print(f"{promo['id']}: NOT applied: cicd.yaml names {app['metadata']['name']!r}, not {promo['app']!r}")
+            refused += 1
             continue
         cl = load_cluster(root, args.cluster)
         render_env(root, app, cl, promo["to"], None, promo["image"], (d / "app.yaml").read_text(), {
@@ -398,7 +425,7 @@ def apply_due(root: Path, args) -> int:
         print(f"{promo['id']}: applied ({why})")
         applied += 1
     build_index(root, args.cluster)
-    return applied
+    return applied, refused
 
 
 # ---------------------------------------------------------------- gc
@@ -499,7 +526,10 @@ def main():
     elif args.cmd == "request-promotion":
         request_promotion(root, args)
     elif args.cmd == "apply-due":
-        print(f"applied {apply_due(root, args)}")
+        applied, refused = apply_due(root, args)
+        print(f"applied {applied}, refused {refused}")
+        if refused:
+            sys.exit(3)  # the job goes red; anything applied is still written for the caller to commit
     elif args.cmd == "gc":
         print(f"removed {gc(root, args)}")
 

@@ -91,12 +91,12 @@ class Render(unittest.TestCase):
             cluster = "c-local"
         os.environ["CICD_SKIP_APPROVAL_CHECK"] = "1"
         try:
-            self.assertEqual(cicd.apply_due(self.root, B), 0)          # not due
+            self.assertEqual(cicd.apply_due(self.root, B), (0, 0))     # not due
             p = next((self.root / "promotions/pending").glob("*/promotion.yaml"))
             d = yaml.safe_load(p.read_text())
             d["notBefore"] = "2000-01-01T00:00:00Z"
             p.write_text(yaml.safe_dump(d))
-            self.assertEqual(cicd.apply_due(self.root, B), 1)
+            self.assertEqual(cicd.apply_due(self.root, B), (1, 0))
         finally:
             del os.environ["CICD_SKIP_APPROVAL_CHECK"]
         meta = yaml.safe_load((self.root / "envs/c-local/hello/prod/cicd-env.yaml").read_text())
@@ -117,7 +117,7 @@ class Render(unittest.TestCase):
             cluster = "c-local"
         os.environ.update(FORGEJO_API="http://127.0.0.1:9/api/v1/repos/x/y", FORGEJO_TOKEN="t")
         try:
-            self.assertEqual(cicd.apply_due(self.root, B), 0)
+            self.assertEqual(cicd.apply_due(self.root, B), (0, 1))
         finally:
             del os.environ["FORGEJO_API"], os.environ["FORGEJO_TOKEN"]
         self.assertFalse((self.root / "envs/c-local/hello/prod").exists())

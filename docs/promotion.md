@@ -23,10 +23,10 @@ request ──▶ PR "Promote hello to prod (id)" ──▶ approve + merge ─�
 2. **Approve.** A reviewer reads the PR, which shows the manifests and digest that will run in prod, then approves and merges it.
 3. **Apply.** The `environments` workflow runs every 5 minutes and on each merge into `promotions/pending/`. It applies a request only if all of these hold:
    - `notBefore` has passed;
-   - the commit that added it belongs to a merged PR;
-   - that PR has an approval from someone other than its author and the requester.
+   - the request reached `master` through a merged PR (found through the merge commit, or the commit itself for a squash or rebase merge);
+   - someone other than the PR's author and the requester authorized it, either with an approving review or by merging it.
 
-   It then renders `envs/<cluster>/<app>/prod/`, moves the request to `promotions/done/<id>/` with `appliedAt` and the approval it relied on, and commits. Flux applies the change within a minute.
+   It then renders `envs/<cluster>/<app>/prod/`, moves the request to `promotions/done/<id>/` with `appliedAt` and the authorization it relied on, and commits. Flux applies the change within a minute. A request that is due but fails these checks turns the run red, and stays pending until it is fixed or removed.
 4. **Roll back.** Promote an earlier build: request a promotion from a `promotions/done/<id>` entry, or revert the prod commit through a PR.
 
 ## Two locks, not one
