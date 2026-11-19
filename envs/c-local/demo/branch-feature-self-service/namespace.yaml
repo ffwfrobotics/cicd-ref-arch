@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: demo-feature-self-service
-  labels:
-    cicd.ffwf.net/app: demo
-    cicd.ffwf.net/env: branch-feature-self-service
-    pod-security.kubernetes.io/enforce: restricted
-    pod-security.kubernetes.io/warn: restricted
