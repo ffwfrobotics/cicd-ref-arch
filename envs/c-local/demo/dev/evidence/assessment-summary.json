@@ -5,10 +5,10 @@
  "env": "dev",
  "commit": "30fe1b938949eb290fffddc1fde6f69772bace98",
  "image": "localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310",
- "generated": "2026-11-20T16:17:45Z",
+ "generated": "2026-11-20T19:21:40Z",
  "counts": {
-  "satisfied": 36,
-  "not-satisfied": 4
+  "satisfied": 35,
+  "not-satisfied": 5
  },
  "coverage": {
   "automated": 31,
@@ -199,7 +199,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-20T06:21:00Z (10 h old)"
+     "found": "grype database built 2026-11-20T06:21:00Z (13 h old)"
     }
    ]
   },
@@ -215,7 +215,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-20T06:21:00Z (10 h old)"
+     "found": "grype database built 2026-11-20T06:21:00Z (13 h old)"
     }
    ]
   },
@@ -325,7 +325,7 @@
    "objective": "legitimate vulnerabilities are remediated [ra-05_odp.03] in accordance with an organizational assessment of risk;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "A vulnerability with a fix blocks prod until it is fixed or recorded as not affecting the app.",
    "evidence": [
     {
@@ -335,8 +335,8 @@
     },
     {
      "selector": "findings:category=external",
-     "holds": true,
-     "found": "no external findings at or above the prod threshold"
+     "holds": false,
+     "found": "1 external findings would block prod: external/TEN-142960-b3426e"
     }
    ]
   },
@@ -368,7 +368,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-20T06:21:00Z (10 h old)"
+     "found": "grype database built 2026-11-20T06:21:00Z (13 h old)"
     }
    ]
   },
@@ -405,7 +405,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (15/16 checks passed)"
+     "found": "security ran: warn (15/17 checks passed)"
     }
    ]
   },
@@ -446,7 +446,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (15/16 checks passed)"
+     "found": "security ran: warn (15/17 checks passed)"
     }
    ]
   },
@@ -467,7 +467,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (15/16 checks passed)"
+     "found": "security ran: warn (15/17 checks passed)"
     }
    ]
   },
@@ -520,7 +520,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "1 findings would block prod: CKV_DOCKER_7"
+     "found": "2 findings would block prod: CKV_DOCKER_7, external/TEN-142960-b3426e"
     }
    ]
   },
@@ -567,7 +567,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (15/16 checks passed)"
+     "found": "security ran: warn (15/17 checks passed)"
     }
    ]
   },
@@ -583,7 +583,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "1 findings would block prod: CKV_DOCKER_7"
+     "found": "2 findings would block prod: CKV_DOCKER_7, external/TEN-142960-b3426e"
     }
    ]
   },
@@ -707,12 +707,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/14caceebf7ef67c5/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/4fb3a40fad2b08f5/hostexecutor/.cicd/oscal/platform.yaml"
   },
   {
    "layer": "sysadmin",
    "component": "demo-owner",
-   "path": "/runner/work/14caceebf7ef67c5/hostexecutor/.compliance/apps/demo/component.yaml"
+   "path": "/runner/work/4fb3a40fad2b08f5/tmp/compliance/apps/demo/component.yaml"
   }
  ]
 }
