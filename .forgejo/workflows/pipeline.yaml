@@ -6,11 +6,13 @@
 # Self-service (pause, resume, remove-env, request-promotion) comes from the dashboard, which checks
 # that the user has write on the app repo and names them in `actor`.
 #
+# Every run is titled "pipeline"; its dispatch inputs (app, branch, sha, action, actor) say what it
+# is for, and the dashboard reads them from the runs API.
+#
 # Only this repo's writers (the platform admins and its bot) can dispatch it. The app is named by
 # its enrollment (tenants/<app>.yaml), which says which repo and path to check out: a dispatch can't
 # point the pipeline at a repo nobody enrolled.
 name: pipeline
-run-name: "${{ inputs.app }} ${{ inputs.action }} ${{ inputs.branch }} ${{ inputs.sha }}"
 on:
   workflow_dispatch:
     inputs:
@@ -38,6 +40,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
+    - uses: ./.cicd/actions/setup
     - id: app
       env: {APP_NAME: "${{ inputs.app }}", BRANCH: "${{ inputs.branch }}", SHA: "${{ inputs.sha }}", ACTION: "${{ inputs.action }}"}
       run: |
@@ -52,7 +55,6 @@ jobs:
     - uses: actions/checkout@v4
       with: {repository: "${{ steps.app.outputs.repo }}", ref: "${{ inputs.sha || inputs.branch }}", path: app,
              token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
-    - uses: ./.cicd/actions/setup
     - id: route
       env: {BRANCH: "${{ inputs.branch }}", APP: "app/${{ steps.app.outputs.path }}", ACTION: "${{ inputs.action }}", ACTOR: "${{ inputs.actor }}"}
       run: |
