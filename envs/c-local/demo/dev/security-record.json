@@ -3,7 +3,7 @@
   "app": "demo",
   "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
   "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
-  "generated": "2026-11-20T04:55:28Z",
+  "generated": "2026-11-20T04:56:58Z",
   "scans": {
     "source": {
       "generated": "2026-11-20T04:52:03Z",
@@ -30,8 +30,8 @@
       }
     },
     "image": {
-      "generated": "2026-11-20T04:55:28Z",
-      "commit": "8f5b76e34e66db6e8ed581eb9a9f39188628b81d",
+      "generated": "2026-11-20T04:56:58Z",
+      "commit": "da37e1c4977066e220293df09db199ab2da258d9",
       "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
       "tools": {
         "syft": "(SBOM kept from the build)",
@@ -41,7 +41,7 @@
       "evidence": {
         "grype": {
           "file": "grype.json",
-          "sha256": "1a9b71a48cbbf4573c85cdfa2d7ede6de25abcf635d01b4792ea68a78fad236a"
+          "sha256": "e0f2ef142e75d96030239b314ec08cb7a688c4c63ffd1e808429117066519c31"
         }
       }
     }
@@ -49,11 +49,12 @@
   "gate": {
     "env": "dev",
     "mode": "report",
-    "status": "pass",
+    "status": "warn",
     "blocking": 0,
     "counts": {
       "suppressed": 8,
-      "below-threshold": 8
+      "below-threshold": 8,
+      "fail": 1
     },
     "notes": []
   },
@@ -73,6 +74,14 @@
       "result": "pass",
       "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
       "source": "tenable-csv"
+    },
+    {
+      "test": "advisory/EXERCISE-0001",
+      "title": "Exercise: made-up flaw in itsdangerous (not real; removed after the test)",
+      "check": "package",
+      "result": "fail",
+      "detail": "itsdangerous 2.2.0",
+      "source": "advisory"
     }
   ],
   "findings": [
@@ -195,6 +204,22 @@
         "reason": "the platform renders a default-deny NetworkPolicy for every environment",
         "expires": ""
       }
+    },
+    {
+      "id": "898cd562e7f7",
+      "category": "vuln",
+      "tool": "advisory",
+      "rule": "EXERCISE-0001",
+      "severity": "high",
+      "location": "pkg:pypi/itsdangerous@2.2.0",
+      "message": "itsdangerous 2.2.0: Exercise: made-up flaw in itsdangerous (not real; removed after the test) (announced 2026-11-20)",
+      "package": "itsdangerous",
+      "version": "2.2.0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.2.1"
+      ],
+      "outcome": "fail"
     }
   ]
 }

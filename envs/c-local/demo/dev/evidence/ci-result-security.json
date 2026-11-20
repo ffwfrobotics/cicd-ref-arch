@@ -1,27 +1,36 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "8f5b76e34e66db6e8ed581eb9a9f39188628b81d",
+  "sha": "da37e1c4977066e220293df09db199ab2da258d9",
   "ref": "refs/heads/master",
   "workflow": "assess",
   "job": "security",
-  "status": "pass",
-  "started_at": "2026-11-20T04:55:28Z",
+  "status": "warn",
+  "started_at": "2026-11-20T04:56:58Z",
   "duration_s": null,
   "summary": {
-    "total": 16,
-    "failed": 0,
+    "total": 17,
+    "failed": 1,
     "passed": 16,
     "skipped": 0
   },
-  "failures": [],
+  "failures": [
+    {
+      "test": "vuln/EXERCISE-0001",
+      "file": "pkg:pypi/itsdangerous@2.2.0",
+      "severity": "high",
+      "category": "vuln",
+      "message": "itsdangerous 2.2.0: Exercise: made-up flaw in itsdangerous (not real; removed after the test) (announced 2026-11-20)"
+    }
+  ],
   "security": {
     "env": "dev",
     "mode": "report",
     "blocking": 0,
     "counts": {
       "suppressed": 8,
-      "below-threshold": 8
+      "below-threshold": 8,
+      "fail": 1
     },
     "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e"
   },
@@ -41,7 +50,15 @@
       "result": "pass",
       "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
       "source": "tenable-csv"
+    },
+    {
+      "test": "advisory/EXERCISE-0001",
+      "title": "Exercise: made-up flaw in itsdangerous (not real; removed after the test)",
+      "check": "package",
+      "result": "fail",
+      "detail": "itsdangerous 2.2.0",
+      "source": "advisory"
     }
   ],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/239"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/242"
 }
