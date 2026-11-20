@@ -231,7 +231,7 @@ SUPPRESSION_FILES = ("security/policy.yaml", "security/vex.openvex.json", ".gitl
 
 
 EVIDENCE = ("security.json", "sbom.cdx.json", "ci-result-test.json", "ci-result-security.json",
-            "assessment-results.json", "assessment-summary.json")
+            "assessment-results.json", "assessment-summary.json", "ssp.json")
 
 
 def keep_security(out: Path, security_dir: Path | None, app_dir: Path | None):
@@ -481,6 +481,15 @@ def assess_into(root: Path, app: str, env: str, evidence: Path, commit: str | No
     if image:
         cmd += ["--image", image]
     r = subprocess.run(cmd, stdout=subprocess.DEVNULL if quiet else sys.stderr)
+    if cfg_path.exists():   # the app's SSP as of this commit's layers, next to its assessment
+        ssp = [sys.executable, str(here / "oscal.py"), "ssp", *cmd[3:cmd.index("--evidence")],
+               "--app-config", str(cfg_path), "--profile-href", f"{cfg.get('profile') or 'profiles/cicd-demo.json'}"]
+        if "--sysadmin-layer" in cmd:
+            ssp += cmd[cmd.index("--sysadmin-layer"):cmd.index("--sysadmin-layer") + 2]
+        if "--app-layer" in cmd:
+            ssp += cmd[cmd.index("--app-layer"):cmd.index("--app-layer") + 2]
+        with open(evidence / "ssp.json", "w") as f:
+            subprocess.run(ssp, stdout=f)
     p = evidence / "assessment-summary.json"
     return json.loads(p.read_text()) if r.returncode == 0 and p.exists() else None
 
@@ -589,6 +598,13 @@ def reassess(root: Path, args) -> list[str]:
         if not (ev / "sbom.cdx.json").exists():
             print(f"{app}/{env_name}: no kept SBOM (built before evidence was kept): skipped")
             continue
+        if args.advisory:
+            import external  # noqa: PLC0415
+            pkgs = external.sbom_packages(ev / "sbom.cdx.json") or []
+            hit = [a for a in args.advisory if Path(a).exists()
+                   and external.package_hits(pkgs, (load_yaml(Path(a)) or {}).get("package") or {"name": ""})]
+            if not hit:
+                continue   # selective: only environments whose SBOM has an affected package
         meta = load_yaml(meta_path)
         kind = meta.get("env", "dev")
         work = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / f"reassess-{app}-{env_name}"
@@ -894,6 +910,7 @@ def main():
     ra.add_argument("--app", default="all")
     ra.add_argument("--env", default="all", help="an environment directory name (dev, prod, branch-...), or all")
     ra.add_argument("--skip-endpoints", help="don't probe endpoints, and say why")
+    ra.add_argument("--advisory", action="append", help="only environments whose SBOM matches this advisory file (repeatable)")
     g = sub.add_parser("gc")
     g.add_argument("--cluster", required=True)
     g.add_argument("--remote", default="origin", help="git remote (or URL) whose branches count")

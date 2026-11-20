@@ -13,6 +13,7 @@ on:
       env: {description: "an environment directory (dev, prod, branch-...), or all", default: all}
       reason: {description: "why (recorded in the commit)", default: ""}
       delay: {description: "seconds to wait first (a deploy rolling out)", default: "0"}
+      advisories: {description: "space-separated advisories/<id>.yaml: only environments whose SBOM they match", default: ""}
 
 env:
   CLUSTER: ${{ vars.CICD_CLUSTER || 'c-local' }}
@@ -33,6 +34,7 @@ jobs:
         ENV_DIR: ${{ inputs.env || 'all' }}
         REASON: ${{ inputs.reason || 'daily' }}
         DELAY: ${{ inputs.delay || '0' }}
+        ADVISORIES: ${{ inputs.advisories || '' }}
       run: |
         set -eu
         case "$DELAY" in ''|*[!0-9]*) DELAY=0 ;; esac
@@ -46,7 +48,8 @@ jobs:
           rm -rf .compliance
           git -c http.extraHeader="$auth" clone -q --depth 1 -b "$cbranch" "${{ github.server_url }}/$crepo.git" .compliance
           echo "compliance repo $crepo at $(git -C .compliance rev-parse --short HEAD)"
-          python3 tools/cicd.py reassess --cluster "$CLUSTER" --app "$APP" --env "$ENV_DIR" | tee assess.log
+          adv=(); for a in $ADVISORIES; do case "$a" in advisories/*.yaml) adv+=(--advisory ".compliance/$a") ;; esac; done
+          python3 tools/cicd.py reassess --cluster "$CLUSTER" --app "$APP" --env "$ENV_DIR" "${adv[@]}" | tee assess.log
           git add -A envs
           if git diff --cached --quiet; then echo "nothing changed"; break; fi
           git commit -q -m "assess: $(grep -c ': gate' assess.log || true) environments ($REASON)" \
