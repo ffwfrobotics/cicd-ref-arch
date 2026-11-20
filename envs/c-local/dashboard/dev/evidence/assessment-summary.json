@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "dashboard",
  "env": "dev",
- "commit": "f99e9ae722a154dadaf2773a7b5ef707dc62cf70",
- "image": "localhost:5000/dashboard@sha256:b7ad50931105a5d54c0d336b5a47c0770b216e9dfc7f1effc35f9d00b3f28a25",
- "generated": "2026-11-20T19:57:05Z",
+ "commit": "5e3e1d83c3dd8e097eb1e21202bd8f59cfd6d49b",
+ "image": "localhost:5000/dashboard@sha256:8b4fadb9c90a9122560a57ea9e01ccea597bdd0de7d370de3b54aafb15bdea98",
+ "generated": "2026-11-20T20:31:06Z",
  "counts": {
   "satisfied": 32,
   "not-satisfied": 8
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit f99e9ae722a1, image pinned by digest"
+     "found": "commit 5e3e1d83c3dd, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit f99e9ae722a1, image pinned by digest"
+     "found": "commit 5e3e1d83c3dd, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -423,7 +423,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (31/32 checks passed)"
+     "found": "test ran: pass (35/36 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
@@ -444,7 +444,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (31/32 checks passed)"
+     "found": "test ran: pass (35/36 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
@@ -465,7 +465,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (31/32 checks passed)"
+     "found": "test ran: pass (35/36 checks passed)"
     },
     {
      "selector": "gate",
@@ -581,7 +581,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (31/32 checks passed)"
+     "found": "test ran: pass (35/36 checks passed)"
     }
    ]
   },
@@ -597,7 +597,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (31/32 checks passed)"
+     "found": "test ran: pass (35/36 checks passed)"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit f99e9ae722a1, image pinned by digest"
+     "found": "commit 5e3e1d83c3dd, image pinned by digest"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/47ba6b3e9a2aa469/hostexecutor/.cicd/oscal/platform.yaml"
+   "path": "/runner/work/862660a8952f5927/hostexecutor/.cicd/oscal/platform.yaml"
   }
  ]
 }
