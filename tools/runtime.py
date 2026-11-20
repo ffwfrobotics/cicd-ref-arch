@@ -127,8 +127,8 @@ def classify(obs: dict, final: bool) -> dict | None:
     if not final:
         return None
     if not pods:
-        why = "" if not obs.get("scale_to_zero") else ("the request to the host didn't wake it"
-                                                         + (f" ({h['error'][:120]})" if h and h.get("error") else ""))
+        answer = (f" ({h['error'][:120]})" if h.get("error") else f" (it answered {h['status']})") if h else " (no answer yet)"
+        why = ("the request to the host didn't wake it" if obs.get("scale_to_zero") else "no pod") + answer
         return out("not-started", why)
     probes = _probe_failures(events)
     last = probes[-1][:200] if probes else "readiness never passed"
@@ -200,13 +200,14 @@ class Request:
 
     def start(self):
         self.result, self.started = None, time.monotonic()
+        self.attempts = getattr(self, "attempts", 0) + 1
 
         def go():
             try:
                 status, _ = external.probe(self.host, "/", self.via, timeout=self.timeout)
-                self.result = {"status": status}
+                self.result = {"status": status, "attempts": self.attempts}
             except Exception as e:  # noqa: BLE001: any failure to get an answer is the finding
-                self.result = {"error": f"{type(e).__name__}: {e}"}
+                self.result = {"error": f"{type(e).__name__}: {e}", "attempts": self.attempts}
         self.thread = threading.Thread(target=go, daemon=True)
         self.thread.start()
 
@@ -253,9 +254,11 @@ def observe(k: Kube, ns: str, workload: dict, digest: str, host: str | None, via
                         key=lambda e: e.get("lastTimestamp") or e.get("eventTime") or "")
         if any(_ready(p) for p in pods) and ready_since is None:
             ready_since = time.monotonic()
-        # a request that failed before the pod was ready says nothing about the ready pod: ask again
-        if req and not req.busy() and ready_since and req.result and (req.result.get("error") or req.result.get("status", 0) >= 500) \
-                and req.started < ready_since:
+        # an answer that isn't the app's (an error, 404 from the gateway, 5xx) before a pod of this build is
+        # ready says nothing about it: ask again every few seconds (the request is also what wakes it)
+        bad = req and req.result and (req.result.get("error") or req.result.get("status", 0) >= 500 or req.result.get("status") == 404)
+        if req and not req.busy() and bad and (ready_since is None and time.monotonic() - req.started > 5
+                                               or ready_since and req.started < ready_since):
             req.start()
         obs = {"applied": True, "pods": pods, "events": events, "http": None if (not req or req.busy()) else req.result,
                "host": host, "logs": {}, "scale_to_zero": bool(stz.get("enabled")), "elapsed": elapsed}
