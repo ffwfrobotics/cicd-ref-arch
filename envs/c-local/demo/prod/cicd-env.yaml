@@ -7,9 +7,10 @@ namespace: demo
 branch: null
 hosts:
 - demo.c-local.k.ffwf.net
-image: localhost:5000/demo@sha256:8818cdda1c4ceff8afba781bb7126639fccf897cf81d1050c446c576e0d635ed
-commit: 110868bd9fcd9306c65529651b74f4e02fff2b26
-promotion: demo-prod-20261120T032017Z
-approval: 'PR #6 merged by john'
-security: security gate pass (below-threshold 8, suppressed 8)
-renderedAt: '2026-11-20T03:40:57Z'
+image: localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e
+commit: 6714eaf7d3d2518d2bf6f889b0be45e7470a1459
+promotion: demo-prod-20261120T050037Z
+approval: 'PR #8 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8); self-assessment 37/40
+  satisfied
+renderedAt: '2026-11-20T05:16:06Z'

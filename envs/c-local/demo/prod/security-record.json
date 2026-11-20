@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "demo",
-  "image": "localhost:5000/demo@sha256:8818cdda1c4ceff8afba781bb7126639fccf897cf81d1050c446c576e0d635ed",
-  "commit": "110868bd9fcd9306c65529651b74f4e02fff2b26",
-  "generated": "2026-11-20T03:40:57Z",
+  "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
+  "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
+  "generated": "2026-11-20T05:16:06Z",
   "scans": {
     "source": {
-      "generated": "2026-11-20T03:17:45Z",
-      "commit": "110868bd9fcd9306c65529651b74f4e02fff2b26",
+      "generated": "2026-11-20T04:52:03Z",
+      "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -25,14 +25,14 @@
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "11443eba65990b8291a12f8d172cdd82a6472adb5d6043781e274f7df7cb57d7"
+          "sha256": "2f49583f2a9bcdafe368ee1081c0d2d9a00a48aafb8a2958f59b4c782a084ff2"
         }
       }
     },
     "image": {
-      "generated": "2026-11-20T03:40:57Z",
-      "commit": "68197dd18ad75ec7013126c04c11f77550567117",
-      "image": "registry.buildkit.svc.cluster.local:5000/demo@sha256:8818cdda1c4ceff8afba781bb7126639fccf897cf81d1050c446c576e0d635ed",
+      "generated": "2026-11-20T05:16:04Z",
+      "commit": "4a26a52854eb2a425e2a432102900509dc300ce7",
+      "image": "registry.buildkit.svc.cluster.local:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "6392806377b89736ff6854c72d72a70b3b88362ea7d034c72f7d445f63e67736"
+          "sha256": "2d3e5972e0dffd85d230c892136b167c1fea9854bb26937a544c9c782da03153"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "00065d8edd0f83debeac4b75a18da2608f61fcd77c9007d202d6a96d4f39d7db"
+          "sha256": "d426d62b7631cb097f01b719365157ad45e64a04a63402738d308ad82a9cbcf3"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "4966a88968adbe337186fd719c8ebe890ad8a1c7954bc4df7150300a7e498cdc"
+          "sha256": "4fb3e93846025287bd1837f647ca5b56bc4300cbac32450e41a55ba938b25af3"
         }
       }
     }
@@ -65,6 +65,24 @@
     },
     "notes": []
   },
+  "external": [
+    {
+      "test": "external/TEN-990001-b3426e",
+      "title": "gunicorn < 25.0 Unsupported Version (demo)",
+      "check": "package",
+      "result": "pass",
+      "detail": "no gunicorn <25.0 in the SBOM",
+      "source": "tenable-csv"
+    },
+    {
+      "test": "external/TEN-142960-b3426e",
+      "title": "HSTS Missing From HTTPS Server (RFC 6797)",
+      "check": "endpoint",
+      "result": "pass",
+      "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+      "source": "tenable-csv"
+    }
+  ],
   "findings": [
     {
       "id": "f075791847fe",
@@ -73,7 +91,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/dab36519d6f7b46c/hostexecutor/Dockerfile.FROM)",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/9bf2c442edc12e76/hostexecutor/Dockerfile.FROM)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (app)",
@@ -88,7 +106,7 @@
       "rule": "CKV_DOCKER_2",
       "severity": "high",
       "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/dab36519d6f7b46c/hostexecutor/Dockerfile.)",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/9bf2c442edc12e76/hostexecutor/Dockerfile.)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (platform)",

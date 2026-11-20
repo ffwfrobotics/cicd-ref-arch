@@ -1,0 +1,47 @@
+{
+  "schema": "ci-result/v1",
+  "repo": "ffwf/cicd-ref-arch",
+  "sha": "4a26a52854eb2a425e2a432102900509dc300ce7",
+  "ref": "master",
+  "workflow": "environments",
+  "job": "security",
+  "status": "pass",
+  "started_at": "2026-11-20T05:16:06Z",
+  "duration_s": null,
+  "summary": {
+    "total": 16,
+    "failed": 0,
+    "passed": 16,
+    "skipped": 0
+  },
+  "failures": [],
+  "security": {
+    "env": "prod",
+    "mode": "enforce",
+    "blocking": 0,
+    "counts": {
+      "suppressed": 8,
+      "below-threshold": 8
+    },
+    "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e"
+  },
+  "external": [
+    {
+      "test": "external/TEN-990001-b3426e",
+      "title": "gunicorn < 25.0 Unsupported Version (demo)",
+      "check": "package",
+      "result": "pass",
+      "detail": "no gunicorn <25.0 in the SBOM",
+      "source": "tenable-csv"
+    },
+    {
+      "test": "external/TEN-142960-b3426e",
+      "title": "HSTS Missing From HTTPS Server (RFC 6797)",
+      "check": "endpoint",
+      "result": "pass",
+      "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+      "source": "tenable-csv"
+    }
+  ],
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/250"
+}

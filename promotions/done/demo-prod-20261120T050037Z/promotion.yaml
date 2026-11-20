@@ -10,3 +10,7 @@ commit: 6714eaf7d3d2518d2bf6f889b0be45e7470a1459
 notBefore: '2026-11-20T05:00:37Z'
 requestedBy: ffwfbot
 reason: 'demo 0.2.2: fixes IT Security findings TEN-142960 (HSTS) and TEN-990001 (gunicorn)'
+appliedAt: '2026-11-20T05:16:06Z'
+approval: 'PR #8 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8); self-assessment 37/40
+  satisfied
