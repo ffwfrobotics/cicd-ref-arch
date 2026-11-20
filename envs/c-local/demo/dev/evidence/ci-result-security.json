@@ -1,0 +1,30 @@
+{
+  "schema": "ci-result/v1",
+  "repo": "ffwf/cicd-demo-app",
+  "sha": "0836bb1a2e432418091734bff05aa331d5119e0e",
+  "ref": "refs/heads/main",
+  "workflow": "cicd",
+  "job": "security",
+  "status": "pass",
+  "started_at": "2026-11-20T04:38:07Z",
+  "duration_s": null,
+  "summary": {
+    "total": 16,
+    "failed": 0,
+    "passed": 16,
+    "skipped": 0
+  },
+  "failures": [],
+  "security": {
+    "env": "dev",
+    "mode": "report",
+    "blocking": 0,
+    "counts": {
+      "suppressed": 8,
+      "below-threshold": 8
+    },
+    "image": "localhost:5000/demo@sha256:74ca2b811018ae80f6f0f1f5a33c68eaa3dd78cf5a9d0ccb9bdcd5ab46f43595"
+  },
+  "external": [],
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-demo-app/actions/runs/28"
+}

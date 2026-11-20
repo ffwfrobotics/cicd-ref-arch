@@ -1,0 +1,21 @@
+{
+  "schema": "ci-result/v1",
+  "repo": "ffwf/cicd-demo-app",
+  "sha": "0836bb1a2e432418091734bff05aa331d5119e0e",
+  "ref": "refs/heads/main",
+  "workflow": "cicd",
+  "job": "test",
+  "status": "pass",
+  "started_at": "2026-11-20T04:34:20Z",
+  "duration_s": 16,
+  "runner": "forgejo-runner-5db5d4bd97-6hvvj",
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0
+  },
+  "failures": [],
+  "log_tail": "test_empty_message_ignored (test_app.App.test_empty_message_ignored) ... ok\ntest_health (test_app.App.test_health) ... ok\ntest_info (test_app.App.test_info) ... ok\ntest_messages_are_escaped (test_app.App.test_messages_are_escaped) ... ok\ntest_sign_and_list (test_app.App.test_sign_and_list) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.009s\n\nOK",
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-demo-app/actions/runs/28"
+}
