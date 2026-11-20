@@ -1,0 +1,17 @@
+# Enrolled from cicd-dashboard (pending until an admin approves it: branch environments only).
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata:
+  name: mabel-deploy
+spec:
+  tenant: john
+  repo: john/mabel-deploy
+  path: .
+  clusters:
+  - c-local
+  owners:
+  - john
+  enrolled: '2026-11-20'
+  status: pending
+  requestedBy: john
+  defaultBranch: master
