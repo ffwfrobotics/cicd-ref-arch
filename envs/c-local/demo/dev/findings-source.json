@@ -1,8 +1,8 @@
 {
   "schema": "security-findings/v1",
   "scope": "source",
-  "generated": "2026-11-20T04:36:37Z",
-  "commit": "0836bb1a2e432418091734bff05aa331d5119e0e",
+  "generated": "2026-11-20T04:52:03Z",
+  "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
   "image": null,
   "tools": {
     "gitleaks": "8.30.1",
@@ -20,10 +20,28 @@
     },
     "checkov": {
       "file": "checkov.json",
-      "sha256": "d27089aa5ccd20944d802cb6de0af84e5308cfdbc5424a2c5a33f939c3e2dd36"
+      "sha256": "2f49583f2a9bcdafe368ee1081c0d2d9a00a48aafb8a2958f59b4c782a084ff2"
     }
   },
   "findings": [
+    {
+      "id": "f075791847fe",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_7",
+      "severity": "high",
+      "location": "Dockerfile:7",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/9bf2c442edc12e76/hostexecutor/Dockerfile.FROM)"
+    },
+    {
+      "id": "fc1a7d0c6c20",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/9bf2c442edc12e76/hostexecutor/Dockerfile.)"
+    },
     {
       "id": "b9b77e041ed9",
       "category": "config",
@@ -77,24 +95,6 @@
       "severity": "high",
       "location": "build/app.yaml:13",
       "message": "Minimize the admission of pods which lack an associated NetworkPolicy (Pod.default.demo.app-demo)"
-    },
-    {
-      "id": "f075791847fe",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_7",
-      "severity": "high",
-      "location": "Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/0b0a0032b5fc34b1/hostexecutor/Dockerfile.FROM)"
-    },
-    {
-      "id": "fc1a7d0c6c20",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_2",
-      "severity": "high",
-      "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/0b0a0032b5fc34b1/hostexecutor/Dockerfile.)"
     }
   ]
 }

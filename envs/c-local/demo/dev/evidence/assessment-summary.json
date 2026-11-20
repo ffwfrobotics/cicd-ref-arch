@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "demo",
  "env": "dev",
- "commit": "0836bb1a2e432418091734bff05aa331d5119e0e",
- "image": "localhost:5000/demo@sha256:74ca2b811018ae80f6f0f1f5a33c68eaa3dd78cf5a9d0ccb9bdcd5ab46f43595",
- "generated": "2026-11-20T04:47:46Z",
+ "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
+ "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
+ "generated": "2026-11-20T04:53:06Z",
  "counts": {
   "satisfied": 34,
   "not-satisfied": 6
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 0836bb1a2e43, image pinned by digest"
+     "found": "commit 6714eaf7d3d2, image pinned by digest"
     }
    ]
   },
@@ -93,7 +93,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 0836bb1a2e43, image pinned by digest"
+     "found": "commit 6714eaf7d3d2, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -114,7 +114,7 @@
     {
      "selector": "sbom",
      "holds": true,
-     "found": "SBOM with 1922 components"
+     "found": "SBOM with 1919 components"
     }
    ]
   },
@@ -130,7 +130,7 @@
     {
      "selector": "sbom",
      "holds": true,
-     "found": "SBOM with 1922 components"
+     "found": "SBOM with 1919 components"
     }
    ]
   },
@@ -146,7 +146,7 @@
     {
      "selector": "sbom",
      "holds": true,
-     "found": "SBOM with 1922 components"
+     "found": "SBOM with 1919 components"
     }
    ]
   },
@@ -162,7 +162,7 @@
     {
      "selector": "sbom",
      "holds": true,
-     "found": "SBOM with 1922 components"
+     "found": "SBOM with 1919 components"
     }
    ]
   },
@@ -178,7 +178,7 @@
     {
      "selector": "sbom",
      "holds": true,
-     "found": "SBOM with 1922 components"
+     "found": "SBOM with 1919 components"
     }
    ]
   },
@@ -194,7 +194,7 @@
     {
      "selector": "sbom",
      "holds": true,
-     "found": "SBOM with 1922 components"
+     "found": "SBOM with 1919 components"
     },
     {
      "selector": "vuln-db:max_age_h=48",
@@ -278,7 +278,7 @@
     {
      "selector": "sbom",
      "holds": true,
-     "found": "SBOM with 1922 components"
+     "found": "SBOM with 1919 components"
     }
    ]
   },
@@ -336,7 +336,7 @@
     {
      "selector": "findings:category=external",
      "holds": false,
-     "found": "2 external findings would block prod: external/TEN-142960-b3426e, external/TEN-990001-b3426e"
+     "found": "1 external findings would block prod: external/TEN-142960-b3426e"
     }
    ]
   },
@@ -405,7 +405,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (16/18 checks passed)"
+     "found": "security ran: warn (16/17 checks passed)"
     }
    ]
   },
@@ -441,12 +441,12 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (5/5 checks passed)"
+     "found": "test ran: pass (6/6 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (16/18 checks passed)"
+     "found": "security ran: warn (16/17 checks passed)"
     }
    ]
   },
@@ -462,12 +462,12 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (5/5 checks passed)"
+     "found": "test ran: pass (6/6 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (16/18 checks passed)"
+     "found": "security ran: warn (16/17 checks passed)"
     }
    ]
   },
@@ -483,7 +483,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (5/5 checks passed)"
+     "found": "test ran: pass (6/6 checks passed)"
     },
     {
      "selector": "gate",
@@ -520,7 +520,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "2 findings would block prod: external/TEN-142960-b3426e, external/TEN-990001-b3426e"
+     "found": "1 findings would block prod: external/TEN-142960-b3426e"
     }
    ]
   },
@@ -567,7 +567,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (16/18 checks passed)"
+     "found": "security ran: warn (16/17 checks passed)"
     }
    ]
   },
@@ -583,7 +583,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "2 findings would block prod: external/TEN-142960-b3426e, external/TEN-990001-b3426e"
+     "found": "1 findings would block prod: external/TEN-142960-b3426e"
     }
    ]
   },
@@ -599,7 +599,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (5/5 checks passed)"
+     "found": "test ran: pass (6/6 checks passed)"
     }
    ]
   },
@@ -615,7 +615,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (5/5 checks passed)"
+     "found": "test ran: pass (6/6 checks passed)"
     }
    ]
   },
@@ -677,7 +677,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 0836bb1a2e43, image pinned by digest"
+     "found": "commit 6714eaf7d3d2, image pinned by digest"
     }
    ]
   },
@@ -707,12 +707,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/a90c526d5e0e2aea/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/9bf2c442edc12e76/hostexecutor/.cicd/oscal/platform.yaml"
   },
   {
    "layer": "sysadmin",
    "component": "demo-owner",
-   "path": "/runner/work/a90c526d5e0e2aea/hostexecutor/.compliance/apps/demo/component.yaml"
+   "path": "/runner/work/9bf2c442edc12e76/tmp/compliance/apps/demo/component.yaml"
   }
  ]
 }

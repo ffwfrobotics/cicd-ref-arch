@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "demo",
-  "image": "localhost:5000/demo@sha256:74ca2b811018ae80f6f0f1f5a33c68eaa3dd78cf5a9d0ccb9bdcd5ab46f43595",
-  "commit": "0836bb1a2e432418091734bff05aa331d5119e0e",
-  "generated": "2026-11-20T04:47:46Z",
+  "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
+  "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
+  "generated": "2026-11-20T04:53:06Z",
   "scans": {
     "source": {
-      "generated": "2026-11-20T04:36:37Z",
-      "commit": "0836bb1a2e432418091734bff05aa331d5119e0e",
+      "generated": "2026-11-20T04:52:03Z",
+      "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -25,23 +25,31 @@
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "d27089aa5ccd20944d802cb6de0af84e5308cfdbc5424a2c5a33f939c3e2dd36"
+          "sha256": "2f49583f2a9bcdafe368ee1081c0d2d9a00a48aafb8a2958f59b4c782a084ff2"
         }
       }
     },
     "image": {
-      "generated": "2026-11-20T04:47:36Z",
-      "commit": "5d2ebd5546974bbba68f308c53193ad986d3c086",
-      "image": "localhost:5000/demo@sha256:74ca2b811018ae80f6f0f1f5a33c68eaa3dd78cf5a9d0ccb9bdcd5ab46f43595",
+      "generated": "2026-11-20T04:53:06Z",
+      "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
+      "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
       "tools": {
-        "syft": "(SBOM kept from the build)",
+        "syft": "16.1.13",
         "grype": "6",
         "grype-db": "2026-11-19T18:41:05Z"
       },
       "evidence": {
+        "sbom-cyclonedx": {
+          "file": "sbom.cdx.json",
+          "sha256": "8594dcc6f6aef3189a2138b16c7040d699358386ad3921ff2313c5c06fafc80d"
+        },
+        "sbom-spdx": {
+          "file": "sbom.spdx.json",
+          "sha256": "16d3fdc57cda2f55a8dced12f66766d490ac51794a8997da5d67f0cf60cb22c3"
+        },
         "grype": {
           "file": "grype.json",
-          "sha256": "3f39f41353f9fc235bdb57c5443d7cc9dd8153101928971473c24e129af32de2"
+          "sha256": "b96fe75cdf072a31249489d73b998f29258edec49becc95de4d6f2b03d1d866f"
         }
       }
     }
@@ -54,29 +62,41 @@
     "counts": {
       "suppressed": 8,
       "below-threshold": 8,
-      "fail": 2
+      "fail": 1
     },
     "notes": []
   },
-  "external": [
+  "findings": [
     {
-      "test": "external/TEN-990001-b3426e",
-      "title": "gunicorn < 25.0 Unsupported Version (demo)",
-      "check": "package",
-      "result": "fail",
-      "detail": "gunicorn 23.0.0 matches <25.0",
-      "source": "tenable-csv"
+      "id": "f075791847fe",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_7",
+      "severity": "high",
+      "location": "Dockerfile:7",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/9bf2c442edc12e76/hostexecutor/Dockerfile.FROM)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (app)",
+        "reason": "false positive: FROM ${BUILD}/${BASE} are ARGs pinned by digest, which checkov cannot resolve",
+        "expires": "2027-05-19"
+      }
     },
     {
-      "test": "external/TEN-142960-b3426e",
-      "title": "HSTS Missing From HTTPS Server (RFC 6797)",
-      "check": "endpoint",
-      "result": "fail",
-      "detail": "https://demo-dev.c-local.k.ffwf.net/ (200) has no Strict-Transport-Security header",
-      "source": "tenable-csv"
-    }
-  ],
-  "findings": [
+      "id": "fc1a7d0c6c20",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/9bf2c442edc12e76/hostexecutor/Dockerfile.)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
+        "expires": ""
+      }
+    },
     {
       "id": "b9b77e041ed9",
       "category": "config",
@@ -168,59 +188,16 @@
       }
     },
     {
-      "id": "f075791847fe",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_7",
-      "severity": "high",
-      "location": "Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/0b0a0032b5fc34b1/hostexecutor/Dockerfile.FROM)",
-      "outcome": "suppressed",
-      "suppressed": {
-        "by": "ignore (app)",
-        "reason": "false positive: FROM ${BUILD}/${BASE} are ARGs pinned by digest, which checkov cannot resolve",
-        "expires": "2027-05-19"
-      }
-    },
-    {
-      "id": "fc1a7d0c6c20",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_2",
-      "severity": "high",
-      "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/0b0a0032b5fc34b1/hostexecutor/Dockerfile.)",
-      "outcome": "suppressed",
-      "suppressed": {
-        "by": "ignore (platform)",
-        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
-        "expires": ""
-      }
-    },
-    {
-      "id": "dd02bc1288f2",
-      "category": "external",
-      "tool": "ledger",
-      "rule": "external/TEN-990001-b3426e",
-      "severity": "high",
-      "location": "demo.c-local.k.ffwf.net:443",
-      "message": "gunicorn < 25.0 Unsupported Version (demo): gunicorn 23.0.0 matches <25.0",
-      "check": "package",
-      "ledger_id": "TEN-990001-b3426e",
-      "unknown": false,
-      "outcome": "fail"
-    },
-    {
       "id": "e2a20f26a4da",
       "category": "external",
       "tool": "ledger",
       "rule": "external/TEN-142960-b3426e",
       "severity": "medium",
       "location": "demo.c-local.k.ffwf.net:443",
-      "message": "HSTS Missing From HTTPS Server (RFC 6797): https://demo-dev.c-local.k.ffwf.net/ (200) has no Strict-Transport-Security header",
+      "message": "HSTS Missing From HTTPS Server (RFC 6797): checked after deploy (cicd-ref-arch assess workflow)",
       "check": "endpoint",
       "ledger_id": "TEN-142960-b3426e",
-      "unknown": false,
+      "unknown": true,
       "outcome": "fail"
     }
   ]
