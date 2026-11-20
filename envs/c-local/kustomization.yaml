@@ -9,4 +9,5 @@ resources:
 - demo/prod
 - hello/dev
 - hello/prod
+- intake-sample/branch-rt-crash
 - intake-sample/dev

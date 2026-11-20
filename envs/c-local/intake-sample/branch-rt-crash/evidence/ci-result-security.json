@@ -1,0 +1,60 @@
+{
+  "schema": "ci-result/v1",
+  "repo": "ffwf/cicd-ref-arch",
+  "sha": "8382177c204c9710b277e3a8be952d3049727d3e",
+  "ref": "refs/heads/master",
+  "workflow": "pipeline",
+  "job": "security",
+  "status": "warn",
+  "started_at": "2026-11-20T20:31:26Z",
+  "duration_s": null,
+  "summary": {
+    "total": 18,
+    "failed": 4,
+    "passed": 14,
+    "skipped": 0
+  },
+  "failures": [
+    {
+      "test": "config/CKV_DOCKER_7",
+      "file": "app/Dockerfile:3",
+      "severity": "high",
+      "category": "config",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/596c55dfc0db1500/hostexecutor/app/Dockerfile.FROM)"
+    },
+    {
+      "test": "config/CKV_K8S_8",
+      "file": "build/app.yaml:13",
+      "severity": "high",
+      "category": "config",
+      "message": "Liveness Probe Should be Configured (Deployment.default.intake-sample)"
+    },
+    {
+      "test": "config/CKV_K8S_11",
+      "file": "build/app.yaml:13",
+      "severity": "high",
+      "category": "config",
+      "message": "CPU limits should be set (Deployment.default.intake-sample)"
+    },
+    {
+      "test": "config/CKV_K8S_22",
+      "file": "build/app.yaml:13",
+      "severity": "high",
+      "category": "config",
+      "message": "Use read-only filesystem for containers where possible (Deployment.default.intake-sample)"
+    }
+  ],
+  "security": {
+    "env": "branch",
+    "mode": "report",
+    "blocking": 0,
+    "counts": {
+      "fail": 4,
+      "suppressed": 6,
+      "below-threshold": 8
+    },
+    "image": "localhost:5000/intake-sample@sha256:d121283d7c0f2094676a2ff9b7a365bd5af674b6df36b7630b99a6d9d8ed392e"
+  },
+  "external": [],
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/507"
+}

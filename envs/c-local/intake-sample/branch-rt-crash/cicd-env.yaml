@@ -1,0 +1,14 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: intake-sample
+env: branch
+dir: branch-rt-crash
+namespace: intake-sample-rt-crash
+branch: rt-crash
+hosts:
+- intake-sample-rt-crash.c-local.k.ffwf.net
+image: localhost:5000/intake-sample@sha256:d121283d7c0f2094676a2ff9b7a365bd5af674b6df36b7630b99a6d9d8ed392e
+repo: ffwfbot/intake-sample
+commit: a189fb2d2bc1a62ba10d0fa6fe8c04b1f0d25360
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/507
+renderedAt: '2026-11-20T20:31:27Z'

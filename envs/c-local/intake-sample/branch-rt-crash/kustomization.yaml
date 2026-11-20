@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: intake-sample-rt-crash
+labels:
+- pairs:
+    cicd.ffwf.net/app: intake-sample
+    cicd.ffwf.net/env: branch-rt-crash
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/intake-sample
+  digest: sha256:d121283d7c0f2094676a2ff9b7a365bd5af674b6df36b7630b99a6d9d8ed392e
