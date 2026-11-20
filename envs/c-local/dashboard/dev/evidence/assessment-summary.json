@@ -3,12 +3,12 @@
  "kind": "self-assessment",
  "app": "dashboard",
  "env": "dev",
- "commit": "3c4056fed76eab162bcc9d9308a78d602c8adab8",
- "image": "localhost:5000/dashboard@sha256:fa1255c1838aa1c1f97167e595ad904f5bd2b091637a1c0faeb7f59efa4363c7",
- "generated": "2026-11-20T16:09:23Z",
+ "commit": "d4d4129b1d7d2882fcf5be461af3c74c6a19c7c8",
+ "image": "localhost:5000/dashboard@sha256:4af5b1f2e79e1808ffcf100d674f5cdd0580c2e68bef2ea3e9eeacbf1cb31a3f",
+ "generated": "2026-11-20T16:24:04Z",
  "counts": {
-  "satisfied": 34,
-  "not-satisfied": 6
+  "satisfied": 32,
+  "not-satisfied": 8
  },
  "coverage": {
   "automated": 31,
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 3c4056fed76e, image pinned by digest"
+     "found": "commit d4d4129b1d7d, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 3c4056fed76e, image pinned by digest"
+     "found": "commit d4d4129b1d7d, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -245,7 +245,7 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     }
    ]
   },
@@ -303,7 +303,7 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     }
    ]
   },
@@ -387,7 +387,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: warn (15/16 checks passed)"
     }
    ]
   },
@@ -428,7 +428,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: warn (15/16 checks passed)"
     }
    ]
   },
@@ -449,7 +449,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: warn (15/16 checks passed)"
     }
    ]
   },
@@ -470,7 +470,7 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     }
    ]
   },
@@ -486,7 +486,7 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     }
    ]
   },
@@ -496,13 +496,13 @@
    "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to correct flaws identified during testing and evaluation.",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "Findings at or above the threshold block prod until corrected.",
    "evidence": [
     {
      "selector": "findings:category=all",
-     "holds": true,
-     "found": "no findings at or above the prod threshold"
+     "holds": false,
+     "found": "1 findings would block prod: CKV_DOCKER_7"
     }
    ]
   },
@@ -544,12 +544,12 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     },
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: warn (15/16 checks passed)"
     }
    ]
   },
@@ -559,13 +559,13 @@
    "objective": "system flaws are corrected;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "Flaws that block prod are corrected before promotion.",
    "evidence": [
     {
      "selector": "findings:category=all",
-     "holds": true,
-     "found": "no findings at or above the prod threshold"
+     "holds": false,
+     "found": "1 findings would block prod: CKV_DOCKER_7"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 3c4056fed76e, image pinned by digest"
+     "found": "commit d4d4129b1d7d, image pinned by digest"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/15c4df5eeb7f676f/hostexecutor/.cicd/oscal/platform.yaml"
+   "path": "/runner/work/7ad6f620f17854c6/hostexecutor/.cicd/oscal/platform.yaml"
   }
  ]
 }

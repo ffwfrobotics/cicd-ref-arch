@@ -1,30 +1,39 @@
 {
   "schema": "ci-result/v1",
-  "repo": "ffwf/cicd-dashboard",
-  "sha": "3c4056fed76eab162bcc9d9308a78d602c8adab8",
-  "ref": "refs/heads/main",
-  "workflow": "cicd",
+  "repo": "ffwf/cicd-ref-arch",
+  "sha": "b034dee4610e621b491217421c92044bfadb5ca7",
+  "ref": "refs/heads/master",
+  "workflow": "pipeline",
   "job": "security",
-  "status": "pass",
-  "started_at": "2026-11-20T16:09:22Z",
+  "status": "warn",
+  "started_at": "2026-11-20T16:24:04Z",
   "duration_s": null,
   "summary": {
     "total": 16,
-    "failed": 0,
-    "passed": 16,
+    "failed": 1,
+    "passed": 15,
     "skipped": 0
   },
-  "failures": [],
+  "failures": [
+    {
+      "test": "config/CKV_DOCKER_7",
+      "file": "app/Dockerfile:7",
+      "severity": "high",
+      "category": "config",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/7ad6f620f17854c6/hostexecutor/app/Dockerfile.FROM)"
+    }
+  ],
   "security": {
     "env": "dev",
     "mode": "report",
     "blocking": 0,
     "counts": {
-      "suppressed": 8,
+      "fail": 1,
+      "suppressed": 7,
       "below-threshold": 8
     },
-    "image": "localhost:5000/dashboard@sha256:fa1255c1838aa1c1f97167e595ad904f5bd2b091637a1c0faeb7f59efa4363c7"
+    "image": "localhost:5000/dashboard@sha256:4af5b1f2e79e1808ffcf100d674f5cdd0580c2e68bef2ea3e9eeacbf1cb31a3f"
   },
   "external": [],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-dashboard/actions/runs/22"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/418"
 }
