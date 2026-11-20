@@ -3,7 +3,7 @@
   "app": "demo",
   "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
   "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
-  "generated": "2026-11-20T04:56:58Z",
+  "generated": "2026-11-20T04:58:39Z",
   "scans": {
     "source": {
       "generated": "2026-11-20T04:52:03Z",
@@ -30,8 +30,8 @@
       }
     },
     "image": {
-      "generated": "2026-11-20T04:56:58Z",
-      "commit": "da37e1c4977066e220293df09db199ab2da258d9",
+      "generated": "2026-11-20T04:58:39Z",
+      "commit": "d76961efef81a7f5d11196d6df9800ee22e4af27",
       "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
       "tools": {
         "syft": "(SBOM kept from the build)",
@@ -41,7 +41,7 @@
       "evidence": {
         "grype": {
           "file": "grype.json",
-          "sha256": "e0f2ef142e75d96030239b314ec08cb7a688c4c63ffd1e808429117066519c31"
+          "sha256": "b739e5bfa962c7ddcdb414d231ad995402a8ad1922c191fd31dc56588c39b5c0"
         }
       }
     }
@@ -49,12 +49,11 @@
   "gate": {
     "env": "dev",
     "mode": "report",
-    "status": "warn",
+    "status": "pass",
     "blocking": 0,
     "counts": {
       "suppressed": 8,
-      "below-threshold": 8,
-      "fail": 1
+      "below-threshold": 8
     },
     "notes": []
   },
@@ -290,22 +289,6 @@
       "fix_state": "unknown",
       "fixed_in": [],
       "outcome": "below-threshold"
-    },
-    {
-      "id": "898cd562e7f7",
-      "category": "vuln",
-      "tool": "advisory",
-      "rule": "EXERCISE-0001",
-      "severity": "high",
-      "location": "pkg:pypi/itsdangerous@2.2.0",
-      "message": "itsdangerous 2.2.0: Exercise: made-up flaw in itsdangerous (not real; removed after the test) (announced 2026-11-20)",
-      "package": "itsdangerous",
-      "version": "2.2.0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "2.2.1"
-      ],
-      "outcome": "fail"
     }
   ],
   "external": [
@@ -324,14 +307,6 @@
       "result": "pass",
       "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
       "source": "tenable-csv"
-    },
-    {
-      "test": "advisory/EXERCISE-0001",
-      "title": "Exercise: made-up flaw in itsdangerous (not real; removed after the test)",
-      "check": "package",
-      "result": "fail",
-      "detail": "itsdangerous 2.2.0",
-      "source": "advisory"
     }
   ]
 }

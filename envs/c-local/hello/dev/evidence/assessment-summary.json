@@ -5,7 +5,7 @@
  "env": "dev",
  "commit": "c6e7f92e542848b135bad337d7c0929fafb8fdab",
  "image": "localhost:5000/hello@sha256:9878d6676e902c0113bb1c074e061f1837f4f686433e72e13a9990892b3249fd",
- "generated": "2026-11-20T04:41:59Z",
+ "generated": "2026-11-20T04:58:42Z",
  "counts": {
   "satisfied": 30,
   "not-satisfied": 10
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/67c93f942f350290/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/902805e5f1f5e918/hostexecutor/oscal/platform.yaml"
   }
  ]
 }
