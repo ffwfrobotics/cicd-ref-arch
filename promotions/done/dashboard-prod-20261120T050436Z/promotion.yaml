@@ -11,3 +11,7 @@ notBefore: '2026-11-20T05:04:36Z'
 requestedBy: ffwfbot
 reason: 'dashboard 0.2.0: controls, IT Security findings, advisories, releases (steps
   3-6)'
+appliedAt: '2026-11-20T05:18:17Z'
+approval: 'PR #9 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8); self-assessment 34/40
+  satisfied
