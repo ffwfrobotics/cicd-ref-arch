@@ -194,3 +194,51 @@ class Tenants(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DispatchMissing(unittest.TestCase):
+    """The safety net under the webhook: only unseen, recent heads of moved apps on this cluster."""
+
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+        (self.root / "tenants").mkdir()
+        for name, repo, cl in [("demo", "o/demo", ["c1"]), ("old", "o/old", ["c1"]), ("hello", "o/platform", ["c1"]),
+                               ("far", "o/far", ["c2"])]:
+            (self.root / "tenants" / f"{name}.yaml").write_text(yaml.safe_dump(
+                {"metadata": {"name": name}, "spec": {"repo": repo, "clusters": cl}}))
+        self.addCleanup(shutil.rmtree, self.root)
+
+    def test_dispatches_only_what_is_missing(self):
+        import datetime as dt
+        import json
+        import urllib.error
+        now = cicd.now_utc()
+        recent = (now - dt.timedelta(minutes=10)).isoformat()
+        old = (now - dt.timedelta(days=3)).isoformat()
+        sent = []
+
+        def api(server, method, path, body=None):
+            if method == "POST":
+                sent.append(body["inputs"])
+                return None
+            if "/actions/runs" in path:
+                return {"workflow_runs": [{"created": recent, "event_payload": json.dumps({"inputs": {"sha": "a" * 40}})}]}
+            if path.endswith("/contents/.forgejo/workflows/cicd.yaml"):
+                if path.startswith("/repos/o/old/"):
+                    return {"name": "cicd.yaml"}
+                raise urllib.error.HTTPError(path, 404, "nf", {}, None)
+            if path.startswith("/repos/o/demo/branches"):
+                return [{"name": "main", "commit": {"id": "a" * 40, "timestamp": recent}},           # already run
+                        {"name": "feat", "commit": {"id": "b" * 40, "timestamp": recent, "author": {"username": "ada"}}},
+                        {"name": "stale", "commit": {"id": "c" * 40, "timestamp": old}}]
+            raise AssertionError(path)
+
+        orig = cicd.forge_api
+        cicd.forge_api = api
+        try:
+            args = type("A", (), {"cluster": "c1", "repo": "o/platform", "server": "https://f", "within_h": 6})()
+            n = cicd.dispatch_missing(self.root, args)
+        finally:
+            cicd.forge_api = orig
+        self.assertEqual(n, 1)
+        self.assertEqual(sent, [{"app": "demo", "branch": "feat", "sha": "b" * 40, "action": "deploy", "actor": "ada"}])

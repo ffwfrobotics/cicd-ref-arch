@@ -2,6 +2,8 @@
 #  - apply promotions that are approved and due (every 5 minutes, and when one is merged)
 #  - remove branch environments whose branch was deleted, here or in an enrolled app's repo
 #    (on delete, every 5 minutes, and when an app's pipeline dispatches it after a branch delete)
+#  - run the platform pipeline for enrolled branch heads it hasn't seen: the safety net under the
+#    forge webhook that normally dispatches it (pipeline.yaml)
 name: environments
 on:
   schedule: [{cron: "*/5 * * * *"}]
@@ -49,3 +51,8 @@ jobs:
         done
         # a due promotion that failed its checks turns the run red (after committing anything else)
         [ "$rc" = 0 ] || { echo "::error::a due promotion was refused: see promote.log above"; exit "$rc"; }
+    - name: dispatch missed pushes
+      if: always()
+      env:
+        FORGEJO_TOKEN: ${{ secrets.CICD_BOT_TOKEN }}
+      run: python3 tools/cicd.py dispatch-missing --cluster "$CLUSTER" --repo '${{ github.repository }}' --server '${{ github.server_url }}'

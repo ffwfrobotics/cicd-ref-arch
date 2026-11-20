@@ -29,6 +29,7 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -738,6 +739,87 @@ def gc(root: Path, args) -> int:
     return removed
 
 
+# ---------------------------------------------------------------- the platform pipeline's trigger
+
+
+def forge_api(server: str, method: str, path: str, body: dict | None = None):
+    """The forge's API with the bot token (FORGEJO_TOKEN): JSON in, JSON (or None) out."""
+    req = urllib.request.Request(f"{server.rstrip('/')}/api/v1{path}", method=method,
+                                 data=json.dumps(body).encode() if body is not None else None,
+                                 headers={"Authorization": f"token {os.environ['FORGEJO_TOKEN']}",
+                                          "Accept": "application/json", "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        data = r.read()
+    return json.loads(data) if data else None
+
+
+def pipeline_runs(server: str, repo: str, since: dt.datetime, workflow: str = "pipeline.yaml") -> list[dict]:
+    """The platform pipeline's runs created since `since`, each with its dispatch inputs."""
+    out, page = [], 1
+    while page <= 50:
+        runs = (forge_api(server, "GET", f"/repos/{repo}/actions/runs?workflow_id={workflow}&limit=50&page={page}")
+                or {}).get("workflow_runs") or []
+        for r in runs:
+            try:
+                r["inputs"] = json.loads(r.get("event_payload") or "{}").get("inputs") or {}
+            except ValueError:
+                r["inputs"] = {}
+            out.append(r)
+        if not runs or min(parse_ts(r["created"]) for r in runs) < since:
+            break
+        page += 1
+    return out
+
+
+def parse_ts(s: str) -> dt.datetime:
+    return dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+
+
+def dispatch_pipeline(server: str, repo: str, inputs: dict) -> None:
+    forge_api(server, "POST", f"/repos/{repo}/actions/workflows/pipeline.yaml/dispatches",
+              {"ref": "master", "inputs": inputs})
+
+
+def dispatch_missing(root: Path, args) -> int:
+    """The safety net under the forge webhook: dispatch the pipeline for every enrolled branch head
+    (committed in the last --within-h hours) that has no pipeline run yet. Apps inside this repo,
+    and apps whose repo still carries its own pipeline (.forgejo/workflows/cicd.yaml), are skipped."""
+    now = now_utc()
+    since = now - dt.timedelta(hours=args.within_h)
+    seen = {r["inputs"].get("sha") for r in pipeline_runs(args.server, args.repo, since - dt.timedelta(minutes=30))}
+    n = 0
+    for name, t in load_tenants(root).items():
+        spec = t["spec"]
+        repo = spec["repo"]
+        clusters = spec.get("clusters") or []
+        if repo == args.repo or args.cluster not in ([clusters] if isinstance(clusters, str) else clusters):
+            continue
+        try:
+            forge_api(args.server, "GET", f"/repos/{repo}/contents/.forgejo/workflows/cicd.yaml")
+            continue   # still runs its own pipeline (not moved to the platform yet)
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                print(f"{name}: cannot read {repo}: {e}", file=sys.stderr)
+                continue
+        page = 1
+        while True:
+            branches = forge_api(args.server, "GET", f"/repos/{repo}/branches?limit=50&page={page}") or []
+            for b in branches:
+                c = b["commit"]
+                if c["id"] in seen or parse_ts(c["timestamp"]) < since:
+                    continue
+                actor = (c.get("author") or {}).get("username") or (c.get("author") or {}).get("name") or ""
+                dispatch_pipeline(args.server, args.repo, {"app": name, "branch": b["name"], "sha": c["id"],
+                                                           "action": "deploy", "actor": actor})
+                print(f"dispatched {name} {b['name']} {c['id'][:7]}")
+                seen.add(c["id"])
+                n += 1
+            if len(branches) < 50:
+                break
+            page += 1
+    return n
+
+
 # ---------------------------------------------------------------- tenants
 
 
@@ -911,6 +993,11 @@ def main():
     ra.add_argument("--env", default="all", help="an environment directory name (dev, prod, branch-...), or all")
     ra.add_argument("--skip-endpoints", help="don't probe endpoints, and say why")
     ra.add_argument("--advisory", action="append", help="only environments whose SBOM matches this advisory file (repeatable)")
+    dm = sub.add_parser("dispatch-missing", help="run the platform pipeline for enrolled branch heads it hasn't seen")
+    dm.add_argument("--cluster", required=True)
+    dm.add_argument("--repo", required=True, help="this (the platform) repo, owner/name")
+    dm.add_argument("--server", required=True, help="forge URL")
+    dm.add_argument("--within-h", type=float, default=6, help="only heads committed this recently")
     g = sub.add_parser("gc")
     g.add_argument("--cluster", required=True)
     g.add_argument("--remote", default="origin", help="git remote (or URL) whose branches count")
@@ -964,6 +1051,8 @@ def main():
             sys.exit(3)  # the job goes red; anything applied is still written for the caller to commit
     elif args.cmd == "gc":
         print(f"removed {gc(root, args)}")
+    elif args.cmd == "dispatch-missing":
+        print(f"dispatched {dispatch_missing(root, args)}")
     elif args.cmd == "assess-evidence":
         summary = assess_into(root, args.app, args.env, Path(args.evidence), args.commit, args.image)
         if summary is None:

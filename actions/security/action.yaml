@@ -18,6 +18,7 @@ inputs:
   out: {default: build/security}
   token: {description: "a token that can read the compliance repo (it may be private)", default: ""}
   user: {description: "the token's user", default: ""}
+  commit: {description: "the app commit (default: the commit this run is for)", default: ""}
 outputs:
   status: {description: "pass, warn or fail", value: "${{ steps.gate.outputs.status }}"}
 runs:
@@ -28,6 +29,7 @@ runs:
     env:
       CTOKEN: ${{ inputs.token }}
       CUSER: ${{ inputs.user }}
+      COMMIT: ${{ inputs.commit }}
     run: |
       set -u
       cicd=$(cd '${{ github.action_path }}/../..' && pwd)
@@ -67,7 +69,7 @@ runs:
         cp '${{ inputs.manifests }}' "$out/app.yaml"
         { echo '### Self-assessment'; echo '```'
           CICD_COMPLIANCE_DIR="$comp" python3 "$cicd/tools/cicd.py" --root "$cicd" assess-evidence --app "$name" \
-            --env '${{ inputs.env }}' --evidence "$out" --commit "$GITHUB_SHA" --image '${{ inputs.image }}' 2>&1 \
+            --env '${{ inputs.env }}' --evidence "$out" --commit "${COMMIT:-$GITHUB_SHA}" --image '${{ inputs.image }}' 2>&1 \
             || echo "self-assessment failed"
           echo '```'; } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
         rm -f "$out/app.yaml"

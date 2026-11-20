@@ -13,6 +13,8 @@ inputs:
   user: {description: the token's user, required: true}
   state-repo: {description: "owner/name of the state repo (default: this repo)", default: ""}
   security-dir: {description: "actions/security output, kept with the environment", default: build/security}
+  commit: {description: "the app commit deployed (default: the commit this run is for)", default: ""}
+  source-repo: {description: "the app repo, owner/name (default: the repo this run is in)", default: ""}
 outputs:
   hosts: {value: "${{ steps.deploy.outputs.hosts }}"}
   env-dir: {description: "the environment's directory name (dev, branch-...)", value: "${{ steps.deploy.outputs.env-dir }}"}
@@ -26,6 +28,8 @@ runs:
     run: |
       set -eu
       repo='${{ inputs.state-repo }}'; [ -n "$repo" ] || repo='${{ github.repository }}'
+      commit='${{ inputs.commit }}'; [ -n "$commit" ] || commit='${{ github.sha }}'
+      src='${{ inputs.source-repo }}'; [ -n "$src" ] || src='${{ github.repository }}'
       server='${{ github.server_url }}'
       cicd=$(cd '${{ github.action_path }}/../..' && pwd)   # tools/ and clusters/ of cicd-ref-arch
       state=$(mktemp -d)
@@ -42,11 +46,11 @@ runs:
         git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
         envdir=$(python3 "$cicd/tools/cicd.py" render "$app_cfg" --env '${{ inputs.env }}' \
           --branch '${{ inputs.branch }}' --cluster '${{ inputs.cluster }}' --image '${{ inputs.image }}' \
-          --manifests .manifests.yaml --commit '${{ github.sha }}' --repo '${{ github.repository }}' --run-url "$run_url" --security-dir "$sec" | tail -1)
+          --manifests .manifests.yaml --commit "$commit" --repo "$src" --run-url "$run_url" --security-dir "$sec" | tail -1)
         git add -A envs
         if git diff --cached --quiet; then echo "environment unchanged"; break; fi
         git commit -q -m "deploy ${{ inputs.env }}: $(python3 -c "import yaml,sys;print(yaml.safe_load(open(sys.argv[1]))['metadata']['name'])" "$app_cfg") ${{ inputs.image }}" \
-          -m "branch ${{ inputs.branch }}, commit ${{ github.sha }}" -m "$run_url"
+          -m "branch ${{ inputs.branch }}, commit $commit" -m "$run_url"
         if git -c http.extraHeader="$auth" push -q origin HEAD:master; then echo "pushed"; break; fi
         [ "$attempt" = 5 ] && { echo "push failed 5 times" >&2; exit 1; }
         sleep $((attempt * 3))

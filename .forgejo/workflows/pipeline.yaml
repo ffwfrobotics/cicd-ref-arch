@@ -1,0 +1,180 @@
+# The cicd-ref-arch pipeline for every enrolled app, run here, in the platform repo (docs/enroll.md).
+# App repos hold no workflow and no token: a push to one is noticed by
+#  - the forge's webhook on the app repo, which cicd-dashboard turns into a dispatch of this workflow;
+#  - and, as a safety net, the environments workflow (every 5 minutes): `cicd.py dispatch-missing`
+#    dispatches any enrolled branch head that has no run here yet.
+# Self-service (pause, resume, remove-env, request-promotion) comes from the dashboard, which checks
+# that the user has write on the app repo and names them in `actor`.
+#
+# Only this repo's writers (the platform admins and its bot) can dispatch it. The app is named by
+# its enrollment (tenants/<app>.yaml), which says which repo and path to check out: a dispatch can't
+# point the pipeline at a repo nobody enrolled.
+name: pipeline
+run-name: "${{ inputs.app }} ${{ inputs.action }} ${{ inputs.branch }} ${{ inputs.sha }}"
+on:
+  workflow_dispatch:
+    inputs:
+      app: {description: "the enrolled app (tenants/<app>.yaml)", required: true}
+      branch: {description: "the app repo's branch", required: true}
+      sha: {description: "the commit (default: the branch's head)", default: ""}
+      action: {description: "deploy | pause | resume | remove-env | request-promotion", default: deploy}
+      actor: {description: "who asked (self-service), or who pushed", default: ""}
+      not_before: {description: "request-promotion: earliest UTC time, e.g. 2026-11-20T15:00:00Z", default: ""}
+      reason: {description: "request-promotion: why", default: ""}
+
+env:
+  CLUSTER: ${{ vars.CICD_CLUSTER || 'c-local' }}
+  STATE_REPO: ${{ github.repository }}
+
+jobs:
+  # which repo and commit, and does this push go through CI/CD? (excluded, paused, the tenant's limit)
+  route:
+    runs-on: ffwf-k8s
+    outputs:
+      env: ${{ steps.route.outputs.env }}
+      repo: ${{ steps.app.outputs.repo }}
+      path: ${{ steps.app.outputs.path }}
+      sha: ${{ steps.route.outputs.sha }}
+    steps:
+    - uses: actions/checkout@v4
+      with: {path: .cicd, persist-credentials: false}
+    - id: app
+      env: {APP_NAME: "${{ inputs.app }}", BRANCH: "${{ inputs.branch }}", SHA: "${{ inputs.sha }}", ACTION: "${{ inputs.action }}"}
+      run: |
+        set -eu
+        printf '%s' "$APP_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]{0,62}$' || { echo "::error::bad app name"; exit 1; }
+        printf '%s' "$SHA" | grep -Eq '^([0-9a-f]{40})?$' || { echo "::error::sha must be a full commit id"; exit 1; }
+        git check-ref-format --branch "$BRANCH" >/dev/null || { echo "::error::bad branch name"; exit 1; }
+        case "$ACTION" in deploy|pause|resume|remove-env|request-promotion) ;; *) echo "::error::unknown action $ACTION"; exit 1 ;; esac
+        t=".cicd/tenants/$APP_NAME.yaml"
+        [ -f "$t" ] || { echo "::error::$APP_NAME is not enrolled (no tenants/$APP_NAME.yaml)"; exit 1; }
+        python3 -c "import yaml,sys;s=yaml.safe_load(open(sys.argv[1]))['spec'];print('repo='+s['repo']);print('path='+(s.get('path') or '.'))" "$t" >> "$GITHUB_OUTPUT"
+    - uses: actions/checkout@v4
+      with: {repository: "${{ steps.app.outputs.repo }}", ref: "${{ inputs.sha || inputs.branch }}", path: app,
+             token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
+    - uses: ./.cicd/actions/setup
+    - id: route
+      env: {BRANCH: "${{ inputs.branch }}", APP: "app/${{ steps.app.outputs.path }}", ACTION: "${{ inputs.action }}", ACTOR: "${{ inputs.actor }}"}
+      run: |
+        echo "sha=$(git -C app rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        echo "${{ steps.app.outputs.repo }} $BRANCH $(git -C app rev-parse --short HEAD): $ACTION${ACTOR:+, by $ACTOR}"
+        [ "$ACTION" = deploy ] || { echo "env=manage" >> "$GITHUB_OUTPUT"; exit 0; }
+        env=$(python3 .cicd/tools/cicd.py --root .cicd which-env "$APP/cicd.yaml" --branch "$BRANCH" --cluster "$CLUSTER")
+        echo "env=$env" >> "$GITHUB_OUTPUT"
+        case "$env" in
+          skip-paused) echo "::notice::branch $BRANCH is paused: no CI/CD until it is resumed" ;;
+          skip-limit)  echo "::notice::the tenant is at its branch limit: $BRANCH waits for a free slot (pause or remove another branch)" ;;
+          skip)        echo "::notice::branch $BRANCH is excluded in cicd.yaml" ;;
+        esac
+
+  test:
+    needs: route
+    if: needs.route.outputs.env != 'manage' && !startsWith(needs.route.outputs.env, 'skip')
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+      with: {path: .cicd, persist-credentials: false}
+    - uses: actions/checkout@v4
+      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app,
+             token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
+    - uses: ./.cicd/actions/setup
+    - uses: ./.cicd/actions/test
+      with: {app: "app/${{ needs.route.outputs.path }}"}
+    - if: always()
+      uses: actions/upload-artifact@v3
+      with: {name: ci-result-test, path: ci-result/}
+
+  deliver:
+    needs: [route, test]
+    if: needs.route.outputs.env == 'dev' || needs.route.outputs.env == 'branch'
+    runs-on: ffwf-k8s
+    env:
+      APP: app/${{ needs.route.outputs.path }}
+    steps:
+    - uses: actions/checkout@v4
+      with: {path: .cicd, persist-credentials: false}
+    - uses: actions/checkout@v4
+      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app,
+             token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
+    - uses: ./.cicd/actions/setup
+    - uses: actions/download-artifact@v3
+      continue-on-error: true
+      with: {name: ci-result-test, path: build/ci-result-test}
+    - id: build
+      uses: ./.cicd/actions/build
+      with: {app: "${{ env.APP }}", cluster: "${{ env.CLUSTER }}"}
+    - id: security
+      uses: ./.cicd/actions/security
+      with: {app: "${{ env.APP }}", env: "${{ needs.route.outputs.env }}", cluster: "${{ env.CLUSTER }}", image: "${{ steps.build.outputs.image }}",
+             token: "${{ secrets.CICD_BOT_TOKEN }}", user: "${{ vars.CICD_BOT_USER }}", commit: "${{ needs.route.outputs.sha }}"}
+    - uses: ./.cicd/actions/sign
+      with: {image: "${{ steps.build.outputs.image }}", out: build/security}
+    - id: deploy
+      uses: ./.cicd/actions/deploy-env
+      with:
+        app: ${{ env.APP }}
+        cluster: ${{ env.CLUSTER }}
+        env: ${{ needs.route.outputs.env }}
+        branch: ${{ inputs.branch }}
+        image: ${{ steps.build.outputs.image }}
+        manifests: build/app.yaml
+        token: ${{ secrets.CICD_BOT_TOKEN }}
+        user: ${{ vars.CICD_BOT_USER }}
+        state-repo: ${{ env.STATE_REPO }}
+        commit: ${{ needs.route.outputs.sha }}
+        source-repo: ${{ needs.route.outputs.repo }}
+    # endpoint checks (IT Security's findings about the running app) need the new version live:
+    # re-assess this environment once it has rolled out
+    - if: success()
+      env:
+        TOKEN: ${{ secrets.CICD_BOT_TOKEN }}
+        ENV_DIR: ${{ steps.deploy.outputs.env-dir }}
+        NAME: ${{ inputs.app }}
+      run: |
+        read -r crepo cbranch < <(python3 -c "import yaml,sys;c=yaml.safe_load(open(sys.argv[1])).get('compliance') or {};print(c.get('repo','-'),c.get('branch','main'))" ".cicd/clusters/$CLUSTER/cicd-cluster.yaml")
+        ledger=$(curl -fsS -H "Authorization: token $TOKEN" "${{ github.server_url }}/api/v1/repos/$crepo/raw/ledger/$NAME.yaml?ref=$cbranch" 2>/dev/null || true)
+        if printf '%s' "$ledger" | grep -q 'type: endpoint'; then
+          jq -n --arg app "$NAME" --arg env "$ENV_DIR" '{ref: "master", inputs: {app: $app, env: $env, reason: "after deploy", delay: "90"}}' \
+            | curl -fsS -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' -d @- \
+              '${{ github.server_url }}/api/v1/repos/${{ env.STATE_REPO }}/actions/workflows/assess.yaml/dispatches' \
+            && echo "asked for an endpoint re-assessment of $NAME/$ENV_DIR in about 90 s"
+        fi
+    - if: always()
+      uses: actions/upload-artifact@v3
+      with: {name: deliver, path: "build/security/\nbuild/app.yaml\nbuild/build-metadata.json"}
+
+  # self-service, for whoever the dashboard says asked (it checked their write on the app repo)
+  manage:
+    needs: route
+    if: needs.route.outputs.env == 'manage'
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+      with: {path: .cicd, persist-credentials: false}
+    - uses: actions/checkout@v4
+      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app,
+             token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
+    - uses: ./.cicd/actions/setup
+    - if: inputs.action == 'request-promotion'
+      uses: ./.cicd/actions/request-promotion
+      with:
+        app: ${{ inputs.app }}
+        not-before: ${{ inputs.not_before }}
+        reason: ${{ inputs.reason }}
+        requested-by: ${{ inputs.actor || github.actor }}
+        cluster: ${{ env.CLUSTER }}
+        token: ${{ secrets.CICD_BOT_TOKEN }}
+        user: ${{ vars.CICD_BOT_USER }}
+        state-repo: ${{ env.STATE_REPO }}
+    - if: inputs.action != 'request-promotion'
+      uses: ./.cicd/actions/manage-env
+      with:
+        action: ${{ inputs.action }}
+        app: app/${{ needs.route.outputs.path }}
+        branch: ${{ inputs.branch }}
+        by: ${{ inputs.actor || github.actor }}
+        cluster: ${{ env.CLUSTER }}
+        token: ${{ secrets.CICD_BOT_TOKEN }}
+        user: ${{ vars.CICD_BOT_USER }}
+        state-repo: ${{ env.STATE_REPO }}
+        source-repo: ${{ needs.route.outputs.repo }}
