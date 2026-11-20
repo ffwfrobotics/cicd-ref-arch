@@ -1,8 +1,8 @@
 {
   "schema": "security-findings/v1",
   "scope": "source",
-  "generated": "2026-11-20T05:02:44Z",
-  "commit": "7865b680eb2110a7963928d7711d4bcf6b36272b",
+  "generated": "2026-11-20T13:25:45Z",
+  "commit": "78d95612b530f48a344c1411ae7ae9f6b0681c5a",
   "image": null,
   "tools": {
     "gitleaks": "8.30.1",
@@ -20,7 +20,7 @@
     },
     "checkov": {
       "file": "checkov.json",
-      "sha256": "035c2a38a8c581c2727e22893e610c8517cf94e62a90d2006efc7c0df1ec209b"
+      "sha256": "692876ce62957c03884e1316d8031979cc7d1fe0e118cd8dbb8bf9344c246bea"
     }
   },
   "findings": [
@@ -31,7 +31,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/a800efee7d79ecf2/hostexecutor/Dockerfile.FROM)"
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/f849c57ee197de75/hostexecutor/Dockerfile.FROM)"
     },
     {
       "id": "fc1a7d0c6c20",
@@ -40,7 +40,7 @@
       "rule": "CKV_DOCKER_2",
       "severity": "high",
       "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/a800efee7d79ecf2/hostexecutor/Dockerfile.)"
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/f849c57ee197de75/hostexecutor/Dockerfile.)"
     },
     {
       "id": "b9b77e041ed9",
