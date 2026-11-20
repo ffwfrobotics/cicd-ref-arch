@@ -76,7 +76,28 @@ Run it again to update the webhook.
 - **Push to the dev branch** (`environments.dev.branch` in `cicd.yaml`): live at `<app>-dev.<cluster>.<zone>`.
 - **Any other branch:** live at `<app>-<branch>.<cluster>.<zone>`. Deleting the branch removes it within a minute: the app's pipeline asks the `environments` workflow here to clean up.
 - **Every run:** a test record and a security record, shown in the run's summary. Dev and branch deploys go ahead on findings; a secret stops them.
+- **Every deploy:** a runtime check: running, or what went wrong (crash with its last log lines, image pull, not ready, …). See [Runtime check](#runtime-check).
 - **Prod:** `request-promotion` in this repo, approved by someone else. See [promotion.md](promotion.md) and [security.md](security.md).
+
+## Runtime check
+
+After each deploy, the `runtime` job (`tools/runtime.py`) watches the environment and posts one word
+as the commit status `cicd/runtime`. The words, and what to do about each, are in
+[contract.md](contract.md#after-the-deploy-the-runtime-check). A run whose app doesn't run is red.
+
+It reads the cluster as `cicd-runtime/reader` (`platform/runtime`): pods, events, logs and
+workloads, and only in environment namespaces, each of which binds the role in its `platform.yaml`.
+That binding arrives with an environment's next deploy.
+
+Setup, once per cluster, as a cluster admin:
+1. Flux creates the ServiceAccount and its token Secret (`cicd-runtime/reader-token`).
+2. Make a kubeconfig with server `https://kubernetes.default.svc`, the Secret's `ca.crt` and
+   `token`, and store it as the platform repo's Actions secret `CICD_RUNTIME_KUBECONFIG`.
+   The runner pods mount no token: only this repo's workflows get it.
+3. Let the runners reach the API server (the kube service IP on 443, and the apiserver behind it).
+
+Without the secret, the job says the check isn't configured and passes. To rotate, delete the
+token Secret (Flux recreates it and Kubernetes issues a new token), then redo step 2.
 
 ## Self-service
 

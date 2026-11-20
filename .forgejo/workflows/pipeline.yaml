@@ -86,7 +86,7 @@ jobs:
           skip-paused) echo "::notice::branch $BRANCH is paused: no CI/CD until it is resumed" ;;
           skip-limit)  echo "::notice::the tenant is at its branch limit: $BRANCH waits for a free slot (pause or remove another branch)" ;;
           skip)        echo "::notice::branch $BRANCH is excluded in cicd.yaml" ;;
-          branch)      [ "${{ steps.app.outputs.status }}" = pending ] && echo "::notice::the app is pending approval: a branch environment only" ;;
+          branch)      if [ "${{ steps.app.outputs.status }}" = pending ]; then echo "::notice::the app is pending approval: a branch environment only"; fi ;;
         esac
 
   test:
