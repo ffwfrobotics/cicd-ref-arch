@@ -20,7 +20,7 @@ while read -r old new ref; do
   else range="$old..$new"; fi
   : > "$tmp/ignore"
   git show "$new:.gitleaksignore" > "$tmp/ignore" 2>/dev/null || :
-  if ! gitleaks git --log-opts="$range" --redact --no-banner --verbose --no-color --exit-code 1 \
+  if ! "${GITLEAKS:-gitleaks}" git --log-opts="$range" --redact --no-banner --verbose --no-color --exit-code 1 \
        --gitleaks-ignore-path "$tmp/ignore" . > "$tmp/out" 2>&1; then
     echo "push refused: possible secret in ${ref#refs/heads/}" >&2
     grep -E "^(Finding|Secret|RuleID|File|Line|Commit|Fingerprint):" "$tmp/out" >&2 || cat "$tmp/out" >&2

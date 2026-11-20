@@ -67,9 +67,9 @@ Either way the request is dispatched to the app's own pipeline, which carries it
 
 ## Secrets at push
 
-The forge-side hook `forge/pre-receive-gitleaks` refuses pushes that add a secret. It is an instance change, made by the forge admin:
-1. put `gitleaks` (the version in `actions/setup/tools.txt`) on the forge's PATH;
-2. install the script as a `pre-receive` hook for the enrolled repos, in each repo's `hooks/pre-receive.d/` on the forge host.
+The forge-side hook `forge/pre-receive-gitleaks` refuses pushes that add a secret. It is an instance change, made by the forge admin on the forge host (or inside the Forgejo container), as the user that owns the repositories:
+1. put `gitleaks` (the version and sha256 in `actions/setup/tools.txt`) where the Forgejo process can run it;
+2. run `forge/install-pre-receive.sh <repositories root> <gitleaks path>`. The repositories root is `[repository] ROOT` in `app.ini`. The script installs the hook into `hooks/pre-receive.d/` of this repo and of every repo in `tenants/`. Run it again after enrolling an app.
 
 Don't use Forgejo's per-repo git-hook editor (`DISABLE_GIT_HOOKS = false`) for this: it lets every repo admin run code on the forge.
 
