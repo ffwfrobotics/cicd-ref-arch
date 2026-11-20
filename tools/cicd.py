@@ -272,6 +272,11 @@ def render_env(root: Path, app: dict, cl: dict, env: str, branch: str | None, im
     out = root / "envs" / cluster / name / env_dir
     if out.exists():
         shutil.rmtree(out)
+    if env == "dev" and branch:
+        # while the app was pending, its dev branch ran as a branch environment: dev replaces it
+        standin = root / "envs" / cluster / name / env_id(app, "branch", branch)[0]
+        if standin.exists():
+            shutil.rmtree(standin)
     labels = {"cicd.ffwf.net/app": name, "cicd.ffwf.net/env": env_dir}
 
     repo, _, digest = image.partition("@")

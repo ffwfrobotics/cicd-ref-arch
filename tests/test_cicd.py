@@ -54,6 +54,12 @@ class Render(unittest.TestCase):
         self.assertEqual(cicd.hosts_for(self.app, "branch", "feat/x", "c-local", "k.ffwf.net"),
                          ["hello-feat-x.c-local.k.ffwf.net"])
 
+    def test_dev_replaces_the_pending_stand_in(self):
+        standin = self.render("branch", "master")
+        self.assertTrue(standin.exists())
+        self.render("dev", "master")
+        self.assertFalse(standin.exists())
+
     def test_branch_env_layout(self):
         out = self.render("branch", "feat/x")
         k = yaml.safe_load((out / "kustomization.yaml").read_text())

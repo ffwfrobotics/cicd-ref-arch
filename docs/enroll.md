@@ -24,9 +24,29 @@ push to app repo ──webhook──▶ cicd-dashboard /hooks/forge ──dispat
 - Each run in the platform repo is titled `pipeline`; its inputs (`app`, `branch`, `sha`, `action`, `actor`) say what it is for, and the dashboard reads them to show each app commit's jobs.
 - Without the webhook (or if the dashboard is down), pushes still start the pipeline within 5 minutes.
 
+## From the dashboard: Add app
+
+Any signed-in user can add an app; an admin approves it. In cicd-dashboard, **Add app**, then paste a clone URL:
+
+| Source | What happens |
+|---|---|
+| A repo on another forge (GitHub, GitLab, another Forgejo) | Imported into this forge under the owner you pick, once, or as a pull **mirror** that keeps syncing. A private source needs a read token there. |
+| A repo already on this forge | Used as it is (you need admin on it). |
+| Empty | A new empty repo: push to it. |
+
+The dashboard then, in this order (`cicd-dashboard/dashboard/enroll.py`):
+1. **as you:** imports or creates the repo, gives the platform bot write on it (to check it out and post commit statuses), and adds the push webhook;
+2. **as the platform:** writes `tenants/<app>.yaml` with `status: pending` and `requestedBy: <you>`, and starts the first run.
+
+**Pending** apps get the whole pipeline (contract check, tests, build, scans, self-assessment), but deploy **only to branch environments**: the default branch too, at `<app>-<branch>.<cluster>.<zone>`. There is no dev host and no promotion, and they count toward the tenant's branch limit.
+
+**Approve** (on the app's page, for writers of this repo) is a commit to `tenants/<app>.yaml` in the approver's name: `status: approved`, `approved: {by, at}`. The default branch then deploys to dev, and the dev deploy removes the stand-in branch environment.
+
+Developers keep working in one of three ways: push to the repo here (change the remote), push-mirror from their forge to here (Forgejo, GitHub and GitLab can all do this), or a push job in their own CI. An imported **mirror** syncs on the forge's mirror interval.
+
 ## 1. The app meets the contract
 
-See `templates/app/` and [contract.md](contract.md):
+The pipeline's first step (`intake`) checks every push against [contract.md](contract.md) and posts what it found as commit statuses on the app repo. A missing `cicd.yaml` or `deploy/` base is filled in with defaults for the run (printed in the log, to commit); a missing Dockerfile stops the run with "nothing to run". So a repo with only a Dockerfile deploys. To start from a complete app, see `templates/app/` and [contract.md](contract.md):
 - `cicd.yaml` at the path you enroll;
 - a kustomize base in `deploy/` whose image is the literal name `app-image`;
 - a Dockerfile with its base pinned by digest;
@@ -90,3 +110,5 @@ Don't use Forgejo's per-repo git-hook editor (`DISABLE_GIT_HOOKS = false`) for t
 - **The dashboard holds the platform token** (it dispatches the pipeline). Anyone who controls the dashboard's dev or prod deployment can start pipeline runs for enrolled apps, but only for enrolled repos and commits that exist in them.
 - **Enrollment names a repo, not people.** Who may push code is the app repo's own access control.
 - **Webhooks need the forge to reach the dashboard.** If it can't, the 5-minute safety net still runs every push.
+- **The platform bot has write on every enrolled repo**: to check out private repos and post the contract statuses. It never pushes to them.
+- **Apps added from the dashboard have no forge-side secret hook** until the forge admin re-runs `forge/install-pre-receive.sh` (see above). The pipeline's own gitleaks scan still runs on every push, and a secret stops the deploy.
