@@ -2,7 +2,7 @@ name: request-promotion
 description: >
   Open a promotion pull request on the state repo, pinned to what the source environment runs now,
   re-scanned under the prod policy, with the suppressions it carries. Used by the platform's
-  request-promotion workflow and by an enrolled app's own pipeline (dispatched by a user with write
+  request-promotion workflow and by the platform pipeline (dispatched for a user with write
   on the app repo; that user is recorded as the requester).
 inputs:
   app: {required: true}

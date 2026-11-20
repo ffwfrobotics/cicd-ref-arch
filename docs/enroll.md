@@ -1,15 +1,28 @@
 # Enrolling an app
 
-The platform is the product; an app's developers use it without access to it. An admin enrolls each app once. After that, the developers push code and nothing else: the pipeline, its token and the policy belong to the platform.
+The platform is the product; an app's developers use it without access to it. An admin enrolls each app once. After that, the developers push code and nothing else. **The pipeline runs in the platform repo** (`.forgejo/workflows/pipeline.yaml`), and the app repo holds no workflow and no token.
 
 | The app's developers | The platform admin |
 |---|---|
-| Code, tests, `Dockerfile`, `deploy/` | Enrolls the app: `tenants/<app>.yaml` |
-| `cicd.yaml`: test command, URL patterns, idle time | The app repo's Actions secret and variables |
-| `security/`: suppressions, stricter settings | The pipeline workflow in the app repo |
+| Code, tests, `Dockerfile`, `deploy/` | Enrolls the app: `tenants/<app>.yaml` and a push webhook on the app repo |
+| `cicd.yaml`: test command, URL patterns, idle time | The platform repo, its pipeline and its bot token |
+| `security/`: suppressions, stricter settings | |
 | Requests a promotion | Approves promotions (someone other than the requester) |
 
 Example: [ffwf/cicd-demo-app](https://forge.goblincorps.com/ffwf/cicd-demo-app).
+
+## How a push reaches the pipeline
+
+```
+push to app repo ──webhook──▶ cicd-dashboard /hooks/forge ──dispatch──▶ cicd-ref-arch pipeline.yaml
+                 (signed)                                  (app, branch, sha, who pushed)
+     every 5 min: environments workflow, `cicd.py dispatch-missing` ──▶ the same, for any push missed
+```
+
+- A dispatch names the **enrolled app**, not a repo: the pipeline reads `tenants/<app>.yaml` to know which repo and path to check out. Nobody can point it at a repo that wasn't enrolled.
+- Only the platform repo's writers (the admins and the bot) can dispatch it. The dashboard does so with the platform token, after checking the signature (webhooks) or the user's write access on the app repo (self-service).
+- Each run in the platform repo is titled `pipeline`; its inputs (`app`, `branch`, `sha`, `action`, `actor`) say what it is for, and the dashboard reads them to show each app commit's jobs.
+- Without the webhook (or if the dashboard is down), pushes still start the pipeline within 5 minutes.
 
 ## 1. The app meets the contract
 
@@ -22,20 +35,21 @@ See `templates/app/` and [contract.md](contract.md):
 
 ## 2. Enroll
 
-From a checkout of this repo, with a token that is an admin of the app repo:
+From a checkout of this repo, with a token that is an admin of the app repo, and the dashboard's webhook secret (the `hook-secret` in its `dashboard-platform` Secret):
 
 ```sh
-FORGEJO_TOKEN=<admin token> CICD_BOT_USER=ffwfbot CICD_BOT_TOKEN=<bot token> \
-  python3 tools/enroll.py --tenant ffwf --repo ffwf/cicd-demo-app --app demo --cluster c-local --owner alice
+FORGEJO_TOKEN=<admin token> CICD_HOOK_SECRET=<webhook secret> \
+  python3 tools/enroll.py --tenant ffwf --repo ffwf/cicd-demo-app --app demo --cluster c-local --owner alice \
+    --hook-url https://dashboard.c-local.k.ffwf.net/hooks/forge
 git add tenants/demo.yaml && git commit -m "enroll demo" && git push
 ```
 
 It:
-1. writes `tenants/<app>.yaml`. Deploys of the app are refused until it is pushed, and only ever accepted from the enrolled repo, on the enrolled clusters;
-2. sets the app repo's secret `CICD_BOT_TOKEN` and its variables `CICD_BOT_USER` and `CICD_CLUSTER`;
-3. commits `templates/ci/app.yaml` to the app repo as `.forgejo/workflows/cicd.yaml`. That commit starts the first run.
+1. writes `tenants/<app>.yaml`. The pipeline refuses an app until this is pushed, and only checks out the enrolled repo;
+2. adds (or updates) a push webhook on the app repo, to the dashboard;
+3. removes what the old model kept in the app repo, if it's there: `.forgejo/workflows/cicd.yaml`, the secret `CICD_BOT_TOKEN`, the variables `CICD_BOT_USER` and `CICD_CLUSTER`. Removing the workflow is a commit, and that push is the first platform run.
 
-Run it again to update the workflow or rotate the token.
+Run it again to update the webhook.
 
 ## 3. What the developers then get
 
@@ -46,11 +60,9 @@ Run it again to update the workflow or rotate the token.
 
 ## Self-service
 
-After enrollment, anyone with **write on the app repo** helps themselves. There are two ways:
-- **Dashboard:** `cicd-dashboard`, signed in through the forge.
-- **Forge:** Actions → `cicd` → Run workflow.
+After enrollment, anyone with **write on the app repo** helps themselves, from `cicd-dashboard`, signed in through the forge.
 
-Either way the request is dispatched to the app's own pipeline, which carries it out and records who asked:
+The dashboard checks that you have write on the app repo, then dispatches the platform pipeline with the action and your login, which the pipeline records:
 
 | Action | Effect |
 |---|---|
@@ -73,9 +85,8 @@ The forge-side hook `forge/pre-receive-gitleaks` refuses pushes that add a secre
 
 Don't use Forgejo's per-repo git-hook editor (`DISABLE_GIT_HOOKS = false`) for this: it lets every repo admin run code on the forge.
 
-## Limits (for a demo)
+## Limits
 
-- **The app repo holds the bot token.** The bot can push to this repo, so anyone who can change the app repo's workflow can deploy anything. In a real setup:
-  - the developers can't edit `.forgejo/` (protected file patterns, or a separate CI owner);
-  - or the app's pipeline only asks the platform to build, through a workflow dispatch.
+- **The dashboard holds the platform token** (it dispatches the pipeline). Anyone who controls the dashboard's dev or prod deployment can start pipeline runs for enrolled apps, but only for enrolled repos and commits that exist in them.
 - **Enrollment names a repo, not people.** Who may push code is the app repo's own access control.
+- **Webhooks need the forge to reach the dashboard.** If it can't, the 5-minute safety net still runs every push.

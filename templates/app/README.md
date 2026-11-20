@@ -1,7 +1,8 @@
 # App template
 
-Copy this directory into an app repo's root (or a subdirectory), rename `myapp`, and add
-`templates/ci/app.yaml` as `.forgejo/workflows/cicd.yaml`. The app then meets the contract in
+Copy this directory into an app repo's root (or a subdirectory), rename `myapp`, and ask an admin
+to enroll it (no workflow goes in the app repo: the pipeline runs in the platform). The app then
+meets the contract in
 [docs/contract.md](../../docs/contract.md):
 
 - `cicd.yaml` names the app, its test command, its environments' URL patterns, and its

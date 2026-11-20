@@ -1,8 +1,8 @@
 name: manage-env
 description: >
   Self-service on an app's environments: pause or resume a branch (a paused branch doesn't go
-  through CI/CD and loses its environment), or remove a branch environment. Run by an enrolled
-  app's own pipeline when a user with write on the app repo dispatches it; the commit names them.
+  through CI/CD and loses its environment), or remove a branch environment. Run by the platform
+  pipeline when the dashboard dispatches it for a user with write on the app repo; the commit names them.
 inputs:
   action: {description: "pause, resume or remove-env", required: true}
   app: {description: path to the app's directory (holds cicd.yaml), required: true}

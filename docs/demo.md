@@ -30,7 +30,7 @@ The platform is the product. [ffwf/cicd-demo-app](https://forge.goblincorps.com/
 
 | # | Who | Do | See |
 |---|---|---|---|
-| 1 | admin | `tools/enroll.py --repo ffwf/cicd-demo-app --app demo --cluster c-local`, then push `tenants/demo.yaml`. | The app repo gets its secret, its variables and `.forgejo/workflows/cicd.yaml`. That commit runs the pipeline: tests (5 pass), build, scans, `demo-dev.c-local.k.ffwf.net` live. The first request wakes it from zero in about 2.4 s. |
+| 1 | admin | `tools/enroll.py --repo ffwf/cicd-demo-app --app demo --cluster c-local`, then push `tenants/demo.yaml`. | The app repo gets a push webhook to the dashboard, and no workflow or token. Its next push runs the platform pipeline: tests (5 pass), build, scans, `demo-dev.c-local.k.ffwf.net` live. The first request wakes it from zero in about 2.4 s. |
 | 2 | developer | Push a branch (`feature/dark-mode`). | `demo-feature-dark-mode.c-local.k.ffwf.net` serves it. The security gate says `warn` (the Werkzeug advisory) and the deploy goes ahead. |
 | 3 | developer | On another branch, commit a test fixture that holds a placeholder webhook secret. | The deploy job fails: `fail high secrets generic-api-key tests/fixtures/webhook-example.json:4`. The log prints the line to add if it is a false positive. Nothing is deployed. |
 | 4 | developer | Add that line to `.gitleaksignore` with a comment saying why, and push. The code doesn't change. | The branch deploys. With the forge hook installed, the push in step 3 would have been refused, and this same commit would clear it. |
