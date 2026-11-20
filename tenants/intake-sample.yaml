@@ -1,4 +1,4 @@
-# Enrolled from cicd-dashboard (pending until an admin approves it: branch environments only).
+# Enrolled from cicd-dashboard; approved by an admin.
 apiVersion: cicd.ffwf.net/v1alpha1
 kind: Tenant
 metadata:
@@ -12,6 +12,9 @@ spec:
   owners:
   - ffwfbot
   enrolled: '2026-11-20'
-  status: pending
+  status: approved
   requestedBy: ffwfbot
   defaultBranch: main
+  approved:
+    by: john
+    at: '2026-11-20T20:04:34Z'
