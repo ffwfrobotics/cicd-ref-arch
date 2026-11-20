@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intake-sample-rt-localhost
+  labels:
+    cicd.ffwf.net/app: intake-sample
+    cicd.ffwf.net/env: branch-rt-localhost
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted

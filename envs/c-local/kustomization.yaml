@@ -10,4 +10,5 @@ resources:
 - hello/dev
 - hello/prod
 - intake-sample/branch-rt-crash
+- intake-sample/branch-rt-localhost
 - intake-sample/dev
