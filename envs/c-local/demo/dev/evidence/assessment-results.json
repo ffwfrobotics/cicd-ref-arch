@@ -1,9 +1,9 @@
 {
  "assessment-results": {
-  "uuid": "64fd25a8-dbec-53ef-afbf-750f5914bb38",
+  "uuid": "7eec2172-eb5d-5f90-9ef3-d0be169efd4f",
   "metadata": {
    "title": "Self-assessment of demo at 30fe1b938949 (dev)",
-   "last-modified": "2026-11-20T19:24:53Z",
+   "last-modified": "2026-11-20T19:38:17Z",
    "version": "1",
    "oscal-version": "1.2.3",
    "props": [
@@ -40,11 +40,11 @@
   },
   "results": [
    {
-    "uuid": "eb42d3ed-7c24-51a4-ab35-b7645b083796",
+    "uuid": "d55f57fb-d0b4-53b2-ac4f-516a6d21b3fa",
     "title": "Self-assessment of demo at 30fe1b938949 (dev)",
-    "description": "36 of 40 objectives satisfied; 31 automated, 4 manual, 3 not-applicable, 2 uncovered.",
-    "start": "2026-11-20T19:24:53Z",
-    "end": "2026-11-20T19:24:53Z",
+    "description": "35 of 40 objectives satisfied; 31 automated, 4 manual, 3 not-applicable, 2 uncovered.",
+    "start": "2026-11-20T19:38:17Z",
+    "end": "2026-11-20T19:38:17Z",
     "props": [
      {
       "name": "coverage-automated",
@@ -95,7 +95,7 @@
     },
     "observations": [
      {
-      "uuid": "7f302d0d-d72a-5126-8182-a8d834d3bc56",
+      "uuid": "82abc460-c2a2-5679-a08a-66358b56266e",
       "title": "manifests",
       "description": "rendered manifests kept in git",
       "props": [
@@ -116,7 +116,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "app.yaml",
@@ -132,7 +132,7 @@
       ]
      },
      {
-      "uuid": "e3bcb3bc-6ee7-5578-8a94-ffb635dc1d45",
+      "uuid": "e64200db-7743-5751-9022-c63f69b9069e",
       "title": "config-control",
       "description": "commit 30fe1b938949, image pinned by digest",
       "props": [
@@ -153,10 +153,10 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z"
+      "collected": "2026-11-20T19:38:17Z"
      },
      {
-      "uuid": "8a5d4018-0385-51a9-8b3d-89638d1d07d7",
+      "uuid": "8e30fd6f-1ec2-56e3-bcdd-d873a86a7e88",
       "title": "attested:name=baseline-review",
       "description": "baseline-review by john on 2026-11-20: reviewed with the 0.2.1 promotion",
       "props": [
@@ -177,10 +177,10 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z"
+      "collected": "2026-11-20T19:38:17Z"
      },
      {
-      "uuid": "6acaa89a-95bb-5991-ba43-162f040e6aca",
+      "uuid": "acaab133-ce60-58f2-bdda-e3fef4fdb604",
       "title": "attested:name=baseline-review-triggers",
       "description": "baseline-review-triggers by john on 2026-11-20",
       "props": [
@@ -201,10 +201,10 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z"
+      "collected": "2026-11-20T19:38:17Z"
      },
      {
-      "uuid": "9e295190-69da-5efb-8d2d-cee74141c8f9",
+      "uuid": "9ae6b73f-2427-54c0-818f-9e9859a118fb",
       "title": "sbom",
       "description": "SBOM with 1919 components",
       "props": [
@@ -225,7 +225,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "sbom.cdx.json",
@@ -234,14 +234,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "bf8eb507e39a2c47495f6cdb846f4f90e9c06f1fa994152c1ac9cc83fce589bd"
+          "value": "08635300dc0526274aafacbf4f64c76b04ff9f75f498e2e4ec1966956cc70f6b"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "7228904b-adb1-5a7b-b485-2bd0b26c31e7",
+      "uuid": "2eb03e08-60c8-5fb2-94f3-1cf68517ecc6",
       "title": "vuln-db:max_age_h=48",
       "description": "grype database built 2026-11-20T06:21:00Z (13 h old)",
       "props": [
@@ -262,10 +262,10 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z"
+      "collected": "2026-11-20T19:38:17Z"
      },
      {
-      "uuid": "3b510349-e7bd-561e-93f1-4f2a5c3d73cb",
+      "uuid": "3e507777-dc4c-5155-a22b-b34f35aaa82e",
       "title": "scan:tool=grype",
       "description": "grype 6 ran",
       "props": [
@@ -286,7 +286,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "security.json",
@@ -295,14 +295,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "306777b18e57d84dd4457c76dc8d0fe1678b284f5681b581596131743fb5912b"
+          "value": "8644d93651ba00474555de22577253ccb6a0c1b84a9cfb8f2ce6ab79da82ebd4"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "9b6bd7c2-ffb7-5aaf-aabb-1f65fbf38ef0",
+      "uuid": "b3facf18-f133-5fdc-a091-ea4d1927a4f0",
       "title": "scan:tool=opengrep",
       "description": "opengrep 1.33.1 ran",
       "props": [
@@ -323,7 +323,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "security.json",
@@ -332,14 +332,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "306777b18e57d84dd4457c76dc8d0fe1678b284f5681b581596131743fb5912b"
+          "value": "8644d93651ba00474555de22577253ccb6a0c1b84a9cfb8f2ce6ab79da82ebd4"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "f08473f1-be99-5057-836c-9aed56c0aaed",
+      "uuid": "bc02db88-96bc-58df-a5ce-707ad114e58b",
       "title": "scan:tool=checkov",
       "description": "checkov 3.4.6 ran",
       "props": [
@@ -360,7 +360,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "security.json",
@@ -369,14 +369,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "306777b18e57d84dd4457c76dc8d0fe1678b284f5681b581596131743fb5912b"
+          "value": "8644d93651ba00474555de22577253ccb6a0c1b84a9cfb8f2ce6ab79da82ebd4"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "1f044497-2a33-5ccd-80fd-c401cad32973",
+      "uuid": "b0d44620-e70e-5063-aff3-41fb65b6e44b",
       "title": "gate",
       "description": "gate warn in dev (report)",
       "props": [
@@ -397,7 +397,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "security.json",
@@ -406,14 +406,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "306777b18e57d84dd4457c76dc8d0fe1678b284f5681b581596131743fb5912b"
+          "value": "8644d93651ba00474555de22577253ccb6a0c1b84a9cfb8f2ce6ab79da82ebd4"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "bf6a59e1-8301-5e1b-8c39-d231a3e81434",
+      "uuid": "651aa2aa-c641-5326-82e2-0b0d0e6b9bff",
       "title": "findings:category=vuln",
       "description": "no vuln findings at or above the prod threshold",
       "props": [
@@ -434,7 +434,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "security.json",
@@ -443,16 +443,16 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "306777b18e57d84dd4457c76dc8d0fe1678b284f5681b581596131743fb5912b"
+          "value": "8644d93651ba00474555de22577253ccb6a0c1b84a9cfb8f2ce6ab79da82ebd4"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "a4e3e78b-a87c-56a6-af4a-2df8a8a1e68b",
+      "uuid": "6c0e3122-4c6a-5fe6-ad6f-99fe09fd247f",
       "title": "findings:category=external",
-      "description": "no external findings at or above the prod threshold",
+      "description": "1 external findings would block prod: external/TEN-142960-b3426e",
       "props": [
        {
         "name": "evidence-selector",
@@ -462,7 +462,7 @@
        {
         "name": "holds",
         "ns": "https://ffwf.net/ns/cicd",
-        "value": "true"
+        "value": "false"
        }
       ],
       "methods": [
@@ -471,7 +471,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "security.json",
@@ -480,14 +480,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "306777b18e57d84dd4457c76dc8d0fe1678b284f5681b581596131743fb5912b"
+          "value": "8644d93651ba00474555de22577253ccb6a0c1b84a9cfb8f2ce6ab79da82ebd4"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "888af237-8de5-52a8-8ada-20b54062c87c",
+      "uuid": "c206bb24-6d07-5247-a5c5-80de6bf97631",
       "title": "release:within_days=30",
       "description": "release demo-20261120T052437Z to IT Security on 2026-11-20",
       "props": [
@@ -508,10 +508,10 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z"
+      "collected": "2026-11-20T19:38:17Z"
      },
      {
-      "uuid": "552278c7-4910-561c-ab56-45845cef7f7b",
+      "uuid": "30ef1483-dcc6-5b98-ab91-9a8074e92df7",
       "title": "attested:app and sysadmin layers=None:name=assessment-plan",
       "description": "assessment-plan by john on 2026-11-20: platform",
       "props": [
@@ -532,12 +532,12 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z"
+      "collected": "2026-11-20T19:38:17Z"
      },
      {
-      "uuid": "9dd6e10b-c238-5d8c-bd3e-52ed87f12cfb",
+      "uuid": "b6db46fb-321a-5307-acc7-f62f2656f1ed",
       "title": "ci-result:job=security",
-      "description": "security ran: warn (15/16 checks passed)",
+      "description": "security ran: warn (15/17 checks passed)",
       "props": [
        {
         "name": "evidence-selector",
@@ -556,7 +556,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "ci-result-security.json",
@@ -565,14 +565,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "68e6a1603afeb83ff039d129c580de73e4527865a139ba4a4c20b458181b3cfe"
+          "value": "5efe1d7d25077734d206aeb7533d48a5a18a7154baf9260e89963284e2829e51"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "b5511e29-55fe-5e68-9883-e6ee6ed5336a",
+      "uuid": "73008337-04a2-5082-901c-297cb4c9dbea",
       "title": "ci-result:job=test",
       "description": "test ran: pass (6/6 checks passed)",
       "props": [
@@ -593,7 +593,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "ci-result-test.json",
@@ -602,16 +602,16 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "c713b58124a31b88e95d6b87d7dc0e78c52e7072076871d7d4a6337a7c887713"
+          "value": "cf230cd0125700f21e96960e09feb82f24cb836a7fcc8199a02724b750cebb51"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "7dc00ddb-96bf-5fdd-93f2-460454aee9cc",
+      "uuid": "5875d739-8357-596d-b014-497501871f2e",
       "title": "findings:category=all",
-      "description": "1 findings would block prod: CKV_DOCKER_7",
+      "description": "2 findings would block prod: CKV_DOCKER_7, external/TEN-142960-b3426e",
       "props": [
        {
         "name": "evidence-selector",
@@ -630,7 +630,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "security.json",
@@ -639,14 +639,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "306777b18e57d84dd4457c76dc8d0fe1678b284f5681b581596131743fb5912b"
+          "value": "8644d93651ba00474555de22577253ccb6a0c1b84a9cfb8f2ce6ab79da82ebd4"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "f86a8da2-8f70-5be2-af38-fc18d4a8f024",
+      "uuid": "07f2ab18-a563-594d-bc7f-d1517aa20d73",
       "title": "findings:category=secrets",
       "description": "no secrets findings at or above the prod threshold",
       "props": [
@@ -667,7 +667,7 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z",
+      "collected": "2026-11-20T19:38:17Z",
       "relevant-evidence": [
        {
         "href": "security.json",
@@ -676,14 +676,14 @@
          {
           "name": "sha256",
           "ns": "https://ffwf.net/ns/cicd",
-          "value": "306777b18e57d84dd4457c76dc8d0fe1678b284f5681b581596131743fb5912b"
+          "value": "8644d93651ba00474555de22577253ccb6a0c1b84a9cfb8f2ce6ab79da82ebd4"
          }
         ]
        }
       ]
      },
      {
-      "uuid": "5117c641-c077-59af-b88b-e8985e964d9f",
+      "uuid": "ace340f1-07cc-5178-9f11-b978bfc86b56",
       "title": "attested:name=forge-pre-receive-gitleaks",
       "description": "forge-pre-receive-gitleaks by arecibo-ffwf-goblincorps-hosting, authorised by john on 2026-11-20: gitleaks 8.30.1 in hooks/pre-receive.d of every enrolled repo on forge.goblincorps.com; smoke-tested",
       "props": [
@@ -704,12 +704,12 @@
       "types": [
        "control-objective"
       ],
-      "collected": "2026-11-20T19:24:53Z"
+      "collected": "2026-11-20T19:38:17Z"
      }
     ],
     "findings": [
      {
-      "uuid": "a7bfba3e-3ca8-59d1-a133-415b6cd57354",
+      "uuid": "500e5c98-c138-51a0-ba77-9775df2215f5",
       "title": "cm-2_obj.a-1: satisfied",
       "description": "The rendered manifests and the image digest of every environment are written to git by the pipeline.",
       "props": [
@@ -733,12 +733,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "7f302d0d-d72a-5126-8182-a8d834d3bc56"
+        "observation-uuid": "82abc460-c2a2-5679-a08a-66358b56266e"
        }
       ]
      },
      {
-      "uuid": "9921aaae-d113-5040-8fb8-c1acc40428d9",
+      "uuid": "9241920d-8a01-5808-a24b-a0550bf317ed",
       "title": "cm-2_obj.a-2: satisfied",
       "description": "The baseline changes only through commits (app repo, then state repo); images are pinned by digest.",
       "props": [
@@ -762,12 +762,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "e3bcb3bc-6ee7-5578-8a94-ffb635dc1d45"
+        "observation-uuid": "e64200db-7743-5751-9022-c63f69b9069e"
        }
       ]
      },
      {
-      "uuid": "40047601-6c80-5aaa-b646-00e442d2bbcd",
+      "uuid": "a3c9af36-1218-564a-b168-7497bc215aeb",
       "title": "cm-2_obj.b.1: satisfied",
       "description": "The baseline (manifests, base image digests, pinned dependencies) is reviewed at every promotion and at least quarterly.",
       "props": [
@@ -791,12 +791,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "8a5d4018-0385-51a9-8b3d-89638d1d07d7"
+        "observation-uuid": "8e30fd6f-1ec2-56e3-bcdd-d873a86a7e88"
        }
       ]
      },
      {
-      "uuid": "4e984a31-0c2b-5e90-bdee-cee3e47b0a4f",
+      "uuid": "dd71bc8b-5181-593f-9caf-0bed1bbd510e",
       "title": "cm-2_obj.b.2: satisfied",
       "description": "The baseline is reviewed after a security advisory affecting it, and when the platform changes its floor.",
       "props": [
@@ -820,12 +820,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "6acaa89a-95bb-5991-ba43-162f040e6aca"
+        "observation-uuid": "acaab133-ce60-58f2-bdda-e3fef4fdb604"
        }
       ]
      },
      {
-      "uuid": "566de8f0-e243-5043-abf7-355946639134",
+      "uuid": "5bad6d59-4c8f-5c18-85a1-8f55d995e948",
       "title": "cm-2_obj.b.3: satisfied",
       "description": "Installing or upgrading a component is a commit, which re-renders and re-records the baseline.",
       "props": [
@@ -849,15 +849,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "e3bcb3bc-6ee7-5578-8a94-ffb635dc1d45"
+        "observation-uuid": "e64200db-7743-5751-9022-c63f69b9069e"
        },
        {
-        "observation-uuid": "7f302d0d-d72a-5126-8182-a8d834d3bc56"
+        "observation-uuid": "82abc460-c2a2-5679-a08a-66358b56266e"
        }
       ]
      },
      {
-      "uuid": "d366220e-f5ef-5d80-af5b-cb73cca4f8fa",
+      "uuid": "692f984c-256f-57fb-94c4-c066a318ca15",
       "title": "cm-8_obj.a.1: satisfied",
       "description": "syft inventories the built image itself, so the inventory is what runs.",
       "props": [
@@ -881,12 +881,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "9e295190-69da-5efb-8d2d-cee74141c8f9"
+        "observation-uuid": "9ae6b73f-2427-54c0-818f-9e9859a118fb"
        }
       ]
      },
      {
-      "uuid": "6d4c9ac6-8b8d-5d98-9423-1eb0e214e246",
+      "uuid": "f4c27aba-1525-5478-a304-354cf741ac5b",
       "title": "cm-8_obj.a.2: satisfied",
       "description": "The SBOM covers every package in the image (OS and language packages).",
       "props": [
@@ -910,12 +910,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "9e295190-69da-5efb-8d2d-cee74141c8f9"
+        "observation-uuid": "9ae6b73f-2427-54c0-818f-9e9859a118fb"
        }
       ]
      },
      {
-      "uuid": "f4a8990b-c407-5309-81c7-8442d842dd66",
+      "uuid": "4ba38f66-e950-572e-ac4b-02344f2eb45a",
       "title": "cm-8_obj.a.3: satisfied",
       "description": "One SBOM per image digest, per application; nothing is shared or counted twice.",
       "props": [
@@ -939,12 +939,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "9e295190-69da-5efb-8d2d-cee74141c8f9"
+        "observation-uuid": "9ae6b73f-2427-54c0-818f-9e9859a118fb"
        }
       ]
      },
      {
-      "uuid": "a3bf4e98-8fad-55d1-b44c-0fe7a8f3dc49",
+      "uuid": "9c926de3-ed57-5af6-8e86-08a3472a1f98",
       "title": "cm-8_obj.a.4: satisfied",
       "description": "Package level, with purl, version and licence (CycloneDX and SPDX).",
       "props": [
@@ -968,12 +968,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "9e295190-69da-5efb-8d2d-cee74141c8f9"
+        "observation-uuid": "9ae6b73f-2427-54c0-818f-9e9859a118fb"
        }
       ]
      },
      {
-      "uuid": "58df4480-0949-5265-a296-967970ca5db1",
+      "uuid": "c581be49-ccf4-5b2a-948e-6d8616f308c0",
       "title": "cm-8_obj.a.5: satisfied",
       "description": "Each component has name, version, purl and licence where the package declares one.",
       "props": [
@@ -997,12 +997,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "9e295190-69da-5efb-8d2d-cee74141c8f9"
+        "observation-uuid": "9ae6b73f-2427-54c0-818f-9e9859a118fb"
        }
       ]
      },
      {
-      "uuid": "deb69cb1-8cc7-5312-81bc-1eaa684516c0",
+      "uuid": "b1cc205e-0230-5168-a293-37dcd41df610",
       "title": "cm-8_obj.b: satisfied",
       "description": "The inventory is regenerated on every build, and re-checked daily against new advisories.",
       "props": [
@@ -1026,15 +1026,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "9e295190-69da-5efb-8d2d-cee74141c8f9"
+        "observation-uuid": "9ae6b73f-2427-54c0-818f-9e9859a118fb"
        },
        {
-        "observation-uuid": "7228904b-adb1-5a7b-b485-2bd0b26c31e7"
+        "observation-uuid": "2eb03e08-60c8-5fb2-94f3-1cf68517ecc6"
        }
       ]
      },
      {
-      "uuid": "897e7cc1-15f1-555e-aca5-ee03aa197e06",
+      "uuid": "ec3022c0-e6e4-58b0-a73d-521baa2cf58c",
       "title": "ra-5_obj.a-1: satisfied",
       "description": "The SBOM of every live image is re-matched when the vulnerability database updates (daily) or an advisory arrives.",
       "props": [
@@ -1058,12 +1058,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "7228904b-adb1-5a7b-b485-2bd0b26c31e7"
+        "observation-uuid": "2eb03e08-60c8-5fb2-94f3-1cf68517ecc6"
        }
       ]
      },
      {
-      "uuid": "5c96172e-c85c-5f56-9b34-fe49ffd95b12",
+      "uuid": "9155e265-6c4d-5267-9a01-f216089a3f5d",
       "title": "ra-5_obj.a-2: satisfied",
       "description": "Every push is scanned; prod is re-scanned at promotion request and again at apply.",
       "props": [
@@ -1087,18 +1087,18 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "3b510349-e7bd-561e-93f1-4f2a5c3d73cb"
+        "observation-uuid": "3e507777-dc4c-5155-a22b-b34f35aaa82e"
        },
        {
-        "observation-uuid": "9b6bd7c2-ffb7-5aaf-aabb-1f65fbf38ef0"
+        "observation-uuid": "b3facf18-f133-5fdc-a091-ea4d1927a4f0"
        },
        {
-        "observation-uuid": "f08473f1-be99-5057-836c-9aed56c0aaed"
+        "observation-uuid": "bc02db88-96bc-58df-a5ce-707ad114e58b"
        }
       ]
      },
      {
-      "uuid": "d6ea016f-1e95-52c3-9645-713e03e8ac3f",
+      "uuid": "3b9ce3a4-6c7a-54cb-b684-d2a70be6b262",
       "title": "ra-5_obj.b.1: satisfied",
       "description": "Scanning, normalisation and the gate decision are automatic, per commit.",
       "props": [
@@ -1122,12 +1122,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "1f044497-2a33-5ccd-80fd-c401cad32973"
+        "observation-uuid": "b0d44620-e70e-5063-aff3-41fb65b6e44b"
        }
       ]
      },
      {
-      "uuid": "22bec79c-b091-5938-8d95-31911b953384",
+      "uuid": "65156b74-41bd-597d-9e2e-f736c945499c",
       "title": "ra-5_obj.b.2: satisfied",
       "description": "Findings are normalised to one record format with CVE ids and purls (security-findings/v1).",
       "props": [
@@ -1151,15 +1151,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "3b510349-e7bd-561e-93f1-4f2a5c3d73cb"
+        "observation-uuid": "3e507777-dc4c-5155-a22b-b34f35aaa82e"
        },
        {
-        "observation-uuid": "9e295190-69da-5efb-8d2d-cee74141c8f9"
+        "observation-uuid": "9ae6b73f-2427-54c0-818f-9e9859a118fb"
        }
       ]
      },
      {
-      "uuid": "f0d7129e-e2a7-5a4a-9129-23584d72b580",
+      "uuid": "f29b438a-d40a-508a-b626-f6581c5a68dc",
       "title": "ra-5_obj.b.3: satisfied",
       "description": "Configuration is checked with checkov's rule set and code with opengrep rules kept in git.",
       "props": [
@@ -1183,15 +1183,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "f08473f1-be99-5057-836c-9aed56c0aaed"
+        "observation-uuid": "bc02db88-96bc-58df-a5ce-707ad114e58b"
        },
        {
-        "observation-uuid": "9b6bd7c2-ffb7-5aaf-aabb-1f65fbf38ef0"
+        "observation-uuid": "b3facf18-f133-5fdc-a091-ea4d1927a4f0"
        }
       ]
      },
      {
-      "uuid": "2d6e45e8-b8ec-5704-86d4-a1e77ad40de2",
+      "uuid": "1ca22991-b9ad-502c-a6e4-7d940ec9a7c0",
       "title": "ra-5_obj.c: satisfied",
       "description": "Each finding gets an outcome (fail, suppressed with reason and expiry, below threshold, no fix) in the gate record.",
       "props": [
@@ -1215,13 +1215,13 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "1f044497-2a33-5ccd-80fd-c401cad32973"
+        "observation-uuid": "b0d44620-e70e-5063-aff3-41fb65b6e44b"
        }
       ]
      },
      {
-      "uuid": "cf7a425d-d1b9-5b8d-afda-4a91f8e99d8d",
-      "title": "ra-5_obj.d: satisfied",
+      "uuid": "fafddfb0-26d4-5f72-b4ac-eda624af79a2",
+      "title": "ra-5_obj.d: not-satisfied",
       "description": "A vulnerability with a fix blocks prod until it is fixed or recorded as not affecting the app.",
       "props": [
        {
@@ -1239,20 +1239,20 @@
        "type": "objective-id",
        "target-id": "ra-5_obj.d",
        "status": {
-        "state": "satisfied"
+        "state": "not-satisfied"
        }
       },
       "related-observations": [
        {
-        "observation-uuid": "bf6a59e1-8301-5e1b-8c39-d231a3e81434"
+        "observation-uuid": "651aa2aa-c641-5326-82e2-0b0d0e6b9bff"
        },
        {
-        "observation-uuid": "a4e3e78b-a87c-56a6-af4a-2df8a8a1e68b"
+        "observation-uuid": "6c0e3122-4c6a-5fe6-ad6f-99fe09fd247f"
        }
       ]
      },
      {
-      "uuid": "90e714c5-3620-53a4-911f-31a641ae3052",
+      "uuid": "ff752eb7-2006-5d8f-ae99-b3e0958af97f",
       "title": "ra-5_obj.e: satisfied",
       "description": "The owner releases assessment packages to IT Security from the dashboard (release log in the compliance repo).",
       "props": [
@@ -1276,12 +1276,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "888af237-8de5-52a8-8ada-20b54062c87c"
+        "observation-uuid": "c206bb24-6d07-5247-a5c5-80de6bf97631"
        }
       ]
      },
      {
-      "uuid": "547f0ac9-b268-50c4-9220-a8efd8204f77",
+      "uuid": "34e7c387-3fc2-5638-99df-646c3be5d273",
       "title": "ra-5_obj.f: satisfied",
       "description": "grype's database is refreshed daily and its build time is recorded with every scan.",
       "props": [
@@ -1305,12 +1305,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "7228904b-adb1-5a7b-b485-2bd0b26c31e7"
+        "observation-uuid": "2eb03e08-60c8-5fb2-94f3-1cf68517ecc6"
        }
       ]
      },
      {
-      "uuid": "2dfe9cfa-ed2d-590d-9fcd-9753d1faeb7d",
+      "uuid": "09bea7c5-65a9-5956-85d0-a8022eef918e",
       "title": "sa-11_obj.a-1: satisfied",
       "description": "The assessment plan is this SSP's evidence selectors, kept in git and reviewed with the owner.",
       "props": [
@@ -1334,12 +1334,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "552278c7-4910-561c-ab56-45845cef7f7b"
+        "observation-uuid": "30ef1483-dcc6-5b98-ab91-9a8074e92df7"
        }
       ]
      },
      {
-      "uuid": "95a05dab-16ca-598c-91fd-c636adc4b5de",
+      "uuid": "84cfb281-79c5-5b96-bb18-47bde7f2b68e",
       "title": "sa-11_obj.a-2: satisfied",
       "description": "The pipeline runs the security assessment on every commit of every branch.",
       "props": [
@@ -1363,15 +1363,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "3b510349-e7bd-561e-93f1-4f2a5c3d73cb"
+        "observation-uuid": "3e507777-dc4c-5155-a22b-b34f35aaa82e"
        },
        {
-        "observation-uuid": "9dd6e10b-c238-5d8c-bd3e-52ed87f12cfb"
+        "observation-uuid": "b6db46fb-321a-5307-acc7-f62f2656f1ed"
        }
       ]
      },
      {
-      "uuid": "ee58c1ee-2b4d-592b-9b04-b4995df891e3",
+      "uuid": "cf20b8b4-da3c-5e18-acb3-4882fe3700d4",
       "title": "sa-11_obj.a-3: not-satisfied",
       "description": "no implementation statement in any layer",
       "props": [
@@ -1390,7 +1390,7 @@
       }
      },
      {
-      "uuid": "62bac81f-51ed-5251-8bc1-6dfa46f34fc9",
+      "uuid": "7478c9bf-7ae5-5585-af91-408d511e5b18",
       "title": "sa-11_obj.a-4: not-satisfied",
       "description": "no implementation statement in any layer",
       "props": [
@@ -1409,7 +1409,7 @@
       }
      },
      {
-      "uuid": "4a18ff96-faae-5316-9394-73a776f16450",
+      "uuid": "d5e40e3e-5ab9-53dc-a3aa-0bd66de6ede3",
       "title": "sa-11_obj.b: satisfied",
       "description": "Unit tests and static, configuration, secret and vulnerability scans on every commit.",
       "props": [
@@ -1433,15 +1433,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "b5511e29-55fe-5e68-9883-e6ee6ed5336a"
+        "observation-uuid": "73008337-04a2-5082-901c-297cb4c9dbea"
        },
        {
-        "observation-uuid": "9dd6e10b-c238-5d8c-bd3e-52ed87f12cfb"
+        "observation-uuid": "b6db46fb-321a-5307-acc7-f62f2656f1ed"
        }
       ]
      },
      {
-      "uuid": "6e43b877-2e74-50d9-9f5a-372d12e70229",
+      "uuid": "10e6094d-abf2-5b9f-bdf3-cd89d0ed35bc",
       "title": "sa-11_obj.c-1: satisfied",
       "description": "Each job writes a ci-result/v1 record; the run log is kept by the forge.",
       "props": [
@@ -1465,15 +1465,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "b5511e29-55fe-5e68-9883-e6ee6ed5336a"
+        "observation-uuid": "73008337-04a2-5082-901c-297cb4c9dbea"
        },
        {
-        "observation-uuid": "9dd6e10b-c238-5d8c-bd3e-52ed87f12cfb"
+        "observation-uuid": "b6db46fb-321a-5307-acc7-f62f2656f1ed"
        }
       ]
      },
      {
-      "uuid": "aa263216-0c00-52d1-af97-ef729dc8cb13",
+      "uuid": "0ede75a9-66d5-57ad-baf0-71b91187e923",
       "title": "sa-11_obj.c-2: satisfied",
       "description": "Results are recorded per commit next to the environment they produced.",
       "props": [
@@ -1497,15 +1497,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "b5511e29-55fe-5e68-9883-e6ee6ed5336a"
+        "observation-uuid": "73008337-04a2-5082-901c-297cb4c9dbea"
        },
        {
-        "observation-uuid": "1f044497-2a33-5ccd-80fd-c401cad32973"
+        "observation-uuid": "b0d44620-e70e-5063-aff3-41fb65b6e44b"
        }
       ]
      },
      {
-      "uuid": "39ea9ebc-64de-534c-881a-c6145bb9b9b6",
+      "uuid": "2b6fe21f-f8a6-56f9-8e45-db9c37d1803c",
       "title": "sa-11_obj.d: satisfied",
       "description": "Suppressions need a reason and an expiry, are versioned with the code, and show as a diff in every promotion.",
       "props": [
@@ -1529,12 +1529,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "1f044497-2a33-5ccd-80fd-c401cad32973"
+        "observation-uuid": "b0d44620-e70e-5063-aff3-41fb65b6e44b"
        }
       ]
      },
      {
-      "uuid": "73130c40-87b2-590e-b0df-2451d7b40a7e",
+      "uuid": "05218e49-18bd-596d-b2c1-abe0c1a4abae",
       "title": "sa-11_obj.e: not-satisfied",
       "description": "Findings at or above the threshold block prod until corrected.",
       "props": [
@@ -1558,12 +1558,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "7dc00ddb-96bf-5fdd-93f2-460454aee9cc"
+        "observation-uuid": "5875d739-8357-596d-b014-497501871f2e"
        }
       ]
      },
      {
-      "uuid": "de9e1f2b-4259-5043-acbf-601345dfbea5",
+      "uuid": "86fc6739-6cee-5bac-96f5-fdd819065ae4",
       "title": "si-2_obj.a-1: satisfied",
       "description": "Flaws are identified by the scans of every commit and by imported findings.",
       "props": [
@@ -1587,18 +1587,18 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "3b510349-e7bd-561e-93f1-4f2a5c3d73cb"
+        "observation-uuid": "3e507777-dc4c-5155-a22b-b34f35aaa82e"
        },
        {
-        "observation-uuid": "9b6bd7c2-ffb7-5aaf-aabb-1f65fbf38ef0"
+        "observation-uuid": "b3facf18-f133-5fdc-a091-ea4d1927a4f0"
        },
        {
-        "observation-uuid": "f08473f1-be99-5057-836c-9aed56c0aaed"
+        "observation-uuid": "bc02db88-96bc-58df-a5ce-707ad114e58b"
        }
       ]
      },
      {
-      "uuid": "6929e4b2-5f20-56c7-a44d-ac871f259a6e",
+      "uuid": "832df679-8f4c-578b-ad41-d476814c2c71",
       "title": "si-2_obj.a-2: satisfied",
       "description": "Flaws are reported in the run, the gate record and the dashboard.",
       "props": [
@@ -1622,15 +1622,15 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "1f044497-2a33-5ccd-80fd-c401cad32973"
+        "observation-uuid": "b0d44620-e70e-5063-aff3-41fb65b6e44b"
        },
        {
-        "observation-uuid": "9dd6e10b-c238-5d8c-bd3e-52ed87f12cfb"
+        "observation-uuid": "b6db46fb-321a-5307-acc7-f62f2656f1ed"
        }
       ]
      },
      {
-      "uuid": "25e85815-e52f-56bb-98c5-0bb5b58fbc6a",
+      "uuid": "08cde9cd-6d6a-545d-9513-1afb977a3178",
       "title": "si-2_obj.a-3: not-satisfied",
       "description": "Flaws that block prod are corrected before promotion.",
       "props": [
@@ -1654,12 +1654,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "7dc00ddb-96bf-5fdd-93f2-460454aee9cc"
+        "observation-uuid": "5875d739-8357-596d-b014-497501871f2e"
        }
       ]
      },
      {
-      "uuid": "449f986d-d49e-5b84-801a-fd37b61b3900",
+      "uuid": "b54424b2-4d78-5e7f-8d24-e872583e89f6",
       "title": "si-2_obj.b-1: satisfied",
       "description": "A fix is a commit; it is tested before it is deployed anywhere.",
       "props": [
@@ -1683,12 +1683,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "b5511e29-55fe-5e68-9883-e6ee6ed5336a"
+        "observation-uuid": "73008337-04a2-5082-901c-297cb4c9dbea"
        }
       ]
      },
      {
-      "uuid": "d983d720-23ce-5eb7-95fc-3e37c1f9779a",
+      "uuid": "51038b9b-2ce9-50e8-8452-02595fe8ca8b",
       "title": "si-2_obj.b-2: satisfied",
       "description": "The same tests run on the fix, in a dev or branch environment before prod.",
       "props": [
@@ -1712,12 +1712,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "b5511e29-55fe-5e68-9883-e6ee6ed5336a"
+        "observation-uuid": "73008337-04a2-5082-901c-297cb4c9dbea"
        }
       ]
      },
      {
-      "uuid": "39d8c71f-beb8-52f3-b615-2f5a43644ddc",
+      "uuid": "abd33897-0cb1-5f9c-b995-3aff63b45be9",
       "title": "si-2_obj.b-3: satisfied",
       "description": "Containers carry no firmware; host firmware belongs to the hosting system's plan (leveraged).",
       "props": [
@@ -1742,7 +1742,7 @@
       }
      },
      {
-      "uuid": "0870c7f5-4f37-5254-8770-f79caab79768",
+      "uuid": "c7f2df31-b6d9-5003-b178-1882cb700777",
       "title": "si-2_obj.b-4: satisfied",
       "description": "Containers carry no firmware; host firmware belongs to the hosting system's plan (leveraged).",
       "props": [
@@ -1767,7 +1767,7 @@
       }
      },
      {
-      "uuid": "b556f1a9-e956-5900-a1b7-b6a21c453411",
+      "uuid": "c06ae0f4-f26d-5de4-bfb3-1d439c4edfaf",
       "title": "si-2_obj.c-1: satisfied",
       "description": "Security updates with a fix block prod until installed (rebuilt and promoted).",
       "props": [
@@ -1791,12 +1791,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "bf6a59e1-8301-5e1b-8c39-d231a3e81434"
+        "observation-uuid": "651aa2aa-c641-5326-82e2-0b0d0e6b9bff"
        }
       ]
      },
      {
-      "uuid": "03ccb257-225f-558c-8f0c-afea7b48fac1",
+      "uuid": "3728f7c8-c77d-5b11-9721-46f5d606551d",
       "title": "si-2_obj.c-2: satisfied",
       "description": "Containers carry no firmware; host firmware belongs to the hosting system's plan (leveraged).",
       "props": [
@@ -1821,7 +1821,7 @@
       }
      },
      {
-      "uuid": "6c892ec1-0b28-506b-afce-8f488af1c0f1",
+      "uuid": "2f7b89fa-19ec-5edf-be52-5680eb8ec040",
       "title": "si-2_obj.d: satisfied",
       "description": "Every fix is a commit through the same pipeline and promotion as any change.",
       "props": [
@@ -1845,12 +1845,12 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "e3bcb3bc-6ee7-5578-8a94-ffb635dc1d45"
+        "observation-uuid": "e64200db-7743-5751-9022-c63f69b9069e"
        }
       ]
      },
      {
-      "uuid": "cc78cd70-e3f8-55cf-8d71-69b0f3450530",
+      "uuid": "4c83b9d3-e5e0-512b-8353-45d511786351",
       "title": "ia-5.7_obj: satisfied",
       "description": "gitleaks on every commit, and the forge refuses pushes that add a secret (pre-receive hook).",
       "props": [
@@ -1874,10 +1874,10 @@
       },
       "related-observations": [
        {
-        "observation-uuid": "f86a8da2-8f70-5be2-af38-fc18d4a8f024"
+        "observation-uuid": "07f2ab18-a563-594d-bc7f-d1517aa20d73"
        },
        {
-        "observation-uuid": "5117c641-c077-59af-b88b-e8985e964d9f"
+        "observation-uuid": "ace340f1-07cc-5178-9f11-b978bfc86b56"
        }
       ]
      }

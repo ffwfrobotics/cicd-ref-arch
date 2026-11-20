@@ -5,10 +5,10 @@
  "env": "dev",
  "commit": "30fe1b938949eb290fffddc1fde6f69772bace98",
  "image": "localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310",
- "generated": "2026-11-20T19:24:53Z",
+ "generated": "2026-11-20T19:38:17Z",
  "counts": {
-  "satisfied": 36,
-  "not-satisfied": 4
+  "satisfied": 35,
+  "not-satisfied": 5
  },
  "coverage": {
   "automated": 31,
@@ -325,7 +325,7 @@
    "objective": "legitimate vulnerabilities are remediated [ra-05_odp.03] in accordance with an organizational assessment of risk;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "A vulnerability with a fix blocks prod until it is fixed or recorded as not affecting the app.",
    "evidence": [
     {
@@ -335,8 +335,8 @@
     },
     {
      "selector": "findings:category=external",
-     "holds": true,
-     "found": "no external findings at or above the prod threshold"
+     "holds": false,
+     "found": "1 external findings would block prod: external/TEN-142960-b3426e"
     }
    ]
   },
@@ -405,7 +405,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (15/16 checks passed)"
+     "found": "security ran: warn (15/17 checks passed)"
     }
    ]
   },
@@ -446,7 +446,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (15/16 checks passed)"
+     "found": "security ran: warn (15/17 checks passed)"
     }
    ]
   },
@@ -467,7 +467,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (15/16 checks passed)"
+     "found": "security ran: warn (15/17 checks passed)"
     }
    ]
   },
@@ -520,7 +520,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "1 findings would block prod: CKV_DOCKER_7"
+     "found": "2 findings would block prod: CKV_DOCKER_7, external/TEN-142960-b3426e"
     }
    ]
   },
@@ -567,7 +567,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (15/16 checks passed)"
+     "found": "security ran: warn (15/17 checks passed)"
     }
    ]
   },
@@ -583,7 +583,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "1 findings would block prod: CKV_DOCKER_7"
+     "found": "2 findings would block prod: CKV_DOCKER_7, external/TEN-142960-b3426e"
     }
    ]
   },
@@ -707,12 +707,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/ff74bf005ff07b9c/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/92127cb91ec66a63/hostexecutor/.cicd/oscal/platform.yaml"
   },
   {
    "layer": "sysadmin",
    "component": "demo-owner",
-   "path": "/runner/work/ff74bf005ff07b9c/hostexecutor/.compliance/apps/demo/component.yaml"
+   "path": "/runner/work/92127cb91ec66a63/tmp/compliance/apps/demo/component.yaml"
   }
  ]
 }
