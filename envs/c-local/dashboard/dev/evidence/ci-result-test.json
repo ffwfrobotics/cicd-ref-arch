@@ -1,0 +1,21 @@
+{
+  "schema": "ci-result/v1",
+  "repo": "ffwf/cicd-dashboard",
+  "sha": "4bfe9d1c0b23288c3915752a479cc32167525665",
+  "ref": "refs/heads/main",
+  "workflow": "cicd",
+  "job": "test",
+  "status": "pass",
+  "started_at": "2026-11-20T04:33:32Z",
+  "duration_s": 64,
+  "runner": "forgejo-runner-5db5d4bd97-q4g9z",
+  "summary": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0
+  },
+  "failures": [],
+  "log_tail": "test_branch_commit_cannot_be_promoted (test_destiny.Destiny.test_branch_commit_cannot_be_promoted) ... ok\ntest_deliver_failed (test_destiny.Destiny.test_deliver_failed) ... ok\ntest_dev_with_findings_warns_and_previews_prod_blockers (test_destiny.Destiny.test_dev_with_findings_warns_and_previews_prod_blockers) ... ok\ntest_just_pushed (test_destiny.Destiny.test_just_pushed) ... ok\ntest_merged_and_due_then_applied (test_destiny.Destiny.test_merged_and_due_then_applied) ... ok\ntest_promotion_waiting_for_second_person (test_destiny.Destiny.test_promotion_waiting_for_second_person) ... ok\ntest_self_merged_promotion_is_refused (test_destiny.Destiny.test_self_merged_promotion_is_refused) ... ok\ntest_skipped_later_job_does_not_hide_result (test_destiny.Destiny.test_skipped_later_job_does_not_hide_result) ... ok\ntest_superseded_dev_build (test_destiny.Destiny.test_superseded_dev_build) ... ok\ntest_tests_failed_skips_delivery (test_destiny.Destiny.test_tests_failed_skips_delivery) ... ok\ntest_same_as_cicd_ref_arch (test_destiny.Slug.test_same_as_cicd_ref_arch) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.001s\n\nOK",
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-dashboard/actions/runs/11"
+}

@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "dashboard",
-  "image": "localhost:5000/dashboard@sha256:b5eb0a102c5009aee848467a8ffed643c466e533bf25b9f05b0e56c1ee7144f3",
-  "commit": "dd430b8dc84921f994137e8a37da3d0f2b44d2c7",
-  "generated": "2026-11-20T03:24:37Z",
+  "image": "localhost:5000/dashboard@sha256:3e2bf98bb15dece226138191249f5832b0ab7307131d9064825bd4b7575f4820",
+  "commit": "4bfe9d1c0b23288c3915752a479cc32167525665",
+  "generated": "2026-11-20T04:37:52Z",
   "scans": {
     "source": {
-      "generated": "2026-11-20T03:24:33Z",
-      "commit": "dd430b8dc84921f994137e8a37da3d0f2b44d2c7",
+      "generated": "2026-11-20T04:36:37Z",
+      "commit": "4bfe9d1c0b23288c3915752a479cc32167525665",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -25,14 +25,14 @@
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "e5a1d3175e0262221b9bccf533863749b785befd1db84f742879e952a5bb8800"
+          "sha256": "870dcb6ec43c42f4d410aad46c157f8e166a0543e96765cdce3033d17aa174db"
         }
       }
     },
     "image": {
-      "generated": "2026-11-20T03:24:37Z",
-      "commit": "dd430b8dc84921f994137e8a37da3d0f2b44d2c7",
-      "image": "localhost:5000/dashboard@sha256:b5eb0a102c5009aee848467a8ffed643c466e533bf25b9f05b0e56c1ee7144f3",
+      "generated": "2026-11-20T04:37:52Z",
+      "commit": "4bfe9d1c0b23288c3915752a479cc32167525665",
+      "image": "localhost:5000/dashboard@sha256:3e2bf98bb15dece226138191249f5832b0ab7307131d9064825bd4b7575f4820",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "733c84c34f94d31c0035631ca7e1af7297874e658ffac7029c3fc774ecf32c2e"
+          "sha256": "37e38364e380a2072c7a47cf3d99f103c3c27d94df139fa786b2c2939c90a010"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "f2b561fe06dd142f6963fe09c2e1192984685d1db030acc1f5cdd9cfea183854"
+          "sha256": "387ef591ee907ccae4c09aa4c5e3d57a289b1451f5090eea345c45023692d4b2"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "5fc679964aa5c0f1604bd7e47f64d5e8ddd3c7d97150667a98454261f8e4d059"
+          "sha256": "26bc2b60c0f7aba6d833adaf4b1a2d86453d14ebf4fabed62c811c687cac4e30"
         }
       }
     }
@@ -66,36 +66,6 @@
     "notes": []
   },
   "findings": [
-    {
-      "id": "f075791847fe",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_7",
-      "severity": "high",
-      "location": "Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/88f5a0b67c5c474d/hostexecutor/Dockerfile.FROM)",
-      "outcome": "suppressed",
-      "suppressed": {
-        "by": "ignore (app)",
-        "reason": "false positive: FROM ${BUILD} and ${BASE} are ARGs pinned by digest, which checkov cannot resolve",
-        "expires": "2027-05-19"
-      }
-    },
-    {
-      "id": "fc1a7d0c6c20",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_2",
-      "severity": "high",
-      "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/88f5a0b67c5c474d/hostexecutor/Dockerfile.)",
-      "outcome": "suppressed",
-      "suppressed": {
-        "by": "ignore (platform)",
-        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
-        "expires": ""
-      }
-    },
     {
       "id": "b9b77e041ed9",
       "category": "config",
@@ -183,6 +153,36 @@
       "suppressed": {
         "by": "ignore (platform)",
         "reason": "the platform renders a default-deny NetworkPolicy for every environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "f075791847fe",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_7",
+      "severity": "high",
+      "location": "Dockerfile:7",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/b614dc7155d62a12/hostexecutor/Dockerfile.FROM)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (app)",
+        "reason": "false positive: FROM ${BUILD} and ${BASE} are ARGs pinned by digest, which checkov cannot resolve",
+        "expires": "2027-05-19"
+      }
+    },
+    {
+      "id": "fc1a7d0c6c20",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/b614dc7155d62a12/hostexecutor/Dockerfile.)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
         "expires": ""
       }
     }
