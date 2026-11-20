@@ -2,8 +2,8 @@
   "schema": "security-findings/v1",
   "app": "demo",
   "image": "localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310",
-  "commit": "3f65c550f6e41f3738050eba852ba8481801a109",
-  "generated": "2026-11-20T20:48:24Z",
+  "commit": "30fe1b938949eb290fffddc1fde6f69772bace98",
+  "generated": "2026-11-20T20:51:55Z",
   "scans": {
     "source": {
       "generated": "2026-11-20T20:46:54Z",
@@ -30,26 +30,18 @@
       }
     },
     "image": {
-      "generated": "2026-11-20T20:48:24Z",
-      "commit": "3f65c550f6e41f3738050eba852ba8481801a109",
+      "generated": "2026-11-20T20:51:55Z",
+      "commit": "e385eb06f2d008701964a3d72f2ae0b73bab22ee",
       "image": "localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310",
       "tools": {
-        "syft": "16.1.13",
+        "syft": "(SBOM kept from the build)",
         "grype": "6",
         "grype-db": "2026-11-20T06:21:00Z"
       },
       "evidence": {
-        "sbom-cyclonedx": {
-          "file": "sbom.cdx.json",
-          "sha256": "bbc0f361f1adf3428037ce73aed0797563484f2486de90fbcd0b5e1a676bfc71"
-        },
-        "sbom-spdx": {
-          "file": "sbom.spdx.json",
-          "sha256": "6d8b02d246de52c4ededf166d98e5a6ed7cf642d508eb6f30cad971407fd39a1"
-        },
         "grype": {
           "file": "grype.json",
-          "sha256": "911c491d7bf957d01216f8bc8fb2d706f321f232045cc82c16653ecdc072c099"
+          "sha256": "a8ef3d13154192675a79e7aaf2a27d67292912f6a8175b8c39beaea755019e3e"
         }
       }
     }
@@ -60,7 +52,7 @@
     "status": "warn",
     "blocking": 0,
     "counts": {
-      "fail": 2,
+      "fail": 1,
       "suppressed": 7,
       "below-threshold": 8
     },
@@ -293,19 +285,6 @@
       "fix_state": "unknown",
       "fixed_in": [],
       "outcome": "below-threshold"
-    },
-    {
-      "id": "e2a20f26a4da",
-      "category": "external",
-      "tool": "ledger",
-      "rule": "external/TEN-142960-b3426e",
-      "severity": "medium",
-      "location": "demo.c-local.k.ffwf.net:443",
-      "message": "HSTS Missing From HTTPS Server (RFC 6797): checked after deploy (cicd-ref-arch assess workflow)",
-      "check": "endpoint",
-      "ledger_id": "TEN-142960-b3426e",
-      "unknown": true,
-      "outcome": "fail"
     }
   ],
   "external": [
@@ -321,8 +300,8 @@
       "test": "external/TEN-142960-b3426e",
       "title": "HSTS Missing From HTTPS Server (RFC 6797)",
       "check": "endpoint",
-      "result": "fail",
-      "detail": "checked after deploy (cicd-ref-arch assess workflow)",
+      "result": "pass",
+      "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
       "source": "tenable-csv"
     }
   ]
