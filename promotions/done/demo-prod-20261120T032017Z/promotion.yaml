@@ -10,3 +10,6 @@ commit: 110868bd9fcd9306c65529651b74f4e02fff2b26
 notBefore: '2026-11-20T03:20:17Z'
 requestedBy: ffwfbot
 reason: 'demo 0.2.1: first promotion approved from the prod dashboard'
+appliedAt: '2026-11-20T03:40:57Z'
+approval: 'PR #6 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8)
