@@ -32,10 +32,6 @@ spec:
           value: ffwf/cicd-ref-arch
         - name: CLUSTER
           value: c-local
-        envFrom:
-        - secretRef:
-            name: dashboard-oauth
-            optional: true
         image: app-image
         livenessProbe:
           httpGet:
@@ -67,8 +63,12 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp
+        - mountPath: /var/run/secrets/dashboard-oauth
+          name: oauth
+          readOnly: true
       enableServiceLinks: false
       securityContext:
+        fsGroup: 65532
         runAsGroup: 65532
         runAsNonRoot: true
         runAsUser: 65532
@@ -79,3 +79,8 @@ spec:
           medium: Memory
           sizeLimit: 16Mi
         name: tmp
+      - name: oauth
+        secret:
+          defaultMode: 288
+          optional: true
+          secretName: dashboard-oauth

@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "dashboard",
-  "image": "localhost:5000/dashboard@sha256:09b4e3711e08c567acb558ed85733687a844f4bd801b60b9baedf9bd4a0936db",
-  "commit": "1c444f498165f95f595282c3c33a5ecf68689759",
-  "generated": "2026-11-19T21:25:21Z",
+  "image": "localhost:5000/dashboard@sha256:749ea7b91cae048d86b59bbbdcdae98005f62328673ab96b70deb05fe990be08",
+  "commit": "5691c3877527c2d634121f0830d9e79e408eed05",
+  "generated": "2026-11-20T01:58:59Z",
   "scans": {
     "source": {
-      "generated": "2026-11-19T21:24:11Z",
-      "commit": "1c444f498165f95f595282c3c33a5ecf68689759",
+      "generated": "2026-11-20T01:58:55Z",
+      "commit": "5691c3877527c2d634121f0830d9e79e408eed05",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -25,14 +25,14 @@
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "71207cfb6e4db67c2ab5f480c8b0566ba197755d4acd33688aae439fb83d0c24"
+          "sha256": "2e85815085fd3bd05f2b3b547b5bc1afc4ec373bbb570ac603b82ed00139dffb"
         }
       }
     },
     "image": {
-      "generated": "2026-11-19T21:25:21Z",
-      "commit": "1c444f498165f95f595282c3c33a5ecf68689759",
-      "image": "localhost:5000/dashboard@sha256:09b4e3711e08c567acb558ed85733687a844f4bd801b60b9baedf9bd4a0936db",
+      "generated": "2026-11-20T01:58:59Z",
+      "commit": "5691c3877527c2d634121f0830d9e79e408eed05",
+      "image": "localhost:5000/dashboard@sha256:749ea7b91cae048d86b59bbbdcdae98005f62328673ab96b70deb05fe990be08",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "ae28a498118c4cbfee5b33f6421a1040906a58a8cd6bd43ce2e84abc6e4b57c5"
+          "sha256": "e5ccb1d66e6ed7ab561ea6b42f6484f97dd6513ee5e8dd533fc9a2cbe419f909"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "ecfa8843d2a5c819162ae778087981dcd6b39eddf25aa5caec98b54049bdc267"
+          "sha256": "5d176d94b838b51ee9f0e0c1301e601560692789037db8ce8ce9c76effab5cde"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "aaf770d60ae7378ae39914c752f1dc753a19c0bc4485e81c6c3e6a9cca0f10d0"
+          "sha256": "e831eba55a541b53a9c377a89ccb34901636444c359def1ba7c1baf2f5e82fe2"
         }
       }
     }
@@ -57,11 +57,10 @@
   "gate": {
     "env": "dev",
     "mode": "report",
-    "status": "warn",
+    "status": "pass",
     "blocking": 0,
     "counts": {
       "suppressed": 8,
-      "fail": 1,
       "below-threshold": 8
     },
     "notes": []
@@ -74,7 +73,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/c17cd8af1238154a/hostexecutor/Dockerfile.FROM)",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/4d148b96801e49a5/hostexecutor/Dockerfile.FROM)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (app)",
@@ -89,7 +88,7 @@
       "rule": "CKV_DOCKER_2",
       "severity": "high",
       "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/c17cd8af1238154a/hostexecutor/Dockerfile.)",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/4d148b96801e49a5/hostexecutor/Dockerfile.)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (platform)",
@@ -111,16 +110,6 @@
         "reason": "the platform sets the namespace when it renders the environment",
         "expires": ""
       }
-    },
-    {
-      "id": "dc52413659e1",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_K8S_35",
-      "severity": "high",
-      "location": "build/app.yaml:13",
-      "message": "Prefer using secrets as files over secrets as environment variables (Deployment.default.dashboard)",
-      "outcome": "fail"
     },
     {
       "id": "52a7b84f5cda",
