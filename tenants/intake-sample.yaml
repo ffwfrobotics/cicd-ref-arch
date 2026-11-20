@@ -1,0 +1,17 @@
+# Enrolled from cicd-dashboard (pending until an admin approves it: branch environments only).
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata:
+  name: intake-sample
+spec:
+  tenant: ffwfbot
+  repo: ffwfbot/intake-sample
+  path: .
+  clusters:
+  - c-local
+  owners:
+  - ffwfbot
+  enrolled: '2026-11-20'
+  status: pending
+  requestedBy: ffwfbot
+  defaultBranch: main
