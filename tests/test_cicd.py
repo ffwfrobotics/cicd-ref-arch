@@ -153,6 +153,16 @@ class Routing(unittest.TestCase):
         self.assertEqual(cicd.route(self.root, self.app, "feat/a", "c-local"), "branch")   # already has one
         self.assertEqual(cicd.route(self.root, self.app, "master", "c-local"), "dev")       # dev always
 
+    def test_pending_gets_branch_envs_only(self):
+        t = self.root / "tenants/hello.yaml"
+        d = yaml.safe_load(t.read_text())
+        d["spec"]["status"] = "pending"
+        t.write_text(yaml.safe_dump(d))
+        self.assertEqual(cicd.route(self.root, self.app, "master", "c-local"), "branch")   # no dev host yet
+        d["spec"]["status"] = "approved"
+        t.write_text(yaml.safe_dump(d))
+        self.assertEqual(cicd.route(self.root, self.app, "master", "c-local"), "dev")
+
     def test_pause_resume_remove(self):
         self.env("hello", "branch-feat-a")
         class A:

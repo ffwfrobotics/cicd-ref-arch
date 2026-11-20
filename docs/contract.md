@@ -1,5 +1,7 @@
 # The app contract
 
+<!-- generated from contract.yaml by `tools/intake.py doc`: edit that file, not this one -->
+
 An app that meets these points deploys through this pipeline with no platform changes.
 
 | # | Rule | Why |
@@ -16,3 +18,25 @@ An app that meets these points deploys through this pipeline with no platform ch
 | 10 | **Egress is denied unless `cicd.yaml` lists it** (`spec.egress: [{cidr, ports}]`). | Each environment gets a default-deny NetworkPolicy. DNS is always allowed. |
 
 Secrets: not in v1. Apps that need one name it in their base, and the value goes in out of band, the same way the private fleet seeds its Secrets. SOPS with age (decided in the base-stack doc) comes later.
+
+## What the pipeline checks on each push
+
+The `intake` step (`tools/intake.py`) checks each pushed commit before anything is built, and posts the result as commit statuses (`cicd/contract`, and `cicd/contract/<check>` for each one that isn't ok). It never fails the run by itself:
+- **assumed**: missing, so a default is used for this run and printed in the log, to commit;
+- **warn**: the pipeline goes on, and the hint says what to change;
+- **missing**: there is nothing to run, so the run stops after intake.
+
+| Check | Rule | What | When it doesn't hold |
+|---|---|---|---|
+| `cicd-yaml` | 1 | cicd.yaml exists and names the enrolled app | assumed: default used. No cicd.yaml: defaults used. Commit the generated one (in the run log) and adjust it |
+| `tests` | 1 | spec.test.run is set | warn. No test command: set spec.test.run in cicd.yaml |
+| `deploy-base` | 2 | the deploy path holds a kustomization.yaml | assumed: default used. No deploy base: one Deployment and Service generated. Commit them (in the run log) to change them |
+| `no-namespace` | 2 | no metadata.namespace in the base | warn. Remove metadata.namespace: each environment sets its own |
+| `app-image` | 3 | a container's image is `app-image` | warn. Set the app container's image to app-image: the pipeline swaps in what it built |
+| `no-replicas` | 4 | the workload sets no spec.replicas | warn. Remove spec.replicas: KEDA sets the count |
+| `restricted` | 5 | runAsNonRoot, seccompProfile RuntimeDefault, allowPrivilegeEscalation false, capabilities drop ALL | warn. The pod will be refused: add the securityContext fields named (see templates/app/deploy/deployment.yaml) |
+| `readiness` | 6 | each container has a readinessProbe | warn. Add a readinessProbe: without one, requests reach the pod before it listens |
+| `service` | 7 | a Service named spec.service.name with port spec.service.port | warn. The gateway can't reach the app: add the Service, or fix spec.service in cicd.yaml |
+| `requests` | 8 | each container sets resources.requests | warn. Set resources.requests (e.g. cpu 10m, memory 32Mi) |
+| `dockerfile` | 9 | the Dockerfile named in spec.build exists | missing: stops the run. Nothing to run: add a Dockerfile (spec.build.dockerfile in cicd.yaml says where) |
+| `base-pinned` | 9 | each FROM names its image @sha256:... | warn. Pin the base image by digest: FROM image:tag@sha256:... |

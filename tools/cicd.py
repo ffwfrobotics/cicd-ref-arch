@@ -833,6 +833,13 @@ def load_tenants(root: Path) -> dict[str, dict]:
     return out
 
 
+def approved(t: dict) -> bool:
+    """An app enrolled through the dashboard is pending until an admin approves it: until then every
+    branch, its dev branch too, gets a branch environment only (no dev host, no promotion).
+    Tenants enrolled before this (no status) count as approved."""
+    return (t.get("spec") or {}).get("status", "approved") == "approved"
+
+
 DEFAULT_BRANCH_LIMIT = 16
 
 
@@ -856,14 +863,15 @@ def route(root: Path, app: dict, branch: str, cluster: str) -> str:
     """dev, branch, skip (excluded), skip-paused or skip-limit: whether this push goes through CI/CD.
     The dev branch, and a branch that already has an environment, always count as active."""
     name = app["metadata"]["name"]
-    if branch == app["spec"]["environments"]["dev"]["branch"]:
+    tenants = load_tenants(root)
+    t = tenants.get(name)
+    dev = branch == app["spec"]["environments"]["dev"]["branch"]
+    if dev and (t is None or approved(t)):
         return "dev"
-    if not branch_wanted(app, branch):
+    if not dev and not branch_wanted(app, branch):
         return "skip"
     if branch in paused_branches(root, cluster, name):
         return "skip-paused"
-    tenants = load_tenants(root)
-    t = tenants.get(name)
     if t is None:
         return "branch"
     env_dir, _ = env_id(app, "branch", branch)
@@ -880,8 +888,9 @@ def manage(root: Path, args) -> str:
     app = load_app(args.app_config) if args.app_config else None
     name = args.app
     env_dir = None
+    t = load_tenants(root).get(name)
     if app is not None and args.branch:
-        if args.branch == app["spec"]["environments"]["dev"]["branch"]:
+        if args.branch == app["spec"]["environments"]["dev"]["branch"] and (t is None or approved(t)):
             env_dir = "dev"
         else:
             env_dir, _ = env_id(app, "branch", args.branch)
@@ -1027,6 +1036,9 @@ def main():
         cl = load_cluster(root, args.cluster)
         if (root / "tenants").is_dir():
             check_tenant(root, app, args.repo, args.cluster)
+            t = load_tenants(root)[app["metadata"]["name"]]
+            if args.env in ("dev", "prod") and not approved(t):
+                sys.exit(f"app {app['metadata']['name']!r} is pending approval: branch environments only")
         out = render_env(root, app, cl, args.env, args.branch, args.image, Path(args.manifests).read_text(), {
             "repo": args.repo, "commit": args.commit, "runUrl": args.run_url,
             "renderedAt": now_utc().isoformat().replace("+00:00", "Z")},

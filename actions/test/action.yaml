@@ -12,7 +12,8 @@ runs:
     run: |
       set -u
       cd '${{ inputs.app }}'
-      cmd=$(python3 -c "import yaml;print(yaml.safe_load(open('cicd.yaml'))['spec']['test']['run'])")
+      cmd=$(python3 -c "import yaml;print(((yaml.safe_load(open('cicd.yaml'))['spec'].get('test') or {}).get('run') or '').strip())")
+      [ -n "$cmd" ] || { echo '::warning::no test command: spec.test.run is not set in cicd.yaml'; cmd='echo "no tests (spec.test.run is not set)"'; }
       mkdir -p "$GITHUB_WORKSPACE/${{ inputs.out }}"
       start=$(date -u +%Y-%m-%dT%H:%M:%SZ); t0=$(date +%s)
       set +e; bash -c "$cmd" 2>&1 | tee "$GITHUB_WORKSPACE/${{ inputs.out }}/test.log"; rc=${PIPESTATUS[0]}; set -e
