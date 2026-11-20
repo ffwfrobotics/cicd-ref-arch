@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: dashboard-prod-20261120T032556Z
+app: dashboard
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/dashboard@sha256:b5eb0a102c5009aee848467a8ffed643c466e533bf25b9f05b0e56c1ee7144f3
+commit: dd430b8dc84921f994137e8a37da3d0f2b44d2c7
+notBefore: '2026-11-20T03:25:56Z'
+requestedBy: ffwfbot
+reason: 'dashboard: show promotions while their PR is open, so prod can approve them'
