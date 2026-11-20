@@ -112,6 +112,8 @@ jobs:
     needs: [route, test]
     if: needs.route.outputs.env == 'dev' || needs.route.outputs.env == 'branch'
     runs-on: ffwf-k8s
+    outputs:
+      env_dir: ${{ steps.deploy.outputs.env-dir }}
     env:
       APP: app/${{ needs.route.outputs.path }}
     steps:
@@ -168,6 +170,35 @@ jobs:
     - if: always()
       uses: actions/upload-artifact@v3
       with: {name: deliver, path: "build/security/\nbuild/app.yaml\nbuild/build-metadata.json"}
+
+  # after the deploy: is it running? (tools/runtime.py, contract.yaml `runtime`) One word as the commit
+  # status cicd/runtime; the pod states, events and last log lines it decided from as the artifact
+  # `runtime`. Fails when the app doesn't run, so the run is red where the developer looks.
+  runtime:
+    needs: [route, deliver]
+    if: needs.deliver.result == 'success'
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4   # the platform repo as it is now: with this deploy's environment
+      with: {path: .cicd, ref: "${{ github.ref }}", persist-credentials: false}
+    - uses: ./.cicd/actions/setup
+    - id: watch
+      env:
+        RUNTIME_KUBECONFIG: ${{ secrets.CICD_RUNTIME_KUBECONFIG }}
+        ENV_DIR: ${{ needs.deliver.outputs.env_dir }}
+      run: |
+        python3 .cicd/tools/runtime.py watch --root .cicd --cluster "$CLUSTER" --app "${{ inputs.app }}" --env-dir "$ENV_DIR" \
+          --sha "${{ needs.route.outputs.sha }}" --out runtime.json --github-output
+    - if: always() && steps.watch.outputs.state != ''
+      env: {FORGEJO_TOKEN: "${{ secrets.CICD_BOT_TOKEN }}"}
+      run: |
+        python3 .cicd/tools/runtime.py statuses runtime.json --repo "${{ needs.route.outputs.repo }}" --sha "${{ needs.route.outputs.sha }}" \
+          --server "${{ github.server_url }}" --target-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_number }}"
+    - if: always()
+      uses: actions/upload-artifact@v3
+      with: {name: runtime, path: runtime.json}
+    - if: steps.watch.outputs.state == 'fail'
+      run: exit 1
 
   # self-service, for whoever the dashboard says asked (it checked their write on the app repo)
   manage:

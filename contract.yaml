@@ -92,3 +92,80 @@ secrets: >-
   Secrets: not in v1. Apps that need one name it in their base, and the value goes in out of
   band, the same way the private fleet seeds its Secrets. SOPS with age (decided in the
   base-stack doc) comes later.
+# After the deploy, tools/runtime.py watches the environment and names what it saw with one of
+# these classes (tools/runtime.py classify). state: ok | warn (not the app's doing) | fail. Shown as the commit status
+# cicd/runtime and as the dashboard's Running step.
+runtime:
+- id: not-applied
+  keyword: not applied
+  state: warn
+  what: the environment didn't run this build within 5 minutes
+  hint: "Flux hasn't applied it yet: the platform's side, not the app's. The next run checks again"
+- id: rejected
+  keyword: rejected
+  rule: 5
+  state: fail
+  what: the namespace refused to create the pod (Pod Security restricted, or a quota)
+  hint: "Fix the securityContext fields named (see templates/app/deploy/deployment.yaml)"
+- id: image-pull
+  keyword: image pull
+  rule: 3
+  state: fail
+  what: the image couldn't be pulled
+  hint: "Use the image name app-image in deploy/: the pipeline swaps in what it built. Other images must be pullable here"
+- id: config
+  keyword: config error
+  state: fail
+  what: the container couldn't be created (a missing Secret, ConfigMap or key it refers to)
+  hint: "Create what it names, or remove the reference: secrets go in out of band (contract: Secrets)"
+- id: oom
+  keyword: out of memory
+  rule: 8
+  state: fail
+  what: killed at its memory limit
+  hint: "Raise resources.limits.memory, or use less"
+- id: crash
+  keyword: crash
+  state: fail
+  what: the process exits (CrashLoopBackOff, or it stopped)
+  hint: "It exits on start: see the last log lines in the run. The main process must keep running in the foreground"
+- id: unschedulable
+  keyword: unschedulable
+  rule: 8
+  state: fail
+  what: no node can fit the pod
+  hint: "Lower resources.requests"
+- id: localhost
+  keyword: localhost only
+  rule: 7
+  state: fail
+  what: the probe's connection is refused and the log shows a 127.0.0.1 or localhost address
+  hint: "Listen on 0.0.0.0, not 127.0.0.1: the probe and the gateway connect from outside the container"
+- id: not-ready
+  keyword: not ready
+  rule: 6
+  state: fail
+  what: running, but the readiness probe never passed
+  hint: "Point the readinessProbe at the port the app listens on and a path that answers 200"
+- id: not-started
+  keyword: not started
+  rule: 7
+  state: fail
+  what: no pod of this build started (a scaled-to-zero app wasn't woken by a request)
+  hint: "Check spec.service and spec.workload in cicd.yaml name the Service and Deployment in deploy/"
+- id: unreachable
+  keyword: unreachable
+  rule: 7
+  state: fail
+  what: ready, but its host gave no answer
+  hint: "The Service must select the pod and target the port it listens on (spec.service in cicd.yaml)"
+- id: http-error
+  keyword: 5xx
+  state: fail
+  what: ready, but the host answers / with a server error
+  hint: "The app answers / with an error: see the log"
+- id: running
+  keyword: running
+  state: ok
+  what: a pod of this build is ready and its host answers below 500
+  hint: "Running"

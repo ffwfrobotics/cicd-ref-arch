@@ -67,7 +67,7 @@ class Render(unittest.TestCase):
         self.assertEqual(k["images"][0]["digest"], DIGEST)
         objs = list(yaml.safe_load_all((out / "platform.yaml").read_text()))
         kinds = [o["kind"] for o in objs]
-        self.assertEqual(kinds, ["NetworkPolicy", "InterceptorRoute", "ScaledObject"])
+        self.assertEqual(kinds, ["NetworkPolicy", "InterceptorRoute", "ScaledObject", "RoleBinding"])   # RoleBinding: the runtime check reads the env
         so = objs[2]["spec"]
         self.assertEqual((so["minReplicaCount"], so["cooldownPeriod"]), (0, 900))
         self.assertEqual(objs[1]["spec"]["rules"][0]["hosts"], ["hello-feat-x.c-local.k.ffwf.net"])

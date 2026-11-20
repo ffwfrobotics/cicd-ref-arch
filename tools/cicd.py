@@ -208,6 +208,13 @@ def platform_objects(app: dict, cl: dict, ns: str, hosts: list[str], zone_hosts:
                                      "sectionName": gw.get("httpsListener", "https")}],
                      "hostnames": hosts,
                      "rules": [{"backendRefs": [{"name": svc["name"], "port": svc["port"]}]}]}})
+    rt = cl.get("runtime")
+    if rt:  # the pipeline's runtime check reads this environment's pods, events and logs (platform/runtime)
+        sa_ns, _, sa = rt["serviceAccount"].partition("/")
+        objs.append({"apiVersion": "rbac.authorization.k8s.io/v1", "kind": "RoleBinding",
+                     "metadata": {"name": "cicd-runtime-reader"},
+                     "roleRef": {"apiGroup": "rbac.authorization.k8s.io", "kind": "ClusterRole", "name": rt["clusterRole"]},
+                     "subjects": [{"kind": "ServiceAccount", "name": sa, "namespace": sa_ns}]})
     return objs
 
 

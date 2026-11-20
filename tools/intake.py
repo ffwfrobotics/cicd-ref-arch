@@ -334,6 +334,14 @@ def doc() -> str:
         for k in r.get("checks") or []:
             when = "missing: stops the run" if k.get("stops") else "assumed: default used" if k.get("fill") else "warn"
             out.append(f"| `{k['id']}` | {r['n']} | {k['what']} | {when}. {k['hint']} |")
+    out += ["", "## After the deploy: the runtime check", "",
+            "The `runtime` job (`tools/runtime.py`) waits for the environment to run the new build, sends one "
+            "request to its host (which also wakes a scaled-to-zero app), and watches the build's pods for about "
+            "90 s. It posts one word as the commit status `cicd/runtime`, and keeps the pod states, events and "
+            "last log lines it decided from with the run (artifact `runtime`).", "",
+            "| Word | Rule | What it saw | What to do |", "|---|---|---|---|"]
+    for k in c["runtime"]:
+        out.append(f"| **{k['keyword']}** | {k.get('rule') or ''} | {k['what']} | {k['hint']} |")
     return "\n".join(out) + "\n"
 
 

@@ -1,6 +1,7 @@
 # The platform layer for this cluster, in dependency order:
 #   cicd-sources -> gateway-api -> traefik -> keda -> keda-http -> gateway
 #   cicd-sources -> buildkit
+#   runtime (read-only access for the pipeline's runtime check)
 # Assumes the cluster already has cert-manager with ClusterIssuer ${CLUSTER_ISSUER}, and a CNI
 # that enforces NetworkPolicy.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -96,3 +97,15 @@ spec:
   sourceRef: {kind: GitRepository, name: cicd-ref-arch}
   postBuild:
     substituteFrom: [{kind: ConfigMap, name: cicd-vars}]
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: cicd-runtime, namespace: flux-system}
+spec:
+  interval: 30m
+  retryInterval: 30s
+  path: ./platform/runtime
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef: {kind: GitRepository, name: cicd-ref-arch}

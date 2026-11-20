@@ -1,0 +1,43 @@
+# Read-only access for the pipeline's runtime check (tools/runtime.py): after a deploy it reads the
+# environment's pods, their events and the last log lines, and says what went wrong.
+#
+# The ClusterRole grants nothing by itself. Each environment namespace binds it to this
+# ServiceAccount (a RoleBinding in the rendered platform.yaml), so the token reads app
+# environments only: not Secrets, and not any other namespace.
+#
+# The token is a long-lived ServiceAccount token. The pipeline gets it as the Actions secret
+# CICD_RUNTIME_KUBECONFIG of the platform repo (docs/enroll.md, "Runtime check"), never on the
+# runner pods themselves: the runners are shared with other repos. Rotate: delete the Secret
+# (Flux recreates it and Kubernetes issues a new token), then update the Actions secret.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cicd-runtime
+  labels: {pod-security.kubernetes.io/enforce: restricted}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: reader, namespace: cicd-runtime}
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: reader-token
+  namespace: cicd-runtime
+  annotations: {kubernetes.io/service-account.name: reader}
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata: {name: cicd-runtime-reader}
+rules:
+- apiGroups: [""]
+  resources: [pods, pods/log, events, services, endpoints]
+  verbs: [get, list, watch]
+- apiGroups: [apps]
+  resources: [deployments, replicasets, statefulsets]
+  verbs: [get, list, watch]
+- apiGroups: [events.k8s.io]
+  resources: [events]
+  verbs: [get, list, watch]

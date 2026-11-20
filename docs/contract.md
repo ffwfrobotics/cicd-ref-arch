@@ -40,3 +40,23 @@ The `intake` step (`tools/intake.py`) checks each pushed commit before anything 
 | `requests` | 8 | each container sets resources.requests | warn. Set resources.requests (e.g. cpu 10m, memory 32Mi) |
 | `dockerfile` | 9 | the Dockerfile named in spec.build exists | missing: stops the run. Nothing to run: add a Dockerfile (spec.build.dockerfile in cicd.yaml says where) |
 | `base-pinned` | 9 | each FROM names its image @sha256:... | warn. Pin the base image by digest: FROM image:tag@sha256:... |
+
+## After the deploy: the runtime check
+
+The `runtime` job (`tools/runtime.py`) waits for the environment to run the new build, sends one request to its host (which also wakes a scaled-to-zero app), and watches the build's pods for about 90 s. It posts one word as the commit status `cicd/runtime`, and keeps the pod states, events and last log lines it decided from with the run (artifact `runtime`).
+
+| Word | Rule | What it saw | What to do |
+|---|---|---|---|
+| **not applied** |  | the environment didn't run this build within 5 minutes | Flux hasn't applied it yet: the platform's side, not the app's. The next run checks again |
+| **rejected** | 5 | the namespace refused to create the pod (Pod Security restricted, or a quota) | Fix the securityContext fields named (see templates/app/deploy/deployment.yaml) |
+| **image pull** | 3 | the image couldn't be pulled | Use the image name app-image in deploy/: the pipeline swaps in what it built. Other images must be pullable here |
+| **config error** |  | the container couldn't be created (a missing Secret, ConfigMap or key it refers to) | Create what it names, or remove the reference: secrets go in out of band (contract: Secrets) |
+| **out of memory** | 8 | killed at its memory limit | Raise resources.limits.memory, or use less |
+| **crash** |  | the process exits (CrashLoopBackOff, or it stopped) | It exits on start: see the last log lines in the run. The main process must keep running in the foreground |
+| **unschedulable** | 8 | no node can fit the pod | Lower resources.requests |
+| **localhost only** | 7 | the probe's connection is refused and the log shows a 127.0.0.1 or localhost address | Listen on 0.0.0.0, not 127.0.0.1: the probe and the gateway connect from outside the container |
+| **not ready** | 6 | running, but the readiness probe never passed | Point the readinessProbe at the port the app listens on and a path that answers 200 |
+| **not started** | 7 | no pod of this build started (a scaled-to-zero app wasn't woken by a request) | Check spec.service and spec.workload in cicd.yaml name the Service and Deployment in deploy/ |
+| **unreachable** | 7 | ready, but its host gave no answer | The Service must select the pod and target the port it listens on (spec.service in cicd.yaml) |
+| **5xx** |  | ready, but the host answers / with a server error | The app answers / with an error: see the log |
+| **running** |  | a pod of this build is ready and its host answers below 500 | Running |
