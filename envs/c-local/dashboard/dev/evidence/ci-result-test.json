@@ -1,21 +1,21 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-dashboard",
-  "sha": "aef6e87ccd923291d500d7819b08f07fe5a71fa1",
+  "sha": "530b72f6670eb07ed0a26d39346841a16516fd3e",
   "ref": "refs/heads/main",
   "workflow": "cicd",
   "job": "test",
   "status": "pass",
-  "started_at": "2026-11-20T14:32:38Z",
-  "duration_s": 7,
-  "runner": "forgejo-runner-5db5d4bd97-q4g9z",
+  "started_at": "2026-11-20T15:43:19Z",
+  "duration_s": 9,
+  "runner": "forgejo-runner-5db5d4bd97-blfp4",
   "summary": {
-    "total": 15,
-    "passed": 14,
+    "total": 19,
+    "passed": 18,
     "failed": 0,
     "skipped": 1
   },
   "failures": [],
-  "log_tail": "test_reimport_keeps_status_and_reopens_closed (test_compliance.Import.test_reimport_keeps_status_and_reopens_closed) ... ok\ntest_tenable_rows_become_checks (test_compliance.Import.test_tenable_rows_become_checks) ... ok\ntest_release_package_is_unaltered_and_hashed (test_compliance.Packages.test_release_package_is_unaltered_and_hashed) ... ok\ntest_versions_match_cicd_ref_arch (test_compliance.SameRulesAsThePlatform.test_versions_match_cicd_ref_arch) ... skipped 'cicd-ref-arch not checked out next to this repo'\ntest_branch_commit_cannot_be_promoted (test_destiny.Destiny.test_branch_commit_cannot_be_promoted) ... ok\ntest_deliver_failed (test_destiny.Destiny.test_deliver_failed) ... ok\ntest_dev_with_findings_warns_and_previews_prod_blockers (test_destiny.Destiny.test_dev_with_findings_warns_and_previews_prod_blockers) ... ok\ntest_just_pushed (test_destiny.Destiny.test_just_pushed) ... ok\ntest_merged_and_due_then_applied (test_destiny.Destiny.test_merged_and_due_then_applied) ... ok\ntest_promotion_waiting_for_second_person (test_destiny.Destiny.test_promotion_waiting_for_second_person) ... ok\ntest_self_merged_promotion_is_refused (test_destiny.Destiny.test_self_merged_promotion_is_refused) ... ok\ntest_skipped_later_job_does_not_hide_result (test_destiny.Destiny.test_skipped_later_job_does_not_hide_result) ... ok\ntest_superseded_dev_build (test_destiny.Destiny.test_superseded_dev_build) ... ok\ntest_tests_failed_skips_delivery (test_destiny.Destiny.test_tests_failed_skips_delivery) ... ok\ntest_same_as_cicd_ref_arch (test_destiny.Slug.test_same_as_cicd_ref_arch) ... ok\n\n----------------------------------------------------------------------\nRan 15 tests in 0.002s\n\nOK (skipped=1)",
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-dashboard/actions/runs/18"
+  "log_tail": "test_reimport_keeps_status_and_reopens_closed (test_compliance.Import.test_reimport_keeps_status_and_reopens_closed) ... ok\ntest_tenable_rows_become_checks (test_compliance.Import.test_tenable_rows_become_checks) ... ok\ntest_release_package_is_unaltered_and_hashed (test_compliance.Packages.test_release_package_is_unaltered_and_hashed) ... ok\ntest_versions_match_cicd_ref_arch (test_compliance.SameRulesAsThePlatform.test_versions_match_cicd_ref_arch) ... skipped 'cicd-ref-arch not checked out next to this repo'\ntest_branch_commit_cannot_be_promoted (test_destiny.Destiny.test_branch_commit_cannot_be_promoted) ... ok\ntest_deliver_failed (test_destiny.Destiny.test_deliver_failed) ... ok\ntest_dev_with_findings_warns_and_previews_prod_blockers (test_destiny.Destiny.test_dev_with_findings_warns_and_previews_prod_blockers) ... ok\ntest_just_pushed (test_destiny.Destiny.test_just_pushed) ... ok\ntest_merged_and_due_then_applied (test_destiny.Destiny.test_merged_and_due_then_applied) ... ok\ntest_promotion_waiting_for_second_person (test_destiny.Destiny.test_promotion_waiting_for_second_person) ... ok\ntest_self_merged_promotion_is_refused (test_destiny.Destiny.test_self_merged_promotion_is_refused) ... ok\ntest_skipped_later_job_does_not_hide_result (test_destiny.Destiny.test_skipped_later_job_does_not_hide_result) ... ok\ntest_superseded_dev_build (test_destiny.Destiny.test_superseded_dev_build) ... ok\ntest_tests_failed_skips_delivery (test_destiny.Destiny.test_tests_failed_skips_delivery) ... ok\ntest_failure_names_the_step (test_destiny.Phases.test_failure_names_the_step) ... ok\ntest_findings_warn_assess_and_blockers_reach_release (test_destiny.Phases.test_findings_warn_assess_and_blockers_reach_release) ... ok\ntest_running_tests_make_develop_run (test_destiny.Phases.test_running_tests_make_develop_run) ... ok\ntest_three_phases_cover_every_stage_once (test_destiny.Phases.test_three_phases_cover_every_stage_once) ... ok\ntest_same_as_cicd_ref_arch (test_destiny.Slug.test_same_as_cicd_ref_arch) ... ok\n\n----------------------------------------------------------------------\nRan 19 tests in 0.002s\n\nOK (skipped=1)",
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-dashboard/actions/runs/19"
 }
