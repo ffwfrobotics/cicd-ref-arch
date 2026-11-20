@@ -16,6 +16,8 @@ inputs:
   manifests: {description: the built deploy base, default: build/app.yaml}
   test-result: {description: "the test job's ci-result record, if downloaded", default: build/ci-result-test/test.json}
   out: {default: build/security}
+  token: {description: "a token that can read the compliance repo (it may be private)", default: ""}
+  user: {description: "the token's user", default: ""}
 outputs:
   status: {description: "pass, warn or fail", value: "${{ steps.gate.outputs.status }}"}
 runs:
@@ -23,6 +25,9 @@ runs:
   steps:
   - id: gate
     shell: bash
+    env:
+      CTOKEN: ${{ inputs.token }}
+      CUSER: ${{ inputs.user }}
     run: |
       set -u
       cicd=$(cd '${{ github.action_path }}/../..' && pwd)
@@ -30,10 +35,11 @@ runs:
       dockerfile=$(python3 -c "import yaml,sys;b=yaml.safe_load(open(sys.argv[1]))['spec'].get('build',{});print(b.get('context','.')+'/'+b.get('dockerfile','Dockerfile'))" "$app/cicd.yaml")
       name=$(python3 -c "import yaml,sys;print(yaml.safe_load(open(sys.argv[1]))['metadata']['name'])" "$app/cicd.yaml")
 
-      # the owner's compliance repo (public in this demo): IT Security's findings, advisories, OSCAL content
+      # the owner's compliance repo (may be private: read with the bot token): IT Security's findings, advisories, OSCAL content
       comp="${RUNNER_TEMP:-/tmp}/compliance"; rm -rf "$comp"
       read -r crepo cbranch < <(python3 -c "import yaml,sys;c=yaml.safe_load(open(sys.argv[1])).get('compliance') or {};print(c.get('repo','-'),c.get('branch','main'))" "$cicd/clusters/${{ inputs.cluster }}/cicd-cluster.yaml")
-      if [ "$crepo" != "-" ] && git clone -q --depth 1 -b "$cbranch" "${{ github.server_url }}/$crepo.git" "$comp" 2>/dev/null; then
+      cauth=(); [ -n "$CTOKEN" ] && cauth=(-c "http.extraHeader=AUTHORIZATION: basic $(printf '%s:%s' "$CUSER" "$CTOKEN" | base64 -w0)")
+      if [ "$crepo" != "-" ] && git "${cauth[@]}" clone -q --depth 1 -b "$cbranch" "${{ github.server_url }}/$crepo.git" "$comp" 2>/dev/null; then
         echo "compliance repo $crepo at $(git -C "$comp" rev-parse --short HEAD)"
         ext=(--ledger "$comp/ledger/$name.yaml" --advisories "$comp/advisories" --sbom "$out/sbom.cdx.json"
              --skip-endpoints "checked after deploy (cicd-ref-arch assess workflow)")

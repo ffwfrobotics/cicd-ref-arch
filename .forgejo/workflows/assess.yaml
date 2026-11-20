@@ -44,7 +44,7 @@ jobs:
         for attempt in 1 2 3 4 5; do
           git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
           rm -rf .compliance
-          git clone -q --depth 1 -b "$cbranch" "${{ github.server_url }}/$crepo.git" .compliance
+          git -c http.extraHeader="$auth" clone -q --depth 1 -b "$cbranch" "${{ github.server_url }}/$crepo.git" .compliance
           echo "compliance repo $crepo at $(git -C .compliance rev-parse --short HEAD)"
           python3 tools/cicd.py reassess --cluster "$CLUSTER" --app "$APP" --env "$ENV_DIR" | tee assess.log
           git add -A envs

@@ -39,7 +39,7 @@ runs:
       id=$(basename "$dir")
       # the compliance repo: IT Security's findings and advisories are part of the prod gate
       read -r crepo cbranch < <(python3 -c "import yaml,sys;c=yaml.safe_load(open(sys.argv[1])).get('compliance') or {};print(c.get('repo','-'),c.get('branch','main'))" "clusters/$cluster/cicd-cluster.yaml")
-      git clone -q --depth 1 -b "$cbranch" "$server/$crepo.git" .compliance 2>/dev/null || echo "no compliance repo $crepo"
+      git -c http.extraHeader="$auth" clone -q --depth 1 -b "$cbranch" "$server/$crepo.git" .compliance 2>/dev/null || echo "no compliance repo $crepo"
       # re-scan the pinned image with today's vulnerability data and gate it as prod will
       sec_rc=0; sec=$(python3 "$cicd/tools/cicd.py" check-security "$dir" --cluster "$cluster") || sec_rc=$?
       echo "$sec"

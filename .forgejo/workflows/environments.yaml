@@ -36,7 +36,7 @@ jobs:
           git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
           # the compliance repo: IT Security's findings and advisories are part of the prod gate
           read -r crepo cbranch < <(python3 -c "import yaml;c=yaml.safe_load(open('clusters/$CLUSTER/cicd-cluster.yaml')).get('compliance') or {};print(c.get('repo','-'),c.get('branch','main'))")
-          rm -rf .compliance; git clone -q --depth 1 -b "$cbranch" "${{ github.server_url }}/$crepo.git" .compliance || echo "::warning::no compliance repo $crepo"
+          rm -rf .compliance; git -c http.extraHeader="$auth" clone -q --depth 1 -b "$cbranch" "${{ github.server_url }}/$crepo.git" .compliance || echo "::warning::no compliance repo $crepo"
           rc=0; python3 tools/cicd.py apply-due --cluster "$CLUSTER" > promote.log || rc=$?; cat promote.log
           python3 tools/cicd.py gc --cluster "$CLUSTER" --repo '${{ github.repository }}' --server '${{ github.server_url }}' | tee gc.log
           git add -A envs promotions

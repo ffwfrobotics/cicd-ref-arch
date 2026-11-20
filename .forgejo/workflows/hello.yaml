@@ -47,7 +47,8 @@ jobs:
     - id: security
       if: steps.env.outputs.env != 'skip'
       uses: ./actions/security
-      with: {app: "${{ env.APP }}", env: "${{ steps.env.outputs.env }}", cluster: "${{ env.CLUSTER }}", image: "${{ steps.build.outputs.image }}"}
+      with: {app: "${{ env.APP }}", env: "${{ steps.env.outputs.env }}", cluster: "${{ env.CLUSTER }}", image: "${{ steps.build.outputs.image }}",
+             token: "${{ secrets.CICD_BOT_TOKEN }}", user: "${{ vars.CICD_BOT_USER }}"}
     - if: steps.env.outputs.env != 'skip'
       uses: ./actions/sign
       with: {image: "${{ steps.build.outputs.image }}", out: build/security}
