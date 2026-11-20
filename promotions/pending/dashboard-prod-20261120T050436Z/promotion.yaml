@@ -1,0 +1,13 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: dashboard-prod-20261120T050436Z
+app: dashboard
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/dashboard@sha256:a22b70b21a830ba72ec8377050d39bd44d1393617f9b99df85041b46ca352307
+commit: 7865b680eb2110a7963928d7711d4bcf6b36272b
+notBefore: '2026-11-20T05:04:36Z'
+requestedBy: ffwfbot
+reason: 'dashboard 0.2.0: controls, IT Security findings, advisories, releases (steps
+  3-6)'
