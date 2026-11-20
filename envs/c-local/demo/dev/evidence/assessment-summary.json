@@ -5,10 +5,10 @@
  "env": "dev",
  "commit": "0836bb1a2e432418091734bff05aa331d5119e0e",
  "image": "localhost:5000/demo@sha256:74ca2b811018ae80f6f0f1f5a33c68eaa3dd78cf5a9d0ccb9bdcd5ab46f43595",
- "generated": "2026-11-20T04:38:07Z",
+ "generated": "2026-11-20T04:47:46Z",
  "counts": {
-  "satisfied": 37,
-  "not-satisfied": 3
+  "satisfied": 34,
+  "not-satisfied": 6
  },
  "coverage": {
   "automated": 31,
@@ -257,7 +257,7 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     }
    ]
   },
@@ -315,7 +315,7 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     }
    ]
   },
@@ -325,7 +325,7 @@
    "objective": "legitimate vulnerabilities are remediated [ra-05_odp.03] in accordance with an organizational assessment of risk;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "A vulnerability with a fix blocks prod until it is fixed or recorded as not affecting the app.",
    "evidence": [
     {
@@ -335,8 +335,8 @@
     },
     {
      "selector": "findings:category=external",
-     "holds": true,
-     "found": "no external findings at or above the prod threshold"
+     "holds": false,
+     "found": "2 external findings would block prod: external/TEN-142960-b3426e, external/TEN-990001-b3426e"
     }
    ]
   },
@@ -405,7 +405,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: warn (16/18 checks passed)"
     }
    ]
   },
@@ -446,7 +446,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: warn (16/18 checks passed)"
     }
    ]
   },
@@ -467,7 +467,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: warn (16/18 checks passed)"
     }
    ]
   },
@@ -488,7 +488,7 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     }
    ]
   },
@@ -504,7 +504,7 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     }
    ]
   },
@@ -514,13 +514,13 @@
    "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to correct flaws identified during testing and evaluation.",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "Findings at or above the threshold block prod until corrected.",
    "evidence": [
     {
      "selector": "findings:category=all",
-     "holds": true,
-     "found": "no findings at or above the prod threshold"
+     "holds": false,
+     "found": "2 findings would block prod: external/TEN-142960-b3426e, external/TEN-990001-b3426e"
     }
    ]
   },
@@ -562,12 +562,12 @@
     {
      "selector": "gate",
      "holds": true,
-     "found": "gate pass in dev (report)"
+     "found": "gate warn in dev (report)"
     },
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: warn (16/18 checks passed)"
     }
    ]
   },
@@ -577,13 +577,13 @@
    "objective": "system flaws are corrected;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "Flaws that block prod are corrected before promotion.",
    "evidence": [
     {
      "selector": "findings:category=all",
-     "holds": true,
-     "found": "no findings at or above the prod threshold"
+     "holds": false,
+     "found": "2 findings would block prod: external/TEN-142960-b3426e, external/TEN-990001-b3426e"
     }
    ]
   },
@@ -707,12 +707,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/0b0a0032b5fc34b1/hostexecutor/.cicd/oscal/platform.yaml"
+   "path": "/runner/work/a90c526d5e0e2aea/hostexecutor/oscal/platform.yaml"
   },
   {
    "layer": "sysadmin",
    "component": "demo-owner",
-   "path": "/runner/work/0b0a0032b5fc34b1/tmp/compliance/apps/demo/component.yaml"
+   "path": "/runner/work/a90c526d5e0e2aea/hostexecutor/.compliance/apps/demo/component.yaml"
   }
  ]
 }
