@@ -1,12 +1,12 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "4a26a52854eb2a425e2a432102900509dc300ce7",
+  "sha": "9cb1f6cc27ffc36e1e4a0b4b1da4ebd8677bc9f2",
   "ref": "master",
-  "workflow": "environments",
+  "workflow": "assess",
   "job": "security",
   "status": "pass",
-  "started_at": "2026-11-20T05:16:06Z",
+  "started_at": "2026-11-20T05:19:51Z",
   "duration_s": null,
   "summary": {
     "total": 16,
@@ -39,9 +39,9 @@
       "title": "HSTS Missing From HTTPS Server (RFC 6797)",
       "check": "endpoint",
       "result": "pass",
-      "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+      "detail": "https://demo.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
       "source": "tenable-csv"
     }
   ],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/250"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/255"
 }
