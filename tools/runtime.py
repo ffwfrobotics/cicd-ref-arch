@@ -224,7 +224,10 @@ def observe(k: Kube, ns: str, workload: dict, digest: str, host: str | None, via
     t0 = time.monotonic()
     say(f"waiting for {workload['name']} in {ns} to run {digest[:19]}... (Flux applies it)")
     while True:
-        w = k.get(f"/apis/apps/v1/namespaces/{ns}/{kind}/{workload['name']}")
+        try:   # 403 until Flux applies the environment's RoleBinding (it comes with the build)
+            w = k.get(f"/apis/apps/v1/namespaces/{ns}/{kind}/{workload['name']}")
+        except RuntimeError:
+            w = None
         if w and this_build([w], digest):
             break
         if time.monotonic() - t0 > wait_applied:
