@@ -2,12 +2,12 @@
   "schema": "security-findings/v1",
   "app": "demo",
   "image": "localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310",
-  "commit": "30fe1b938949eb290fffddc1fde6f69772bace98",
-  "generated": "2026-11-20T19:42:03Z",
+  "commit": "3f65c550f6e41f3738050eba852ba8481801a109",
+  "generated": "2026-11-20T20:48:24Z",
   "scans": {
     "source": {
-      "generated": "2026-11-20T19:37:05Z",
-      "commit": "c767c71a8ea231522ae486596c0a2047330a9f41",
+      "generated": "2026-11-20T20:46:54Z",
+      "commit": "3f65c550f6e41f3738050eba852ba8481801a109",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -21,27 +21,35 @@
         },
         "opengrep": {
           "file": "opengrep.sarif",
-          "sha256": "28290d0d0d37886605dfa076275fff39d00d829bf7b2379b27d8bcf330754d65"
+          "sha256": "5da7e28853311323d04f834f100b1eff5fed14d72d64a64f3bbc2c67a9596eb3"
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "fac736ba35cbd4a5c22c0c5dc55f9ee3616da681ef048222335a8eecfd2e6a7e"
+          "sha256": "6b328d73cc7da484dce83a2a7d657cc891fb19368b4b1277dfc82b6c52bae827"
         }
       }
     },
     "image": {
-      "generated": "2026-11-20T19:42:03Z",
-      "commit": "3e60d7c680bb84d92318de4e5b08f5fc29a4a4d3",
+      "generated": "2026-11-20T20:48:24Z",
+      "commit": "3f65c550f6e41f3738050eba852ba8481801a109",
       "image": "localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310",
       "tools": {
-        "syft": "(SBOM kept from the build)",
+        "syft": "16.1.13",
         "grype": "6",
         "grype-db": "2026-11-20T06:21:00Z"
       },
       "evidence": {
+        "sbom-cyclonedx": {
+          "file": "sbom.cdx.json",
+          "sha256": "bbc0f361f1adf3428037ce73aed0797563484f2486de90fbcd0b5e1a676bfc71"
+        },
+        "sbom-spdx": {
+          "file": "sbom.spdx.json",
+          "sha256": "6d8b02d246de52c4ededf166d98e5a6ed7cf642d508eb6f30cad971407fd39a1"
+        },
         "grype": {
           "file": "grype.json",
-          "sha256": "978b8d0acf024296f28004dd9a1f56924f7a56ff44cec116dc5b5be42de86657"
+          "sha256": "911c491d7bf957d01216f8bc8fb2d706f321f232045cc82c16653ecdc072c099"
         }
       }
     }
@@ -52,7 +60,7 @@
     "status": "warn",
     "blocking": 0,
     "counts": {
-      "fail": 1,
+      "fail": 2,
       "suppressed": 7,
       "below-threshold": 8
     },
@@ -66,7 +74,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "app/Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/92127cb91ec66a63/hostexecutor/app/Dockerfile.FROM)",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/a9099efe7f688962/hostexecutor/app/Dockerfile.FROM)",
       "outcome": "fail"
     },
     {
@@ -76,7 +84,7 @@
       "rule": "CKV_DOCKER_2",
       "severity": "high",
       "location": "app/Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/92127cb91ec66a63/hostexecutor/app/Dockerfile.)",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/a9099efe7f688962/hostexecutor/app/Dockerfile.)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (platform)",
@@ -285,6 +293,19 @@
       "fix_state": "unknown",
       "fixed_in": [],
       "outcome": "below-threshold"
+    },
+    {
+      "id": "e2a20f26a4da",
+      "category": "external",
+      "tool": "ledger",
+      "rule": "external/TEN-142960-b3426e",
+      "severity": "medium",
+      "location": "demo.c-local.k.ffwf.net:443",
+      "message": "HSTS Missing From HTTPS Server (RFC 6797): checked after deploy (cicd-ref-arch assess workflow)",
+      "check": "endpoint",
+      "ledger_id": "TEN-142960-b3426e",
+      "unknown": true,
+      "outcome": "fail"
     }
   ],
   "external": [
@@ -300,8 +321,8 @@
       "test": "external/TEN-142960-b3426e",
       "title": "HSTS Missing From HTTPS Server (RFC 6797)",
       "check": "endpoint",
-      "result": "pass",
-      "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+      "result": "fail",
+      "detail": "checked after deploy (cicd-ref-arch assess workflow)",
       "source": "tenable-csv"
     }
   ]

@@ -1,16 +1,16 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "3e60d7c680bb84d92318de4e5b08f5fc29a4a4d3",
+  "sha": "3f65c550f6e41f3738050eba852ba8481801a109",
   "ref": "refs/heads/master",
-  "workflow": "assess",
+  "workflow": "pipeline",
   "job": "security",
   "status": "warn",
-  "started_at": "2026-11-20T19:42:03Z",
+  "started_at": "2026-11-20T20:48:24Z",
   "duration_s": null,
   "summary": {
-    "total": 16,
-    "failed": 1,
+    "total": 17,
+    "failed": 2,
     "passed": 15,
     "skipped": 0
   },
@@ -20,7 +20,14 @@
       "file": "app/Dockerfile:7",
       "severity": "high",
       "category": "config",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/92127cb91ec66a63/hostexecutor/app/Dockerfile.FROM)"
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/a9099efe7f688962/hostexecutor/app/Dockerfile.FROM)"
+    },
+    {
+      "test": "external/external/TEN-142960-b3426e",
+      "file": "demo.c-local.k.ffwf.net:443",
+      "severity": "medium",
+      "category": "external",
+      "message": "HSTS Missing From HTTPS Server (RFC 6797): checked after deploy (cicd-ref-arch assess workflow)"
     }
   ],
   "security": {
@@ -28,7 +35,7 @@
     "mode": "report",
     "blocking": 0,
     "counts": {
-      "fail": 1,
+      "fail": 2,
       "suppressed": 7,
       "below-threshold": 8
     },
@@ -47,10 +54,10 @@
       "test": "external/TEN-142960-b3426e",
       "title": "HSTS Missing From HTTPS Server (RFC 6797)",
       "check": "endpoint",
-      "result": "pass",
-      "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+      "result": "fail",
+      "detail": "checked after deploy (cicd-ref-arch assess workflow)",
       "source": "tenable-csv"
     }
   ],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/473"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/525"
 }
