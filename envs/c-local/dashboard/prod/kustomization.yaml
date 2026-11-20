@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dashboard
+labels:
+- pairs:
+    cicd.ffwf.net/app: dashboard
+    cicd.ffwf.net/env: prod
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/dashboard
+  digest: sha256:749ea7b91cae048d86b59bbbdcdae98005f62328673ab96b70deb05fe990be08

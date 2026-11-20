@@ -1,0 +1,15 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: dashboard
+env: prod
+dir: prod
+namespace: dashboard
+branch: null
+hosts:
+- dashboard.c-local.k.ffwf.net
+image: localhost:5000/dashboard@sha256:749ea7b91cae048d86b59bbbdcdae98005f62328673ab96b70deb05fe990be08
+commit: 5691c3877527c2d634121f0830d9e79e408eed05
+promotion: dashboard-prod-20261120T020637Z
+approval: 'PR #5 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8)
+renderedAt: '2026-11-20T03:12:20Z'

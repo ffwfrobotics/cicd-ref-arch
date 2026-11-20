@@ -1,0 +1,81 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: keda
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  - to:
+    - ipBlock:
+        cidr: 100.64.0.2/32
+        except: []
+    ports:
+    - protocol: TCP
+      port: 443
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 100.64.0.0/10
+        - 169.254.0.0/16
+        - 127.0.0.0/8
+    ports:
+    - protocol: TCP
+      port: 443
+---
+apiVersion: http.keda.sh/v1beta1
+kind: InterceptorRoute
+metadata:
+  name: dashboard
+spec:
+  target:
+    service: dashboard
+    port: 80
+  rules:
+  - hosts:
+    - dashboard.c-local.k.ffwf.net
+  scalingMetric:
+    concurrency:
+      targetValue: 100
+  timeouts:
+    readiness: 60s
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: dashboard
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: dashboard
+  minReplicaCount: 0
+  maxReplicaCount: 1
+  cooldownPeriod: 900
+  triggers:
+  - type: external-push
+    metadata:
+      scalerAddress: keda-add-ons-http-external-scaler.keda:9090
+      interceptorRoute: dashboard

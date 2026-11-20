@@ -11,3 +11,6 @@ notBefore: '2026-11-20T02:06:37Z'
 requestedBy: ffwfbot
 reason: 'cicd-dashboard step 2 to prod: sign-in, self-service, approvals (OAuth Secret
   as files)'
+appliedAt: '2026-11-20T03:12:20Z'
+approval: 'PR #5 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8)
