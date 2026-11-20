@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: demo-prod-20261120T050037Z
+app: demo
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e
+commit: 6714eaf7d3d2518d2bf6f889b0be45e7470a1459
+notBefore: '2026-11-20T05:00:37Z'
+requestedBy: ffwfbot
+reason: 'demo 0.2.2: fixes IT Security findings TEN-142960 (HSTS) and TEN-990001 (gunicorn)'

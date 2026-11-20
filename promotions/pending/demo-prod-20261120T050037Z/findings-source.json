@@ -1,0 +1,100 @@
+{
+  "schema": "security-findings/v1",
+  "scope": "source",
+  "generated": "2026-11-20T04:52:03Z",
+  "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
+  "image": null,
+  "tools": {
+    "gitleaks": "8.30.1",
+    "opengrep": "1.33.1",
+    "checkov": "3.4.6"
+  },
+  "evidence": {
+    "gitleaks": {
+      "file": "gitleaks.json",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "opengrep": {
+      "file": "opengrep.sarif",
+      "sha256": "f9777916c570b463564a9c5cc17095769c5cd7efe23bf547df985dfcfa688453"
+    },
+    "checkov": {
+      "file": "checkov.json",
+      "sha256": "2f49583f2a9bcdafe368ee1081c0d2d9a00a48aafb8a2958f59b4c782a084ff2"
+    }
+  },
+  "findings": [
+    {
+      "id": "f075791847fe",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_7",
+      "severity": "high",
+      "location": "Dockerfile:7",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/9bf2c442edc12e76/hostexecutor/Dockerfile.FROM)"
+    },
+    {
+      "id": "fc1a7d0c6c20",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/9bf2c442edc12e76/hostexecutor/Dockerfile.)"
+    },
+    {
+      "id": "b9b77e041ed9",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_21",
+      "severity": "high",
+      "location": "build/app.yaml:1",
+      "message": "The default namespace should not be used (Service.default.demo)"
+    },
+    {
+      "id": "52a7b84f5cda",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_11",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "CPU limits should be set (Deployment.default.demo)"
+    },
+    {
+      "id": "9a99e240c143",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_43",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Image should use digest (Deployment.default.demo)"
+    },
+    {
+      "id": "cbf3f491bc56",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_14",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Image Tag should be fixed - not latest or blank (Deployment.default.demo)"
+    },
+    {
+      "id": "5a34b7c50fd9",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_21",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "The default namespace should not be used (Deployment.default.demo)"
+    },
+    {
+      "id": "e6cbf5b0a8ee",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV2_K8S_6",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Minimize the admission of pods which lack an associated NetworkPolicy (Pod.default.demo.app-demo)"
+    }
+  ]
+}
