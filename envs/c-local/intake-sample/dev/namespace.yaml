@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: intake-sample-main
+  name: intake-sample-dev
   labels:
     cicd.ffwf.net/app: intake-sample
-    cicd.ffwf.net/env: branch-main
+    cicd.ffwf.net/env: dev
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/warn: restricted

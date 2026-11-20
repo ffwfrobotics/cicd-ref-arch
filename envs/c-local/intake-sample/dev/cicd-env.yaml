@@ -1,14 +1,14 @@
 apiVersion: cicd.ffwf.net/v1alpha1
 kind: Environment
 app: intake-sample
-env: branch
-dir: branch-main
-namespace: intake-sample-main
+env: dev
+dir: dev
+namespace: intake-sample-dev
 branch: main
 hosts:
-- intake-sample-main.c-local.k.ffwf.net
+- intake-sample-dev.c-local.k.ffwf.net
 image: localhost:5000/intake-sample@sha256:f258f85f3c445155bd596d44e9f3131be0aaf9ee1b03170828c5637006d1f4d2
 repo: ffwfbot/intake-sample
 commit: 64f185b410ee260fa83dc80ed8dec39047c05d1e
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/480
-renderedAt: '2026-11-20T19:47:12Z'
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/491
+renderedAt: '2026-11-20T20:07:44Z'

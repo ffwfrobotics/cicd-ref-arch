@@ -9,4 +9,4 @@ resources:
 - demo/prod
 - hello/dev
 - hello/prod
-- intake-sample/branch-main
+- intake-sample/dev

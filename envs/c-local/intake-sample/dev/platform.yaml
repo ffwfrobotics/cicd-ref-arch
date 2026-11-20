@@ -36,7 +36,7 @@ spec:
     port: 80
   rules:
   - hosts:
-    - intake-sample-main.c-local.k.ffwf.net
+    - intake-sample-dev.c-local.k.ffwf.net
   scalingMetric:
     concurrency:
       targetValue: 50
