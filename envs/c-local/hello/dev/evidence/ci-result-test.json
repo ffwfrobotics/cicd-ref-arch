@@ -1,14 +1,14 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "e33d1718e2f7b0abf50897230639f61fc4621a98",
+  "sha": "c6e7f92e542848b135bad337d7c0929fafb8fdab",
   "ref": "refs/heads/master",
   "workflow": "hello",
   "job": "test",
   "status": "pass",
-  "started_at": "2026-11-20T04:32:26Z",
+  "started_at": "2026-11-20T04:40:23Z",
   "duration_s": 0,
-  "runner": "forgejo-runner-5db5d4bd97-qjt84",
+  "runner": "forgejo-runner-5db5d4bd97-w9n9z",
   "summary": {
     "total": 4,
     "passed": 4,
@@ -16,6 +16,6 @@
     "skipped": 0
   },
   "failures": [],
-  "log_tail": "test_healthz (test_app.HelloTest.test_healthz) ... 127.0.0.1 \"GET /healthz HTTP/1.1\" 200 -\nok\ntest_index_names_the_build (test_app.HelloTest.test_index_names_the_build) ... 127.0.0.1 \"GET / HTTP/1.1\" 200 -\nok\ntest_info_is_json (test_app.HelloTest.test_info_is_json) ... 127.0.0.1 \"GET /api/info HTTP/1.1\" 200 -\nok\ntest_unknown_path_404 (test_app.HelloTest.test_unknown_path_404) ... 127.0.0.1 \"GET /nope HTTP/1.1\" 404 -\nok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.518s\n\nOK",
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/224"
+  "log_tail": "test_healthz (test_app.HelloTest.test_healthz) ... 127.0.0.1 \"GET /healthz HTTP/1.1\" 200 -\nok\ntest_index_names_the_build (test_app.HelloTest.test_index_names_the_build) ... 127.0.0.1 \"GET / HTTP/1.1\" 200 -\nok\ntest_info_is_json (test_app.HelloTest.test_info_is_json) ... 127.0.0.1 \"GET /api/info HTTP/1.1\" 200 -\nok\ntest_unknown_path_404 (test_app.HelloTest.test_unknown_path_404) ... 127.0.0.1 \"GET /nope HTTP/1.1\" 404 -\nok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.532s\n\nOK",
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/230"
 }
