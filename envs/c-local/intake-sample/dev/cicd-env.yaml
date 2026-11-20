@@ -10,5 +10,5 @@ hosts:
 image: localhost:5000/intake-sample@sha256:f258f85f3c445155bd596d44e9f3131be0aaf9ee1b03170828c5637006d1f4d2
 repo: ffwfbot/intake-sample
 commit: 64f185b410ee260fa83dc80ed8dec39047c05d1e
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/517
-renderedAt: '2026-11-20T20:37:45Z'
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/521
+renderedAt: '2026-11-20T20:42:19Z'
