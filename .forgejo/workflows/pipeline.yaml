@@ -45,8 +45,8 @@ jobs:
       env: {APP_NAME: "${{ inputs.app }}", BRANCH: "${{ inputs.branch }}", SHA: "${{ inputs.sha }}", ACTION: "${{ inputs.action }}"}
       run: |
         set -eu
-        printf '%s' "$APP_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]{0,62}$' || { echo "::error::bad app name"; exit 1; }
-        printf '%s' "$SHA" | grep -Eq '^([0-9a-f]{40})?$' || { echo "::error::sha must be a full commit id"; exit 1; }
+        [[ "$APP_NAME" =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]] || { echo "::error::bad app name"; exit 1; }
+        [[ -z "$SHA" || "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full commit id"; exit 1; }
         git check-ref-format --branch "$BRANCH" >/dev/null || { echo "::error::bad branch name"; exit 1; }
         case "$ACTION" in deploy|pause|resume|remove-env|request-promotion) ;; *) echo "::error::unknown action $ACTION"; exit 1 ;; esac
         t=".cicd/tenants/$APP_NAME.yaml"
