@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: demo-prod-20261120T032017Z
+app: demo
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/demo@sha256:8818cdda1c4ceff8afba781bb7126639fccf897cf81d1050c446c576e0d635ed
+commit: 110868bd9fcd9306c65529651b74f4e02fff2b26
+notBefore: '2026-11-20T03:20:17Z'
+requestedBy: ffwfbot
+reason: 'demo 0.2.1: first promotion approved from the prod dashboard'
