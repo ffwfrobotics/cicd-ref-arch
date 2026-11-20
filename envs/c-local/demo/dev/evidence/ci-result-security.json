@@ -1,29 +1,45 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "20e8739dbada670005d4450057072bf0998e2a80",
+  "sha": "0132094483f7c613ee7ed8fa99e5b9edf811d3b6",
   "ref": "refs/heads/master",
-  "workflow": "assess",
+  "workflow": "pipeline",
   "job": "security",
-  "status": "pass",
-  "started_at": "2026-11-20T05:37:49Z",
+  "status": "warn",
+  "started_at": "2026-11-20T16:05:46Z",
   "duration_s": null,
   "summary": {
-    "total": 16,
-    "failed": 0,
-    "passed": 16,
+    "total": 17,
+    "failed": 2,
+    "passed": 15,
     "skipped": 0
   },
-  "failures": [],
+  "failures": [
+    {
+      "test": "config/CKV_DOCKER_7",
+      "file": "app/Dockerfile:7",
+      "severity": "high",
+      "category": "config",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/05a46de126cb4f8e/hostexecutor/app/Dockerfile.FROM)"
+    },
+    {
+      "test": "external/external/TEN-142960-b3426e",
+      "file": "demo.c-local.k.ffwf.net:443",
+      "severity": "medium",
+      "category": "external",
+      "message": "HSTS Missing From HTTPS Server (RFC 6797): checked after deploy (cicd-ref-arch assess workflow)"
+    }
+  ],
   "security": {
     "env": "dev",
     "mode": "report",
     "blocking": 0,
     "counts": {
-      "suppressed": 8,
+      "fail": 2,
+      "suppressed": 7,
       "below-threshold": 8
     },
-    "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e"
+    "image": "localhost:5000/demo@sha256:57b2985522487fb715552015226519986e1cfcf82983d73b001ba3cdd2bf4b22"
   },
   "external": [
     {
@@ -38,10 +54,10 @@
       "test": "external/TEN-142960-b3426e",
       "title": "HSTS Missing From HTTPS Server (RFC 6797)",
       "check": "endpoint",
-      "result": "pass",
-      "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+      "result": "fail",
+      "detail": "checked after deploy (cicd-ref-arch assess workflow)",
       "source": "tenable-csv"
     }
   ],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/263"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/399"
 }
