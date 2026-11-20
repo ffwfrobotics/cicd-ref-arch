@@ -3,7 +3,7 @@
   "app": "dashboard",
   "image": "localhost:5000/dashboard@sha256:b5eb0a102c5009aee848467a8ffed643c466e533bf25b9f05b0e56c1ee7144f3",
   "commit": "dd430b8dc84921f994137e8a37da3d0f2b44d2c7",
-  "generated": "2026-11-20T03:26:02Z",
+  "generated": "2026-11-20T03:28:04Z",
   "scans": {
     "source": {
       "generated": "2026-11-20T03:24:33Z",
@@ -30,8 +30,8 @@
       }
     },
     "image": {
-      "generated": "2026-11-20T03:26:01Z",
-      "commit": "dd430b8dc84921f994137e8a37da3d0f2b44d2c7",
+      "generated": "2026-11-20T03:28:04Z",
+      "commit": "995fd1e144599498872afc0bcfc52719270eea06",
       "image": "registry.buildkit.svc.cluster.local:5000/dashboard@sha256:b5eb0a102c5009aee848467a8ffed643c466e533bf25b9f05b0e56c1ee7144f3",
       "tools": {
         "syft": "16.1.13",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "398ecde2e8b25ccc8513bf1ca7b4493980e46ead3dddaaff6d84d018a0c85981"
+          "sha256": "77b09cd8823a3680eef5f783900d11b46b5486b1051210fa61656161fba599c2"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "b2b452fc691effba8491a04314b2b3878674d3047cb12679c16c4ff2c051cbca"
+          "sha256": "d608affc9747c9efb466a983ee83d2a9ff0c398eed567b21ca3ea190a412355c"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "e0ac3302ea82082042eaf5e6dce86c9c5415d63fa0cae4f8413ab6a8a7bdc0f8"
+          "sha256": "9fbc36d775a09d13655d13ba428b836438050d30d23f9d85b10dff8822d3ddfa"
         }
       }
     }

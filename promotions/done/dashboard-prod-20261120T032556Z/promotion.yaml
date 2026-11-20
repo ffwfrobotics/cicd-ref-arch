@@ -10,3 +10,6 @@ commit: dd430b8dc84921f994137e8a37da3d0f2b44d2c7
 notBefore: '2026-11-20T03:25:56Z'
 requestedBy: ffwfbot
 reason: 'dashboard: show promotions while their PR is open, so prod can approve them'
+appliedAt: '2026-11-20T03:28:04Z'
+approval: 'PR #7 merged by john'
+security: security gate pass (below-threshold 8, suppressed 8)
