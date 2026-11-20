@@ -7,8 +7,8 @@ namespace: demo-dev
 branch: main
 hosts:
 - demo-dev.c-local.k.ffwf.net
-image: localhost:5000/demo@sha256:57b2985522487fb715552015226519986e1cfcf82983d73b001ba3cdd2bf4b22
+image: localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310
 repo: ffwf/cicd-demo-app
-commit: 6714eaf7d3d2518d2bf6f889b0be45e7470a1459
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/399
-renderedAt: '2026-11-20T16:05:48Z'
+commit: 30fe1b938949eb290fffddc1fde6f69772bace98
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/409
+renderedAt: '2026-11-20T16:14:50Z'
