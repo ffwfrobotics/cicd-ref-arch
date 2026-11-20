@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "dashboard",
  "env": "dev",
- "commit": "eec516c3507b56045af9914df5bd9618e4a92b1a",
- "image": "localhost:5000/dashboard@sha256:6da2d361198ccbe93cfc28dd586f93b87fa19df651512575fedc3daf7120a69f",
- "generated": "2026-11-20T19:42:45Z",
+ "commit": "7fa71a1d828065dab12ad2a6e3e0a8035b54b908",
+ "image": "localhost:5000/dashboard@sha256:e90e799f5383db3d5b8be2d7705da1c9649c094631204d0c63a6341f776d5ea5",
+ "generated": "2026-11-20T19:53:02Z",
  "counts": {
   "satisfied": 32,
   "not-satisfied": 8
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit eec516c3507b, image pinned by digest"
+     "found": "commit 7fa71a1d8280, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit eec516c3507b, image pinned by digest"
+     "found": "commit 7fa71a1d8280, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-20T06:21:00Z (13 h old)"
+     "found": "grype database built 2026-11-20T06:21:00Z (14 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-20T06:21:00Z (13 h old)"
+     "found": "grype database built 2026-11-20T06:21:00Z (14 h old)"
     }
    ]
   },
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-20T06:21:00Z (13 h old)"
+     "found": "grype database built 2026-11-20T06:21:00Z (14 h old)"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit eec516c3507b, image pinned by digest"
+     "found": "commit 7fa71a1d8280, image pinned by digest"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/ea99fbe524ef7c0b/hostexecutor/.cicd/oscal/platform.yaml"
+   "path": "/runner/work/d2e3bade3d1a739f/hostexecutor/.cicd/oscal/platform.yaml"
   }
  ]
 }
