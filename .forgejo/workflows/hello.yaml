@@ -32,6 +32,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: ./actions/setup
+    - uses: actions/download-artifact@v3
+      continue-on-error: true
+      with: {name: ci-result-test, path: build/ci-result-test}
     - id: env
       run: |
         echo "env=$(python3 tools/cicd.py which-env $APP/cicd.yaml --branch '${{ github.ref_name }}')" >> "$GITHUB_OUTPUT"
@@ -44,7 +47,7 @@ jobs:
     - id: security
       if: steps.env.outputs.env != 'skip'
       uses: ./actions/security
-      with: {app: "${{ env.APP }}", env: "${{ steps.env.outputs.env }}", image: "${{ steps.build.outputs.image }}"}
+      with: {app: "${{ env.APP }}", env: "${{ steps.env.outputs.env }}", cluster: "${{ env.CLUSTER }}", image: "${{ steps.build.outputs.image }}"}
     - if: steps.env.outputs.env != 'skip'
       uses: ./actions/sign
       with: {image: "${{ steps.build.outputs.image }}", out: build/security}

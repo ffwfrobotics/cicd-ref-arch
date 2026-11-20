@@ -11,3 +11,8 @@ keda:
   scaler: keda-add-ons-http-external-scaler.keda:9090
   interceptor: {service: keda-add-ons-http-interceptor-proxy, port: 8080}
 buildkit: tcp://buildkitd.buildkit.svc.cluster.local:1234
+# The owner's compliance repo: OSCAL content, IT Security's findings (ledger), advisories, releases
+compliance: {repo: ffwf/cicd-compliance, branch: main}
+# Endpoint checks (an IT Security finding like "missing HSTS") connect here, with the app's host
+# name as SNI and Host header: the gateway, as any LAN client reaches it.
+probe: {via: "traefik.gateway-system.svc.cluster.local:443"}

@@ -10,6 +10,9 @@ Subcommands:
   request-promotion write promotions/pending/<id>/ pinned to what the source environment runs now
   check-security    re-scan a pending promotion's image and gate it under the prod policy
   apply-due         apply pending promotions that are due, approved, and pass the prod security gate
+  assess-evidence   OSCAL self-assessment of one build's evidence (actions/security)
+  reassess          re-gate and re-assess environments from their kept evidence, without a rebuild
+                    (after IT Security's findings or an advisory change, and daily)
   gc                remove branch environments whose branch no longer exists
 
 Needs Python 3.10+ and PyYAML (actions/setup installs it).
@@ -227,6 +230,10 @@ def edge_objects(app: dict, cl: dict, ns: str, env_dir: str, extra: list[str]) -
 SUPPRESSION_FILES = ("security/policy.yaml", "security/vex.openvex.json", ".gitleaksignore")
 
 
+EVIDENCE = ("security.json", "sbom.cdx.json", "ci-result-test.json", "ci-result-security.json",
+            "assessment-results.json", "assessment-summary.json")
+
+
 def keep_security(out: Path, security_dir: Path | None, app_dir: Path | None):
     """Next to an environment: the build's security summary and source findings (small; the image
     is re-scanned at promotion), and copies of the app's suppression records, so a promotion
@@ -241,6 +248,10 @@ def keep_security(out: Path, security_dir: Path | None, app_dir: Path | None):
         src = security_dir / "findings-source.json"
         if src.exists():
             shutil.copy(src, out / "findings-source.json")
+        for name in EVIDENCE:   # unaltered records: what the self-assessment and releases point at
+            if (security_dir / name).exists():
+                (out / "evidence").mkdir(parents=True, exist_ok=True)
+                shutil.copy(security_dir / name, out / "evidence" / name)
     if app_dir is not None:
         for rel in SUPPRESSION_FILES:
             if (app_dir / rel).exists():
@@ -346,6 +357,8 @@ def request_promotion(root: Path, args) -> Path:
             shutil.copy(src / extra, out / ("dev-" + extra if extra == "security-record.json" else extra))
     if (src / "suppressions").is_dir():
         shutil.copytree(src / "suppressions", out / "suppressions")
+    if (src / "evidence").is_dir():
+        shutil.copytree(src / "evidence", out / "evidence")
     write(out / "promotion.yaml", dump_yaml({
         "apiVersion": API, "kind": "Promotion",
         "id": pid, "app": args.app, "cluster": args.cluster,
@@ -419,9 +432,94 @@ def approval_of(root: Path, promo_dir: Path, promo: dict) -> tuple[bool, str]:
     return True, f"PR #{pr['number']} " + ", ".join(how)
 
 
+# ---------------------------------------------------------------- compliance (docs/oscal.md)
+
+
+def compliance_dir(root: Path) -> Path | None:
+    """A checkout of the compliance repo (ledger, advisories, OSCAL content), if there is one."""
+    d = Path(os.environ.get("CICD_COMPLIANCE_DIR") or root / ".compliance")
+    return d if (d / "profiles").is_dir() else None
+
+
+def gate_args(root: Path, cl: dict, app: str, sbom: Path | None, host: str | None, skip_endpoints: str | None) -> list[str]:
+    """The compliance part of a gate: IT Security's findings and advisories, checked on this commit."""
+    comp = compliance_dir(root)
+    if comp is None:
+        return []
+    out = ["--ledger", str(comp / "ledger" / f"{app}.yaml"), "--advisories", str(comp / "advisories")]
+    if sbom and sbom.exists():
+        out += ["--sbom", str(sbom)]
+    if skip_endpoints:
+        out += ["--skip-endpoints", skip_endpoints]
+    elif host:
+        out += ["--host", host]
+        if (cl.get("probe") or {}).get("via"):
+            out += ["--via", cl["probe"]["via"]]
+    return out
+
+
+def assess_into(root: Path, app: str, env: str, evidence: Path, commit: str | None, image: str | None,
+                quiet: bool = False) -> dict | None:
+    """OSCAL self-assessment of the evidence in `evidence` (written next to it); its summary."""
+    comp = compliance_dir(root)
+    if comp is None:
+        return None
+    here = Path(__file__).resolve().parent
+    cfg_path = comp / "apps" / app / "app.yaml"
+    cfg = load_yaml(cfg_path) if cfg_path.exists() else {}
+    profile = comp / (cfg.get("profile") or "profiles/cicd-demo.json")
+    catalog = comp / "catalogs" / "nist-800-53r5-excerpt.json"
+    cmd = [sys.executable, str(here / "oscal.py"), "assess", "--catalog", str(catalog), "--profile", str(profile),
+           "--platform", str(root / "oscal" / "platform.yaml"), "--evidence", str(evidence),
+           "--releases", str(comp / "releases"), "--app", app, "--env", env, "--out", str(evidence)]
+    if (comp / "apps" / app / "component.yaml").exists():
+        cmd += ["--sysadmin-layer", str(comp / "apps" / app / "component.yaml")]
+    if (evidence / "app-component.yaml").exists():
+        cmd += ["--app-layer", str(evidence / "app-component.yaml")]
+    if commit:
+        cmd += ["--commit", commit]
+    if image:
+        cmd += ["--image", image]
+    r = subprocess.run(cmd, stdout=subprocess.DEVNULL if quiet else sys.stderr)
+    p = evidence / "assessment-summary.json"
+    return json.loads(p.read_text()) if r.returncode == 0 and p.exists() else None
+
+
+# objectives whose failing evidence blocks a prod promotion when the app requires an assessment;
+# an uncovered objective or a missing release to IT Security is shown, never blocking
+BLOCKING_KINDS = ("findings", "scan", "sbom", "ci-result", "gate", "vuln-db", "attested")
+
+
+def assessment_blockers(summary: dict | None) -> list[str]:
+    if summary is None:
+        return ["no self-assessment could be made"]
+    out = []
+    for o in summary["objectives"]:
+        if o["state"] == "satisfied" or o["coverage"] in ("uncovered", "not-applicable"):
+            continue
+        bad = [e for e in o["evidence"] if not e["holds"] and (e["selector"] or "").split(":")[0] in BLOCKING_KINDS]
+        if bad:
+            out.append(f"{o['id']} ({bad[0]['found']})")
+    return out
+
+
+def requires_assessment(root: Path, app: str) -> bool:
+    comp = compliance_dir(root)
+    p = comp / "apps" / app / "app.yaml" if comp else None
+    return bool(p and p.exists() and ((load_yaml(p) or {}).get("promotion") or {}).get("require_assessment"))
+
+
+def small_record(rec: dict) -> dict:
+    small = {k: rec.get(k) for k in ("schema", "app", "image", "commit", "generated", "scans", "gate", "external")}
+    small["findings"] = [f for f in rec.get("findings", []) if f["outcome"] in ("fail", "suppressed")]
+    return small
+
+
 def security_of(root: Path, promo_dir: Path, promo: dict, cl: dict) -> tuple[bool, str]:
     """Re-scan the pinned image and gate it, with the source findings recorded at build time,
-    under the prod policy (enforce). Writes security-record.json into the promotion directory."""
+    under the prod policy (enforce), with IT Security's findings and advisories from the
+    compliance repo; then the OSCAL self-assessment, which blocks too if the app requires it.
+    Writes security-record.json and evidence/ into the promotion directory."""
     if os.environ.get("CICD_SKIP_SECURITY_CHECK") == "1":
         return True, "security check skipped (CICD_SKIP_SECURITY_CHECK=1)"
     tools = Path(__file__).resolve().parent / "security.py"
@@ -442,21 +540,87 @@ def security_of(root: Path, promo_dir: Path, promo: dict, cl: dict) -> tuple[boo
         findings += ["--findings", str(work / "findings-image.json")]
     if not findings:
         return False, "no security findings could be produced"
+    # endpoint checks look at the source environment: it runs this very image
+    src_meta = root / "envs" / promo["cluster"] / promo["app"] / promo["from"] / "cicd-env.yaml"
+    host = (load_yaml(src_meta).get("hosts") or [None])[0] if src_meta.exists() else None
+    ev = promo_dir / "evidence"
+    ev.mkdir(exist_ok=True)
     rc = subprocess.run([sys.executable, str(tools), "gate", "--env", promo["to"], *findings,
                          "--policy", str(root / "security" / "policy.yaml"),
                          "--app-policy", str(sup / "policy.yaml"), "--app-name", promo["app"],
                          "--image", image, "--commit", str(promo.get("commit") or ""),
-                         "--out", str(work / "security.json")], stdout=sys.stderr).returncode
+                         *gate_args(root, cl, promo["app"], work / "sbom.cdx.json", host, None),
+                         "--out", str(work / "security.json"), "--ci-result", str(ev / "ci-result-security.json")],
+                        stdout=sys.stderr).returncode
     rec = json.loads((work / "security.json").read_text())
-    small = {k: rec.get(k) for k in ("schema", "app", "image", "commit", "generated", "scans", "gate")}
-    small["findings"] = [f for f in rec["findings"] if f["outcome"] in ("fail", "suppressed")]
-    write(promo_dir / "security-record.json", json.dumps(small, indent=2) + "\n")
+    write(promo_dir / "security-record.json", json.dumps(small_record(rec), indent=2) + "\n")
+    for name in ("security.json", "sbom.cdx.json"):
+        if (work / name).exists():
+            shutil.copy(work / name, ev / name)
+    shutil.copy(promo_dir / "app.yaml", ev / "app.yaml")
+    summary = assess_into(root, promo["app"], promo["to"], ev, promo.get("commit"), image)
+    (ev / "app.yaml").unlink()
     g = rec["gate"]
     counts = ", ".join(f"{k} {v}" for k, v in sorted(g["counts"].items()))
+    assessed = (f"; self-assessment {summary['counts']['satisfied']}/{len(summary['objectives'])} satisfied"
+                if summary else "")
     if rc != 0:
         bad = [f"{f['category']}/{f['rule']}" for f in rec["findings"] if f["outcome"] == "fail"][:5]
-        return False, f"security gate {g['status']} ({g['blocking']} blocking: {', '.join(bad)})"
-    return True, f"security gate {g['status']} ({counts})"
+        return False, f"security gate {g['status']} ({g['blocking']} blocking: {', '.join(bad)}){assessed}"
+    if requires_assessment(root, promo["app"]):
+        blockers = assessment_blockers(summary)
+        if blockers:
+            return False, f"security gate {g['status']}, but the required self-assessment has blockers: {'; '.join(blockers[:4])}"
+    return True, f"security gate {g['status']} ({counts}){assessed}"
+
+
+def reassess(root: Path, args) -> list[str]:
+    """Re-scan each environment's kept SBOM, re-gate it with IT Security's findings and the
+    advisories as they are now, and re-assess it. Changes envs/*/security-record.json and evidence/."""
+    tools = Path(__file__).resolve().parent / "security.py"
+    cl = load_cluster(root, args.cluster)
+    done = []
+    for meta_path in sorted((root / "envs" / args.cluster).glob("*/*/cicd-env.yaml")):
+        env_dir = meta_path.parent
+        app, env_name = env_dir.parent.name, env_dir.name
+        if args.app not in ("all", app) or args.env not in ("all", env_name):
+            continue
+        ev = env_dir / "evidence"
+        if not (ev / "sbom.cdx.json").exists():
+            print(f"{app}/{env_name}: no kept SBOM (built before evidence was kept): skipped")
+            continue
+        meta = load_yaml(meta_path)
+        kind = meta.get("env", "dev")
+        work = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / f"reassess-{app}-{env_name}"
+        shutil.rmtree(work, ignore_errors=True)
+        work.mkdir(parents=True)
+        sup = env_dir / "suppressions"
+        subprocess.run([sys.executable, str(tools), "scan-sbom", "--sbom", str(ev / "sbom.cdx.json"),
+                        "--digest", meta["image"], "--vex", str(sup / "vex.openvex.json"), "--out", str(work)],
+                       stdout=sys.stderr)
+        findings = [x for n in ("findings-source.json",) if (env_dir / n).exists() for x in ("--findings", str(env_dir / n))]
+        if (work / "findings-image.json").exists():
+            findings += ["--findings", str(work / "findings-image.json")]
+        host = (meta.get("hosts") or [None])[0]
+        subprocess.run([sys.executable, str(tools), "gate", "--env", kind, *findings,
+                        "--policy", str(root / "security" / "policy.yaml"), "--app-policy", str(sup / "policy.yaml"),
+                        "--app-name", app, "--image", meta["image"], "--commit", str(meta.get("commit") or ""),
+                        *gate_args(root, cl, app, ev / "sbom.cdx.json", host, args.skip_endpoints),
+                        "--out", str(ev / "security.json"), "--ci-result", str(ev / "ci-result-security.json")],
+                       stdout=subprocess.DEVNULL)
+        rec = json.loads((ev / "security.json").read_text())
+        write(env_dir / "security-record.json", json.dumps(small_record(rec), indent=2) + "\n")
+        shutil.copy(env_dir / "app.yaml", ev / "app.yaml")
+        summary = assess_into(root, app, kind, ev, meta.get("commit"), meta["image"], quiet=True)
+        (ev / "app.yaml").unlink()
+        g = rec["gate"]
+        ext = rec.get("external") or []
+        line = (f"{app}/{env_name}: gate {g['status']} ({g['blocking']} blocking)"
+                + (f", external {sum(t['result'] == 'fail' for t in ext)} failing of {len(ext)}" if ext else "")
+                + (f", self-assessment {summary['counts']['satisfied']}/{len(summary['objectives'])}" if summary else ""))
+        print(line)
+        done.append(line)
+    return done
 
 
 def apply_due(root: Path, args) -> tuple[int, int]:
@@ -498,6 +662,8 @@ def apply_due(root: Path, args) -> tuple[int, int]:
                 shutil.copy(d / extra, out_env / extra)
         if (d / "suppressions").is_dir():
             shutil.copytree(d / "suppressions", out_env / "suppressions")
+        if (d / "evidence").is_dir():
+            shutil.copytree(d / "evidence", out_env / "evidence")
         done = root / "promotions" / "done" / d.name
         done.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(d), str(done))
@@ -717,6 +883,17 @@ def main():
     a = sub.add_parser("apply-due")
     a.add_argument("--cluster", required=True)
 
+    ae = sub.add_parser("assess-evidence", help="OSCAL self-assessment of one build's evidence directory")
+    ae.add_argument("--app", required=True)
+    ae.add_argument("--env", required=True)
+    ae.add_argument("--evidence", required=True)
+    ae.add_argument("--commit")
+    ae.add_argument("--image")
+    ra = sub.add_parser("reassess", help="re-gate and re-assess environments from their kept evidence")
+    ra.add_argument("--cluster", required=True)
+    ra.add_argument("--app", default="all")
+    ra.add_argument("--env", default="all", help="an environment directory name (dev, prod, branch-...), or all")
+    ra.add_argument("--skip-endpoints", help="don't probe endpoints, and say why")
     g = sub.add_parser("gc")
     g.add_argument("--cluster", required=True)
     g.add_argument("--remote", default="origin", help="git remote (or URL) whose branches count")
@@ -770,6 +947,14 @@ def main():
             sys.exit(3)  # the job goes red; anything applied is still written for the caller to commit
     elif args.cmd == "gc":
         print(f"removed {gc(root, args)}")
+    elif args.cmd == "assess-evidence":
+        summary = assess_into(root, args.app, args.env, Path(args.evidence), args.commit, args.image)
+        if summary is None:
+            sys.exit("no self-assessment: no compliance repo checkout, or oscal.py failed")
+    elif args.cmd == "reassess":
+        if compliance_dir(root) is None:
+            print("no compliance repo checkout (.compliance or CICD_COMPLIANCE_DIR): gates without IT Security's findings")
+        print(f"reassessed {len(reassess(root, args))}")
 
 
 if __name__ == "__main__":

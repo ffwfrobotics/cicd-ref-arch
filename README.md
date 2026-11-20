@@ -17,6 +17,7 @@ The demo story, end to end:
    - Dev and branch deploys report findings and go ahead. A secret is the exception: it stops any deploy, and a forge hook refuses it at push.
    - A prod promotion is re-scanned and refused if it fails the policy.
    - False positives are records with a reason and an expiry, never code changes, and the promotion PR shows them. See [docs/security.md](docs/security.md).
+   - Every build also makes the commit's OSCAL self-assessment; IT Security's findings, imported by the owner, become failing tests without a developer PR; advisories re-scan only the environments they affect. See [docs/oscal.md](docs/oscal.md).
 5. **Approved, scheduled promotion.**
    - A person requests promotion of a dev build to `<app>.<cluster>.<zone>` and/or a custom domain, with a not-before time.
    - A different person approves the pull request.
@@ -30,7 +31,7 @@ Agents that turn CI results into pull requests are out of scope. They come next,
 
 | Path | What it holds |
 |---|---|
-| [`docs/`](docs/) | [architecture](docs/architecture.md), [the app contract](docs/contract.md), [promotion](docs/promotion.md), [security](docs/security.md), [enrolling an app](docs/enroll.md), [demo runbook](docs/demo.md), [decisions and open questions](docs/decisions.md) |
+| [`docs/`](docs/) | [architecture](docs/architecture.md), [the app contract](docs/contract.md), [promotion](docs/promotion.md), [security](docs/security.md), [continuous self-assessment (OSCAL)](docs/oscal.md), [enrolling an app](docs/enroll.md), [demo runbook](docs/demo.md), [decisions and open questions](docs/decisions.md) |
 | `platform/` | Cluster add-ons the pipeline relies on: Gateway API with Traefik, KEDA with the HTTP add-on, BuildKit. Applied by Flux. |
 | `clusters/<name>/` | Flux entry points for one cluster: the platform, plus the environments CI writes. |
 | `envs/<cluster>/<app>/<env>/` | **Written by CI, never by hand.** One directory per running environment. Deleting one removes the environment (Flux prune). |

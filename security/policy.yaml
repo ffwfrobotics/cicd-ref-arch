@@ -11,6 +11,7 @@ categories:
   vuln:    {fail_at: high, require_fix: true}     # high and critical CVEs that have a fixed version
   sast:    {fail_at: high}                        # opengrep rule severity ERROR
   config:  {fail_at: high}                        # checkov: every failed check counts as high
+  external: {fail_at: low}                        # IT Security's findings (compliance repo ledger): only the owner can accept
   tooling: {fail_at: low}                         # a scanner that produced no output
 # Checks the platform satisfies itself when it renders an environment, so an app never has to.
 ignore:

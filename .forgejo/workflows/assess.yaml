@@ -1,0 +1,58 @@
+# Continuous self-assessment (docs/oscal.md): re-gate and re-assess environments from the evidence
+# they keep (SBOM, source findings, test records), without rebuilding anything.
+#  - when the dashboard changes the compliance repo: IT Security's findings imported, closed or
+#    accepted, an advisory announced (it dispatches this for the affected environments only)
+#  - after a deploy whose app has endpoint checks (the app's pipeline dispatches it)
+#  - daily, for every environment: the vulnerability database has news
+name: assess
+on:
+  schedule: [{cron: "17 5 * * *"}]
+  workflow_dispatch:
+    inputs:
+      app: {description: "an app, or all", default: all}
+      env: {description: "an environment directory (dev, prod, branch-...), or all", default: all}
+      reason: {description: "why (recorded in the commit)", default: ""}
+      delay: {description: "seconds to wait first (a deploy rolling out)", default: "0"}
+
+env:
+  CLUSTER: ${{ vars.CICD_CLUSTER || 'c-local' }}
+
+jobs:
+  assess:
+    runs-on: ffwf-k8s
+    concurrency: {group: assess, cancel-in-progress: false}
+    steps:
+    - uses: actions/checkout@v4
+      with: {persist-credentials: false}
+    - uses: ./actions/setup
+    - name: reassess
+      env:
+        FORGEJO_TOKEN: ${{ secrets.CICD_BOT_TOKEN }}
+        BOT: ${{ vars.CICD_BOT_USER }}
+        APP: ${{ inputs.app || 'all' }}
+        ENV_DIR: ${{ inputs.env || 'all' }}
+        REASON: ${{ inputs.reason || 'daily' }}
+        DELAY: ${{ inputs.delay || '0' }}
+      run: |
+        set -eu
+        case "$DELAY" in ''|*[!0-9]*) DELAY=0 ;; esac
+        [ "$DELAY" -le 600 ] || DELAY=600
+        sleep "$DELAY"
+        auth="AUTHORIZATION: basic $(printf '%s:%s' "$BOT" "$FORGEJO_TOKEN" | base64 -w0)"
+        git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
+        read -r crepo cbranch < <(python3 -c "import yaml;c=yaml.safe_load(open('clusters/$CLUSTER/cicd-cluster.yaml')).get('compliance') or {};print(c.get('repo','-'),c.get('branch','main'))")
+        for attempt in 1 2 3 4 5; do
+          git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
+          rm -rf .compliance
+          git clone -q --depth 1 -b "$cbranch" "${{ github.server_url }}/$crepo.git" .compliance
+          echo "compliance repo $crepo at $(git -C .compliance rev-parse --short HEAD)"
+          python3 tools/cicd.py reassess --cluster "$CLUSTER" --app "$APP" --env "$ENV_DIR" | tee assess.log
+          git add -A envs
+          if git diff --cached --quiet; then echo "nothing changed"; break; fi
+          git commit -q -m "assess: $(grep -c ': gate' assess.log || true) environments ($REASON)" \
+            -m "$(grep ': gate' assess.log || true)" -m "compliance $crepo@$(git -C .compliance rev-parse --short HEAD)"
+          git -c http.extraHeader="$auth" push -q origin HEAD:master && break
+          [ "$attempt" = 5 ] && exit 1
+          sleep $((attempt * 3))
+        done
+        { echo "### Self-assessment ($REASON)"; echo '```'; cat assess.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

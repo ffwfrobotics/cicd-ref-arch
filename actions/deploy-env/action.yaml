@@ -15,6 +15,7 @@ inputs:
   security-dir: {description: "actions/security output, kept with the environment", default: build/security}
 outputs:
   hosts: {value: "${{ steps.deploy.outputs.hosts }}"}
+  env-dir: {description: "the environment's directory name (dev, branch-...)", value: "${{ steps.deploy.outputs.env-dir }}"}
 runs:
   using: composite
   steps:
@@ -39,9 +40,9 @@ runs:
       run_url="$server/${{ github.repository }}/actions/runs/${{ github.run_number }}"
       for attempt in 1 2 3 4 5; do
         git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
-        python3 "$cicd/tools/cicd.py" render "$app_cfg" --env '${{ inputs.env }}' \
+        envdir=$(python3 "$cicd/tools/cicd.py" render "$app_cfg" --env '${{ inputs.env }}' \
           --branch '${{ inputs.branch }}' --cluster '${{ inputs.cluster }}' --image '${{ inputs.image }}' \
-          --manifests .manifests.yaml --commit '${{ github.sha }}' --repo '${{ github.repository }}' --run-url "$run_url" --security-dir "$sec" >/dev/null
+          --manifests .manifests.yaml --commit '${{ github.sha }}' --repo '${{ github.repository }}' --run-url "$run_url" --security-dir "$sec" | tail -1)
         git add -A envs
         if git diff --cached --quiet; then echo "environment unchanged"; break; fi
         git commit -q -m "deploy ${{ inputs.env }}: $(python3 -c "import yaml,sys;print(yaml.safe_load(open(sys.argv[1]))['metadata']['name'])" "$app_cfg") ${{ inputs.image }}" \
@@ -54,4 +55,5 @@ runs:
         --branch '${{ inputs.branch }}' --cluster '${{ inputs.cluster }}' \
         --zone "$(python3 -c "import yaml;print(yaml.safe_load(open('$cicd/clusters/${{ inputs.cluster }}/cicd-cluster.yaml'))['zone'])")" | paste -sd' ')
       echo "hosts=$hosts" >> "$GITHUB_OUTPUT"
+      echo "env-dir=$(basename "$envdir")" >> "$GITHUB_OUTPUT"
       for h in $hosts; do echo "environment: https://$h/"; done

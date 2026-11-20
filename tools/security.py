@@ -3,7 +3,10 @@
 
   scan-source  secrets (gitleaks), code (opengrep) and config (checkov) of an app's tree
   scan-image   SBOM (syft) of a built image, then known vulnerabilities (grype) with the app's VEX
-  gate         findings + policy + environment -> security record, ci-result/v1 record, exit code
+  scan-sbom    grype over an SBOM kept from an earlier build (re-assessment without the image)
+  gate         findings + policy + environment -> security record, ci-result/v1 record, exit code;
+               with --ledger/--advisories also IT Security's findings and announced vulnerabilities
+               from the compliance repo, each one a test against this commit (tools/external.py)
 
 Every scanner reports and never fails on its own: only `gate` decides. Native scanner output is kept
 next to the normalised findings as evidence. Policy is the platform's floor (security/policy.yaml in
@@ -28,7 +31,7 @@ import yaml
 
 SCHEMA = "security-findings/v1"
 SEVERITY = {"critical": 4, "high": 3, "medium": 2, "low": 1, "negligible": 0, "info": 0, "unknown": 0}
-CATEGORIES = ("secrets", "sast", "config", "vuln", "tooling")
+CATEGORIES = ("secrets", "sast", "config", "vuln", "external", "tooling")
 ENV_KINDS = ("dev", "branch", "prod")
 SOURCE_TOOLS = ("gitleaks", "opengrep", "checkov")
 IMAGE_TOOLS = ("syft", "grype")
@@ -232,6 +235,26 @@ def scan_image(args) -> int:
     return write_findings(out / "findings-image.json", "image", findings, tools, evidence, out, args)
 
 
+def scan_sbom(args) -> int:
+    """grype over an SBOM kept from an earlier build: a re-scan without the image (re-assessment)."""
+    out = Path(args.out).resolve(); out.mkdir(parents=True, exist_ok=True)
+    findings, tools, evidence = [], {}, {}
+    gr = out / "grype.json"
+    vex = [x for v in args.vex or [] if v and Path(v).exists() for x in ("--vex", v)]
+    run(["grype", f"sbom:{Path(args.sbom).resolve()}", *vex, "-q", "-o", "json", "--file", str(gr)], expect=gr)
+    if gr.exists():
+        findings += parse_grype(gr)
+        tools["syft"] = "(SBOM kept from the build)"
+        tools["grype"] = tool_version(["grype", "version"])
+        db = subprocess.run(["grype", "db", "status", "-o", "json"], capture_output=True, text=True).stdout
+        try:
+            tools["grype-db"] = json.loads(db).get("built", "?")
+        except json.JSONDecodeError:
+            pass
+        evidence["grype"] = gr.name
+    return write_findings(out / "findings-image.json", "image", findings, tools, evidence, out, args)
+
+
 def write_findings(path: Path, scope: str, findings, tools, evidence, out: Path, args) -> int:
     rec = {"schema": SCHEMA, "scope": scope, "generated": now(),
            "commit": os.environ.get("GITHUB_SHA") or getattr(args, "commit", None),
@@ -282,6 +305,8 @@ def load_policy(platform: Path, app: Path | None) -> tuple[dict, list[str]]:
 def match_ignore(f: dict, ignores: list[dict], today: dt.date):
     """(active ignore, expired ignore) that match this finding."""
     expired = None
+    if f["category"] == "external":   # only the owner's security role can waive these, in the ledger
+        return None, None
     for i in ignores:
         if i.get("category") and i["category"] != f["category"]:
             continue
@@ -353,13 +378,25 @@ def load_findings(paths: list[str]) -> tuple[list[dict], list[str], dict]:
 
 def cmd_gate(args) -> int:
     pol, notes = load_policy(Path(args.policy), Path(args.app_policy) if args.app_policy else None)
+    pol["categories"].setdefault("external", {"fail_at": "low"})
     findings, tools, meta = load_findings(args.findings)
     expected = [t for t in args.expect.split(",") if t] if args.expect else []
+    tests = None
+    if args.ledger or args.advisories:
+        import external  # noqa: PLC0415
+        ctx = {"packages": external.sbom_packages(Path(args.sbom) if args.sbom else None), "raw_findings": findings,
+               "host": args.host, "via": args.via, "skip_endpoints": args.skip_endpoints, "app": args.app_name}
+        ext, tests = external.external_findings(external.load_ledger(Path(args.ledger) if args.ledger else None),
+                                                external.load_advisories(Path(args.advisories) if args.advisories else None),
+                                                ctx, dt.datetime.now(dt.timezone.utc).date())
+        findings = findings + ext
     res = gate(findings, pol, args.env, expected, tools)
     res["notes"] = notes
     rec = {"schema": SCHEMA, "app": args.app_name, "image": args.image, "commit": args.commit or os.environ.get("GITHUB_SHA"),
            "generated": now(), "scans": meta, "gate": {k: v for k, v in res.items() if k != "findings"},
            "findings": res["findings"]}
+    if tests is not None:
+        rec["external"] = tests
     out = Path(args.out); out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(rec, indent=2) + "\n")
     if args.ci_result:
@@ -385,6 +422,7 @@ def write_ci_result(path: Path, rec: dict):
                       "category": f["category"], "message": f["message"]} for f in fails[:50]],
         "security": {"env": g["env"], "mode": g["mode"], "blocking": g["blocking"], "counts": g["counts"],
                      "image": rec.get("image")},
+        "external": rec.get("external") or [],
         "run_url": f"{server}/{repo}/actions/runs/{env.get('GITHUB_RUN_NUMBER', '')}" if server else None,
     }, indent=2) + "\n")
 
@@ -394,6 +432,8 @@ def print_summary(rec: dict):
     print(f"security gate: {g['status'].upper()} (env {g['env']}, mode {g['mode']}, blocking {g['blocking']}) {g['counts']}")
     for n in g.get("notes", []):
         print(f"  note: {n}")
+    for t in rec.get("external") or []:
+        print(f"  test {t['result']:<8} {t['test']:<28} {t['detail']}")
     order = {"fail": 0, "suppressed": 1, "no-fix-available": 2, "below-threshold": 3}
     shown = [f for f in rec["findings"] if f["outcome"] in ("fail", "suppressed")
              or (f["outcome"] == "no-fix-available" and SEVERITY.get(f["severity"], 0) >= 4)]
@@ -419,6 +459,10 @@ def summary_markdown(rec: dict, limit: int = 30) -> str:
     g = rec["gate"]
     lines = [f"**Security gate: {g['status']}** (environment `{g['env']}`, mode `{g['mode']}`, "
              f"{g['blocking']} blocking). Counts: " + ", ".join(f"{k} {v}" for k, v in sorted(g["counts"].items())), ""]
+    ext = rec.get("external") or []
+    if ext:
+        lines += ["IT Security's findings and announced vulnerabilities, as tests:", "", "| test | result | detail |", "|---|---|---|"]
+        lines += [f"| `{t['test']}` | {t['result']} | {t['detail']} |" for t in ext] + [""]
     shown = [f for f in rec["findings"] if f["outcome"] in ("fail", "suppressed")]
     if shown:
         lines += ["| outcome | severity | category | rule | where | note |", "|---|---|---|---|---|---|"]
@@ -447,6 +491,11 @@ def main():
     i.add_argument("--name")
     i.add_argument("--vex", action="append")
     i.add_argument("--out", default="build/security")
+    b = sub.add_parser("scan-sbom", help="grype over a kept SBOM (re-assessment, no image needed)")
+    b.add_argument("--sbom", required=True)
+    b.add_argument("--digest", help="the image reference to record")
+    b.add_argument("--vex", action="append")
+    b.add_argument("--out", default="build/security")
     g = sub.add_parser("gate")
     g.add_argument("--findings", action="append", required=True)
     g.add_argument("--env", required=True, choices=ENV_KINDS)
@@ -458,6 +507,12 @@ def main():
     g.add_argument("--commit")
     g.add_argument("--out", required=True)
     g.add_argument("--ci-result")
+    g.add_argument("--ledger", help="ledger/<app>.yaml of the compliance repo: IT Security's findings")
+    g.add_argument("--advisories", help="advisories/ of the compliance repo")
+    g.add_argument("--sbom", help="the image's CycloneDX SBOM, for package checks and advisories")
+    g.add_argument("--host", help="the environment's host name, for endpoint checks")
+    g.add_argument("--via", help="connect endpoint checks to this address[:port] (the cluster gateway)")
+    g.add_argument("--skip-endpoints", help="don't probe endpoints, and say why (e.g. not deployed yet)")
     m = sub.add_parser("summary", help="Markdown summary of a security record")
     m.add_argument("record")
     a = ap.parse_args()
@@ -465,6 +520,8 @@ def main():
         sys.exit(scan_source(a))
     if a.cmd == "scan-image":
         sys.exit(scan_image(a))
+    if a.cmd == "scan-sbom":
+        sys.exit(scan_sbom(a))
     if a.cmd == "gate":
         sys.exit(cmd_gate(a))
     if a.cmd == "summary":

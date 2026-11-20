@@ -37,10 +37,26 @@ runs:
       dir=$(python3 "$cicd/tools/cicd.py" request-promotion --app "$app" --cluster "$cluster" \
         --from '${{ inputs.from }}' ${nb:+--not-before "$nb"} --requested-by "$who" --reason "$REASON")
       id=$(basename "$dir")
+      # the compliance repo: IT Security's findings and advisories are part of the prod gate
+      read -r crepo cbranch < <(python3 -c "import yaml,sys;c=yaml.safe_load(open(sys.argv[1])).get('compliance') or {};print(c.get('repo','-'),c.get('branch','main'))" "clusters/$cluster/cicd-cluster.yaml")
+      git clone -q --depth 1 -b "$cbranch" "$server/$crepo.git" .compliance 2>/dev/null || echo "no compliance repo $crepo"
       # re-scan the pinned image with today's vulnerability data and gate it as prod will
       sec_rc=0; sec=$(python3 "$cicd/tools/cicd.py" check-security "$dir" --cluster "$cluster") || sec_rc=$?
       echo "$sec"
       sec_md=$(python3 "$cicd/tools/security.py" summary "$dir/security-record.json" 2>/dev/null || echo "no security record")
+      assess_md=$(python3 - "$dir/evidence/assessment-summary.json" <<'PY' 2>/dev/null || echo "no self-assessment (no compliance repo)"
+      import json, sys
+      s = json.load(open(sys.argv[1]))
+      c, cov = s["counts"], s["coverage"]
+      print(f"**{c['satisfied']} of {len(s['objectives'])} objectives satisfied** (" + ", ".join(f"{v} {k}" for k, v in sorted(cov.items())) + ")\n")
+      bad = [o for o in s["objectives"] if o["state"] != "satisfied"]
+      if bad:
+          print("| objective | coverage | why |\n|---|---|---|")
+          for o in bad:
+              why = "; ".join(e["found"] for e in o["evidence"] if not e["holds"]) or o["reason"]
+              print(f"| `{o['id']}` | {o['coverage']} | {why} |")
+      PY
+      )
       prod="envs/$cluster/$app/prod/suppressions"
       sup_diff=$(diff -ruN "$prod" "$(realpath --relative-to=. "$dir")/suppressions" 2>/dev/null | grep -v '^diff -ruN' || true)
       git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
@@ -48,8 +64,8 @@ runs:
       git add "$dir"
       git commit -q -m "promote $app ${{ inputs.from }} -> prod ($id)" -m "requested by $who: $REASON"
       git -c http.extraHeader="$auth" push -q origin "promote/$id"
-      body=$(jq -n --arg id "$id" --arg p "$(cat "$dir/promotion.yaml")" --arg sec "$sec_md" --arg diff "${sup_diff:-no changes}" --arg who "$who" \
-        '"Promotion request `\($id)`, requested by **\($who)**.\n\n```yaml\n\($p)\n```\n\nApproving and merging this queues it; the `environments` workflow applies it at or after `notBefore`. The approval or the merge must come from someone other than \($who).\n\n`app.yaml` in this PR is exactly what will run in prod.\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\n\nThe `environments` workflow scans the image again when it applies the promotion, and refuses it if the gate fails then.\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
+      body=$(jq -n --arg id "$id" --arg p "$(cat "$dir/promotion.yaml")" --arg sec "$sec_md" --arg diff "${sup_diff:-no changes}" --arg who "$who" --arg assess "$assess_md" \
+        '"Promotion request `\($id)`, requested by **\($who)**.\n\n```yaml\n\($p)\n```\n\nApproving and merging this queues it; the `environments` workflow applies it at or after `notBefore`. The approval or the merge must come from someone other than \($who).\n\n`app.yaml` in this PR is exactly what will run in prod.\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\n\nThe `environments` workflow scans the image again when it applies the promotion, and refuses it if the gate fails then.\n\n## Self-assessment (OSCAL, the owner'"'"'s evidence)\n\n\($assess)\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
       title="Promote $app to prod ($id)"; [ "$sec_rc" = 0 ] || title="[security: fail] $title"
       url=$(jq -n --arg head "promote/$id" --arg title "$title" --argjson body "$body" \
         '{head: $head, base: "master", title: $title, body: $body}' \
