@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fxp-bump-src-4553d97
+  labels:
+    cicd.ffwf.net/app: fxp
+    cicd.ffwf.net/env: branch-bump-src-4553d97
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
