@@ -90,32 +90,70 @@ def generate(work: Path, app: str, source: str, d: dict, update: str) -> list[st
     return out
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--app", required=True)
-    ap.add_argument("--source", required=True, help="owner/name of the source repo on this forge")
-    ap.add_argument("--branch", help="the source branch that maps to the IaC repo's dev branch (default: its default)")
-    ap.add_argument("--update", default="follow", choices=cicd.UPDATES)
-    ap.add_argument("--org", default="ffwf-iac")
-    ap.add_argument("--tenant", default="ffwf")
-    ap.add_argument("--cluster", action="append", default=[])
-    ap.add_argument("--hook-url", default=os.environ.get("CICD_HOOK_URL", ""))
-    ap.add_argument("--requested-by", default="")
-    ap.add_argument("--approved", action="store_true", help="enroll as approved (an admin running this); default pending")
-    ap.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
-    ap.add_argument("--root", default=str(ROOT), help="the platform repo checkout to write tenants/<app>.yaml into")
-    a = ap.parse_args()
-    if not cicd.re.fullmatch(r"[a-z0-9][a-z0-9-]{0,62}", a.app):
-        sys.exit("bad app name")
-    token = os.environ.get("FORGEJO_TOKEN") or sys.exit("FORGEJO_TOKEN is not set")
-    user = os.environ.get("BOT", "cicd-bot")
-    hook_secret = os.environ.get("CICD_HOOK_SECRET", "")
-    if a.hook_url and not hook_secret:
-        sys.exit("CICD_HOOK_SECRET is not set (needed with --hook-url)")
-    root = Path(a.root)
-    if (root / "tenants" / f"{a.app}.yaml").exists():
-        sys.exit(f"{a.app} is already enrolled")
+def hooks(server: str, token: str, hook_url: str, secret: str, repos: list[str]):
+    for repo in repos:
+        cfg = {"url": hook_url, "content_type": "json", "secret": secret}
+        code, have = cicd.api("GET", server, f"/repos/{repo}/hooks", token)
+        same = [h for h in (have if code == 200 else []) if (h.get("config") or {}).get("url") == hook_url]
+        if same:
+            code, _ = cicd.api("PATCH", server, f"/repos/{repo}/hooks/{same[0]['id']}", token, {
+                "active": True, "events": ["push", "delete"], "branch_filter": "*", "config": cfg})
+        else:
+            code, _ = cicd.api("POST", server, f"/repos/{repo}/hooks", token, {
+                "type": "forgejo", "active": True, "events": ["push", "delete"], "branch_filter": "*", "config": cfg})
+        print(f"webhook on {repo}: {code}")
 
+
+def write_tenant(root: Path, a, spec: dict, note: str):
+    spec = {"kind": "App", "tenant": a.tenant, **spec, "clusters": a.cluster or ["c-local"],
+            "enrolled": cicd.now_utc().date().isoformat()}
+    if not a.approved:
+        spec["status"] = "pending"
+    if a.requested_by:
+        spec["requestedBy"] = a.requested_by
+    t = {"apiVersion": cicd.API, "kind": "Tenant", "metadata": {"name": a.app}, "spec": spec}
+    cicd.tenant_spec(t)   # checks it
+    (root / "tenants").mkdir(exist_ok=True)
+    (root / "tenants" / f"{a.app}.yaml").write_text(f"# {note} (docs/enrollment.md)\n" + yaml.safe_dump(t, sort_keys=False))
+    print(f"wrote tenants/{a.app}.yaml ({'approved' if a.approved else 'pending'}): commit and push it")
+
+
+def submodules(gitmodules: str, repo: str) -> dict[str, str]:
+    """path -> owner/name, for .gitmodules entries that point at this forge (relative or absolute URLs)."""
+    out, cur = {}, {}
+    for line in gitmodules.splitlines() + ["[end]"]:
+        line = line.strip()
+        if line.startswith("["):
+            if cur.get("path") and cur.get("url"):
+                u = cur["url"]
+                if u.startswith(("../", "./")):
+                    full = os.path.normpath(os.path.join("/" + repo, u))
+                else:
+                    full = "/" + "/".join(u.split("://", 1)[-1].split("/")[1:])
+                full = full[:-4] if full.endswith(".git") else full
+                parts = full.strip("/").split("/")
+                if len(parts) >= 2:
+                    out[cur["path"]] = "/".join(parts[-2:])
+            cur = {}
+        elif "=" in line:
+            k, v = (x.strip() for x in line.split("=", 1))
+            cur[k] = v
+    return out
+
+
+def monorepo_sources(repo: str, path: str, context: str, gitmodules: str, update: str) -> list[dict]:
+    """The submodules a monorepo project depends on: the one its build context is in, and the one its IaC
+    root is in (a config repo inside the monorepo)."""
+    subs = submodules(gitmodules, repo)
+    ctx = os.path.normpath(os.path.join(path, context))
+    out = []
+    for p, r in sorted(subs.items()):
+        if ctx == p or ctx.startswith(p + "/") or path == p or path.startswith(p + "/"):
+            out.append({"path": p, "repo": r, "branch": "main", "update": update})
+    return out
+
+
+def wrap_new(a, root: Path, token: str, hook_secret: str):
     code, src = cicd.api("GET", a.server, f"/repos/{a.source}", token)
     if code != 200:
         sys.exit(f"cannot read {a.source}: {code}")
@@ -134,6 +172,7 @@ def main():
         if branches:
             sys.exit(f"{iac} exists and has content: wrap only fills an empty repo")
 
+    user = os.environ.get("BOT", "cicd-bot")
     auth = "AUTHORIZATION: basic " + base64.b64encode(f"{user}:{token}".encode()).decode()
     work = Path(tempfile.mkdtemp(prefix=f"wrap-{a.app}-"))
     try:
@@ -144,8 +183,7 @@ def main():
         git("init", "-q", "-b", "main")
         git("submodule", "add", "-q", "-b", branch, f"{a.server.rstrip('/')}/{a.source}.git", "src")
         # a relative URL: the forge's own address (and any mirror of both repos) resolves it
-        rel = os.path.relpath(f"/{a.source}.git", f"/{iac}")
-        git("config", "-f", ".gitmodules", "submodule.src.url", rel)
+        git("config", "-f", ".gitmodules", "submodule.src.url", os.path.relpath(f"/{a.source}.git", f"/{iac}"))
         d = detect(work / "src")
         made = generate(work, a.app, a.source, d, a.update)
         sha = git("-C", "src", "rev-parse", "HEAD")
@@ -159,34 +197,75 @@ def main():
         print(f"pushed {iac}: src -> {a.source}@{sha[:7]}; {', '.join(made)}")
     finally:
         shutil.rmtree(work, ignore_errors=True)
-
     if a.hook_url:
-        for repo in (iac, a.source):
-            hook = {"type": "forgejo", "active": True, "events": ["push", "delete"], "branch_filter": "*",
-                    "config": {"url": a.hook_url, "content_type": "json", "secret": hook_secret}}
-            code, hooks = cicd.api("GET", a.server, f"/repos/{repo}/hooks", token)
-            same = [h for h in (hooks if code == 200 else []) if (h.get("config") or {}).get("url") == a.hook_url]
-            if same:
-                code, _ = cicd.api("PATCH", a.server, f"/repos/{repo}/hooks/{same[0]['id']}", token, {
-                    "active": True, "events": ["push", "delete"], "branch_filter": "*", "config": hook["config"]})
-            else:
-                code, _ = cicd.api("POST", a.server, f"/repos/{repo}/hooks", token, hook)
-            print(f"webhook on {repo}: {code}")
+        hooks(a.server, token, a.hook_url, hook_secret, [iac, a.source])
+    write_tenant(root, a, {"mode": "wrapped", "repo": iac, "path": ".",
+                           "sources": [{"path": "src", "repo": a.source, "branch": branch, "update": a.update}]},
+                 f"Wrapped by tools/wrap.py: built and deployed from {iac}, code from {a.source}")
 
-    spec = {"kind": "App", "mode": "wrapped", "tenant": a.tenant, "repo": iac, "path": ".",
-            "sources": [{"path": "src", "repo": a.source, "branch": branch, "update": a.update}],
-            "clusters": a.cluster or ["c-local"], "enrolled": cicd.now_utc().date().isoformat()}
-    if not a.approved:
-        spec["status"] = "pending"
-    if a.requested_by:
-        spec["requestedBy"] = a.requested_by
-    t = {"apiVersion": cicd.API, "kind": "Tenant", "metadata": {"name": a.app}, "spec": spec}
-    cicd.tenant_spec(t)   # checks it
-    (root / "tenants").mkdir(exist_ok=True)
-    (root / "tenants" / f"{a.app}.yaml").write_text(
-        f"# Wrapped by tools/wrap.py (docs/enrollment.md): built and deployed from {iac}, code from {a.source}.\n"
-        + yaml.safe_dump(t, sort_keys=False))
-    print(f"wrote tenants/{a.app}.yaml ({'approved' if a.approved else 'pending'}): commit and push it")
+
+def enroll_monorepo(a, root: Path, token: str, hook_secret: str):
+    """A project of a monorepo: the IaC root is a.path in a.repo; its sources are the submodules it builds from."""
+    code, _ = cicd.api("GET", a.server, f"/repos/{a.repo}", token)
+    if code != 200:
+        sys.exit(f"cannot read {a.repo}: {code}")
+    code, gm = cicd.api("GET", a.server, f"/repos/{a.repo}/raw/.gitmodules", token)
+    gm = gm if code == 200 and isinstance(gm, str) else ""
+    code, cfg = cicd.api("GET", a.server, f"/repos/{a.repo}/raw/{a.path}/cicd.yaml", token)
+    context = "."
+    if code == 200 and isinstance(cfg, str):
+        context = ((yaml.safe_load(cfg) or {}).get("spec", {}).get("build") or {}).get("context", ".")
+    else:
+        # the IaC root may be inside a config submodule: read it through that submodule's repo
+        for p, r in submodules(gm, a.repo).items():
+            if a.path.startswith(p + "/"):
+                c2, cfg = cicd.api("GET", a.server, f"/repos/{r}/raw/{a.path[len(p) + 1:]}/cicd.yaml", token)
+                if c2 == 200 and isinstance(cfg, str):
+                    context = ((yaml.safe_load(cfg) or {}).get("spec", {}).get("build") or {}).get("context", ".")
+                break
+    sources = monorepo_sources(a.repo, a.path, context, gm, a.update)
+    print(f"{a.repo}:{a.path}, context {context}: sources {', '.join(x['path'] + ' ' + x['repo'] for x in sources) or 'none'}")
+    if a.hook_url:
+        hooks(a.server, token, a.hook_url, hook_secret, [a.repo] + [x["repo"] for x in sources])
+    write_tenant(root, a, {"mode": "monorepo", "repo": a.repo, "path": a.path, "sources": sources},
+                 f"A project of the monorepo {a.repo} at {a.path}")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--app", required=True)
+    ap.add_argument("--mode", default="wrapped", choices=["wrapped", "monorepo"])
+    ap.add_argument("--source", help="wrapped: owner/name of the source repo on this forge")
+    ap.add_argument("--repo", help="monorepo: owner/name of the monorepo")
+    ap.add_argument("--path", help="monorepo: the project's IaC root in it, e.g. apps/api")
+    ap.add_argument("--branch", help="the source branch that maps to the IaC repo's dev branch (default: its default)")
+    ap.add_argument("--update", default="follow", choices=cicd.UPDATES)
+    ap.add_argument("--org", default="ffwf-iac")
+    ap.add_argument("--tenant", default="ffwf")
+    ap.add_argument("--cluster", action="append", default=[])
+    ap.add_argument("--hook-url", default=os.environ.get("CICD_HOOK_URL", ""))
+    ap.add_argument("--requested-by", default="")
+    ap.add_argument("--approved", action="store_true", help="enroll as approved (an admin running this); default pending")
+    ap.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
+    ap.add_argument("--root", default=str(ROOT), help="the platform repo checkout to write tenants/<app>.yaml into")
+    a = ap.parse_args()
+    if not cicd.re.fullmatch(r"[a-z0-9][a-z0-9-]{0,62}", a.app):
+        sys.exit("bad app name")
+    token = os.environ.get("FORGEJO_TOKEN") or sys.exit("FORGEJO_TOKEN is not set")
+    hook_secret = os.environ.get("CICD_HOOK_SECRET", "")
+    if a.hook_url and not hook_secret:
+        sys.exit("CICD_HOOK_SECRET is not set (needed with --hook-url)")
+    root = Path(a.root)
+    if (root / "tenants" / f"{a.app}.yaml").exists():
+        sys.exit(f"{a.app} is already enrolled")
+    if a.mode == "wrapped":
+        if not a.source:
+            sys.exit("--source is needed")
+        wrap_new(a, root, token, hook_secret)
+    else:
+        if not (a.repo and a.path):
+            sys.exit("--repo and --path are needed")
+        enroll_monorepo(a, root, token, hook_secret)
 
 
 if __name__ == "__main__":

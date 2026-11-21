@@ -196,3 +196,17 @@ class Detect(unittest.TestCase):
         self.assertEqual(dep["spec"]["template"]["spec"]["securityContext"]["runAsUser"], 101)
         self.assertEqual(dep["spec"]["template"]["spec"]["containers"][0]["ports"][0]["containerPort"], 8080)
         self.assertIn("Dockerfile (static)", made)
+
+
+class Monorepo(unittest.TestCase):
+    def test_sources_from_gitmodules(self):
+        import wrap  # noqa: PLC0415
+        gm = ('[submodule "svc-a"]\n\tpath = svc-a\n\turl = ../fx-svc-a.git\n'
+              '[submodule "config"]\n\tpath = config\n\turl = https://forge.example/ffwf-fixtures/fx-config.git\n'
+              '[submodule "other"]\n\tpath = other\n\turl = ../fx-other.git\n')
+        self.assertEqual(wrap.submodules(gm, "ffwf-fixtures/fx-mono"),
+                         {"svc-a": "ffwf-fixtures/fx-svc-a", "config": "ffwf-fixtures/fx-config", "other": "ffwf-fixtures/fx-other"})
+        inline = wrap.monorepo_sources("ffwf-fixtures/fx-mono", "apps/a", "../../svc-a", gm, "follow")
+        self.assertEqual([x["path"] for x in inline], ["svc-a"])
+        cfg = wrap.monorepo_sources("ffwf-fixtures/fx-mono", "config/apps/a", "../../../svc-a", gm, "pin")
+        self.assertEqual([(x["path"], x["update"]) for x in cfg], [("config", "pin"), ("svc-a", "pin")])

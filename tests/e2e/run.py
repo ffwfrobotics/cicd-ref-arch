@@ -397,6 +397,59 @@ def v6_monorepo_config_repo():
     check("48Mi" in str(app_yaml), "the rendered environment has the new request")
 
 
+def overlay_files(marker, prod_patch):
+    """fx-overlays: a direct app whose deploy-prod/ asks for more memory than dev."""
+    import fixtures
+    files = fixtures.iac_files("fxo", fixtures.source_dir(fixtures.fill(fixtures.SVC_A, marker)), ".")
+    files.update(fixtures.fill(fixtures.SVC_A, marker))
+    cfg = yaml.safe_load(files["cicd.yaml"])
+    cfg["spec"]["overlays"] = {"allow": ["resources"]}
+    files["cicd.yaml"] = yaml.safe_dump(cfg, sort_keys=False)
+    files["deploy-prod/kustomization.yaml"] = yaml.safe_dump({
+        "apiVersion": "kustomize.config.k8s.io/v1beta1", "kind": "Kustomization", "resources": ["../deploy"],
+        "patches": [{"target": {"kind": "Deployment", "name": "fxo"}, "patch": prod_patch}]})
+    return files
+
+
+BIGGER = "- op: replace\n  path: /spec/template/spec/containers/0/resources/requests/memory\n  value: 128Mi\n"
+BROKEN = "- op: replace\n  path: /spec/template/spec/nonsense/0/x\n  value: 1\n"
+
+
+@scenario
+def v2_overlays():
+    """fx-overlays (direct): dev runs the base, prod the deploy-prod/ overlay; the PR shows it; a broken overlay fails the push."""
+    import fixtures
+    app, repo = "fxo", fixtures.ensure_repo("fx-overlays")
+    unenroll(app)
+    enroll_record(app, {"repo": repo})
+    fixtures.hook(repo)
+    s1 = fixtures.write_tree(repo, overlay_files("o1", BIGGER), "fixture: overlays", reset=True)
+    dispatch(app=app, branch="main", sha=s1, action="deploy", actor="cicd-e2e")
+    meta, rt = deployed(app, "dev", s1, repo)
+    check(rt == "success", "dev runs")
+    dev_yaml = raw_state(f"envs/{CLUSTER}/{app}/dev/app.yaml")
+    prod_yaml = raw_state(f"envs/{CLUSTER}/{app}/dev/app-prod.yaml")
+    check("32Mi" in dev_yaml and "128Mi" not in dev_yaml, "dev runs the base's 32Mi request")
+    check("128Mi" in prod_yaml, "dev keeps the prod overlay built from the same commit")
+    dispatch(app=app, branch="main", sha=s1, action="request-promotion", actor="cicd-e2e")
+    pr = wait("the promotion PR", lambda: next((p for p in api("GET", f"/repos/{STATE}/pulls?state=open&limit=20")[1] or []
+                                               if p["head"]["ref"].startswith(f"promote/{app}-prod-")), None), timeout=600)
+    check("Prod differs from dev" in pr["body"] and "+" in pr["body"] and "128Mi" in pr["body"], "the PR shows prod's bigger request")
+    code, _ = api("POST", f"/repos/{STATE}/pulls/{pr['number']}/merge", {"Do": "merge", "MergeTitleField": pr["title"]})
+    check(code in (200, 204), f"merged promotion PR #{pr['number']}")
+    wait("prod to be applied", lambda: (env_meta_text(app, "prod") or {}).get("commit") == s1, timeout=900, every=20)
+    check("128Mi" in raw_state(f"envs/{CLUSTER}/{app}/prod/app.yaml"), "prod runs the overlay's 128Mi request")
+    code, ev = api("GET", f"/repos/{STATE}/raw/envs/{CLUSTER}/{app}/prod/evidence/approval.json")
+    check(isinstance(ev, dict) and ev.get("separated") is False, "the approval record says no second person (the bot did both)")
+    s2 = fixtures.write_tree(repo, overlay_files("o2", BROKEN), "fixture: a broken prod overlay")
+    st = wait("cicd/contract/overlays on the broken commit",
+              lambda: (lambda x: x if x in ("failure", "error", "warning") else None)(status(repo, s2, "cicd/contract/overlays")), timeout=900)
+    check(st in ("failure", "error"), f"the broken prod overlay fails the push ({st})")
+    time.sleep(60)
+    check((env_meta_text(app, "dev") or {}).get("commit") == s1, "dev was not redeployed from the broken commit")
+    unenroll(app)
+
+
 def raw_state(path):
     req = __import__("urllib.request").request.Request(f"{SERVER}/api/v1/repos/{STATE}/raw/{path}?ref=master",
                                                        headers={"Authorization": f"token {TOKEN}"})

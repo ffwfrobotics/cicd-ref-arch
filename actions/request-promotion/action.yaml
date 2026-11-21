@@ -57,6 +57,8 @@ runs:
               print(f"| `{o['id']}` | {o['coverage']} | {why} |")
       PY
       )
+      # a deploy-prod/ overlay: what prod runs differs from what the source environment runs, and the PR shows how
+      env_diff=$(diff -u --label "${{ inputs.from }}" --label prod "envs/$cluster/$app/${{ inputs.from }}/app.yaml" "$dir/app.yaml" 2>/dev/null | head -150 || true)
       prod="envs/$cluster/$app/prod/suppressions"
       sup_diff=$(diff -ruN "$prod" "$(realpath --relative-to=. "$dir")/suppressions" 2>/dev/null | grep -v '^diff -ruN' || true)
       git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
@@ -64,8 +66,8 @@ runs:
       git add "$dir"
       git commit -q -m "promote $app ${{ inputs.from }} -> prod ($id)" -m "requested by $who: $REASON"
       git -c http.extraHeader="$auth" push -q origin "promote/$id"
-      body=$(jq -n --arg id "$id" --arg p "$(cat "$dir/promotion.yaml")" --arg sec "$sec_md" --arg diff "${sup_diff:-no changes}" --arg who "$who" --arg assess "$assess_md" \
-        '"Promotion request `\($id)`, requested by **\($who)**.\n\n```yaml\n\($p)\n```\n\nMerging this queues it: the `environments` workflow applies whatever is merged, at or after `notBefore`. Who approved and merged it is recorded with it in prod; a second person (not \($who)) is the expected path.\n\n`app.yaml` in this PR is exactly what will run in prod.\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\n\nThe commit status `cicd/promotion` carries this result. The `environments` workflow scans the image again when it applies the promotion and records the result in prod.\n\n## Self-assessment (OSCAL, the owner'"'"'s evidence)\n\n\($assess)\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
+      body=$(jq -n --arg id "$id" --arg p "$(cat "$dir/promotion.yaml")" --arg sec "$sec_md" --arg diff "${sup_diff:-no changes}" --arg who "$who" --arg assess "$assess_md" --arg envdiff "${env_diff:-}" \
+        '"Promotion request `\($id)`, requested by **\($who)**.\n\n```yaml\n\($p)\n```\n\nMerging this queues it: the `environments` workflow applies whatever is merged, at or after `notBefore`. Who approved and merged it is recorded with it in prod; a second person (not \($who)) is the expected path.\n\n`app.yaml` in this PR is exactly what will run in prod.\(if $envdiff == "" then "" else "\n\n## Prod differs from ${{ inputs.from }} (deploy-prod/)\n\n```diff\n\($envdiff)\n```" end)\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\n\nThe commit status `cicd/promotion` carries this result. The `environments` workflow scans the image again when it applies the promotion and records the result in prod.\n\n## Self-assessment (OSCAL, the owner'"'"'s evidence)\n\n\($assess)\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
       title="Promote $app to prod ($id)"; [ "$sec_rc" = 0 ] || title="[security: fail] $title"
       url=$(jq -n --arg head "promote/$id" --arg title "$title" --argjson body "$body" \
         '{head: $head, base: "master", title: $title, body: $body}' \

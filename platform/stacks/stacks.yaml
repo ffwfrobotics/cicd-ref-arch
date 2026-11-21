@@ -1,0 +1,65 @@
+# Slots for nested clusters (docs/stacks.md, provider k0s-pod). A stack's dev run stands one cluster up in
+# a free slot, checks it and stands it down. There are two slots: that is the capacity budget, and the
+# only namespaces where privileged pods may run for CI.
+#
+# The ServiceAccount cicd-stack/runner can manage pods (and exec into them) and ConfigMaps in the
+# slots, and nothing else: it can't create namespaces, read Secrets elsewhere, or touch app
+# environments. The pipeline gets its token as the Actions secret CICD_STACK_KUBECONFIG of the
+# platform repo, never on the runner pods. Rotate: delete the Secret runner-token (Flux recreates it),
+# then update the Actions secret.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cicd-stack
+  labels: {pod-security.kubernetes.io/enforce: restricted}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: runner, namespace: cicd-stack}
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: runner-token
+  namespace: cicd-stack
+  annotations: {kubernetes.io/service-account.name: runner}
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata: {name: cicd-stack-slot}
+rules:
+- apiGroups: [""]
+  resources: [pods, configmaps]
+  verbs: [get, list, watch, create, update, patch, delete]
+- apiGroups: [""]
+  resources: [pods/exec]
+  verbs: [create, get]
+- apiGroups: [""]
+  resources: [pods/log, events]
+  verbs: [get, list, watch]
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stack-slot-1
+  labels: {pod-security.kubernetes.io/enforce: privileged, cicd.ffwf.net/stack-slot: "1"}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: cicd-stack-runner, namespace: stack-slot-1}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: cicd-stack-slot}
+subjects: [{kind: ServiceAccount, name: runner, namespace: cicd-stack}]
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stack-slot-2
+  labels: {pod-security.kubernetes.io/enforce: privileged, cicd.ffwf.net/stack-slot: "2"}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: cicd-stack-runner, namespace: stack-slot-2}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: cicd-stack-slot}
+subjects: [{kind: ServiceAccount, name: runner, namespace: cicd-stack}]

@@ -2,6 +2,7 @@
 #   cicd-sources -> gateway-api -> traefik -> keda -> keda-http -> gateway
 #   cicd-sources -> buildkit
 #   runtime (read-only access for the pipeline's runtime check)
+#   stacks (slots for nested clusters: docs/stacks.md)
 # Assumes the cluster already has cert-manager with ClusterIssuer ${CLUSTER_ISSUER}, and a CNI
 # that enforces NetworkPolicy.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -105,6 +106,18 @@ spec:
   interval: 30m
   retryInterval: 30s
   path: ./platform/runtime
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef: {kind: GitRepository, name: cicd-ref-arch}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: cicd-stacks, namespace: flux-system}
+spec:
+  interval: 30m
+  retryInterval: 30s
+  path: ./platform/stacks
   prune: true
   wait: true
   timeout: 5m

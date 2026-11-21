@@ -1,0 +1,68 @@
+# Enroll an app in wrapped or monorepo mode (docs/enrollment.md), for whoever the dashboard says asked
+# (it checked they may: admin on the source repo, or on the monorepo). The bot does the work:
+# - wrapped:  tools/wrap.py creates <org>/<app> with the source as src/ and generated Dockerfile,
+#             cicd.yaml and deploy/; webhooks on both repos;
+# - monorepo: the project at <repo>/<path>, its sources read from the monorepo's .gitmodules.
+# Then it commits tenants/<app>.yaml (pending: an admin approves) and starts the first run.
+# Direct enrollment needs none of this: the dashboard writes the record itself.
+name: enroll
+on:
+  workflow_dispatch:
+    inputs:
+      app: {description: "the app's name", required: true}
+      mode: {description: "wrapped | monorepo", required: true}
+      source: {description: "wrapped: the source repo, owner/name", default: ""}
+      repo: {description: "monorepo: the monorepo, owner/name", default: ""}
+      path: {description: "monorepo: the project's IaC root in it", default: ""}
+      update: {description: "follow | pin", default: follow}
+      actor: {description: "who asked (recorded as the requester)", required: true}
+      hook_url: {description: "the dashboard's webhook endpoint", default: ""}
+
+jobs:
+  enroll:
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+      with: {fetch-depth: 0, persist-credentials: false}
+    - uses: ./actions/setup
+    - env:
+        FORGEJO_TOKEN: ${{ secrets.CICD_BOT_TOKEN }}
+        BOT: ${{ vars.CICD_BOT_USER }}
+        CICD_HOOK_SECRET: ${{ secrets.CICD_HOOK_SECRET }}
+        APP: ${{ inputs.app }}
+        MODE: ${{ inputs.mode }}
+        SOURCE: ${{ inputs.source }}
+        REPO: ${{ inputs.repo }}
+        IPATH: ${{ inputs.path }}
+        UPDATE: ${{ inputs.update }}
+        ACTOR: ${{ inputs.actor }}
+        HOOK: ${{ inputs.hook_url }}
+      run: |
+        set -eu
+        [[ "$APP" =~ ^[a-z][a-z0-9-]{1,23}[a-z0-9]$ ]] || { echo "::error::bad app name"; exit 1; }
+        case "$MODE" in wrapped|monorepo) ;; *) echo "::error::mode is wrapped or monorepo"; exit 1 ;; esac
+        case "$UPDATE" in follow|pin) ;; *) echo "::error::update is follow or pin"; exit 1 ;; esac
+        auth="AUTHORIZATION: basic $(printf '%s:%s' "$BOT" "$FORGEJO_TOKEN" | base64 -w0)"
+        git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
+        args=(--app "$APP" --mode "$MODE" --update "$UPDATE" --requested-by "$ACTOR" --root . --server '${{ github.server_url }}')
+        [ -n "$HOOK" ] && args+=(--hook-url "$HOOK")
+        if [ "$MODE" = wrapped ]; then args+=(--source "$SOURCE"); else args+=(--repo "$REPO" --path "$IPATH"); fi
+        python3 tools/wrap.py "${args[@]}"
+        for attempt in 1 2 3 4 5; do
+          git add "tenants/$APP.yaml"
+          git commit -q -m "enroll $APP ($MODE, pending)" -m "Requested-by: $ACTOR" -m "Authorized-by: cicd-dashboard"
+          git -c http.extraHeader="$auth" push -q origin HEAD:master && break
+          [ "$attempt" = 5 ] && exit 1
+          cp "tenants/$APP.yaml" /tmp/tenant.yaml
+          git reset -q --hard HEAD~1; git -c http.extraHeader="$auth" pull -q --rebase origin master
+          cp /tmp/tenant.yaml "tenants/$APP.yaml"; sleep $((attempt * 3))
+        done
+        # the first run: the IaC root's head (its push happened before the record existed)
+        iac=$(python3 tools/cicd.py --root . tenant "$APP" --github-output | sed -n 's/^repo=//p')
+        branch=$(curl -fsS -H "Authorization: token $FORGEJO_TOKEN" '${{ github.server_url }}'"/api/v1/repos/$iac" | jq -r .default_branch)
+        sha=$(curl -fsS -H "Authorization: token $FORGEJO_TOKEN" '${{ github.server_url }}'"/api/v1/repos/$iac/branches/$branch" | jq -r .commit.id)
+        jq -n --arg a "$APP" --arg b "$branch" --arg s "$sha" --arg who "$ACTOR" \
+          '{ref: "master", inputs: {app: $a, branch: $b, sha: $s, action: "deploy", actor: $who}}' \
+          | curl -fsS -X POST -H "Authorization: token $FORGEJO_TOKEN" -H 'Content-Type: application/json' -d @- \
+            '${{ github.server_url }}/api/v1/repos/${{ github.repository }}/actions/workflows/pipeline.yaml/dispatches'
+        echo "enrolled $APP ($MODE) from $iac@${sha:0:7}, pending approval; first run started"
