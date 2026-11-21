@@ -1223,7 +1223,7 @@ def main():
                 sys.exit(f"app {app['metadata']['name']!r} is pending approval: branch environments only")
         out = render_env(root, app, cl, args.env, args.branch, args.image, Path(args.manifests).read_text(), {
             "repo": args.repo, "commit": args.commit, "runUrl": args.run_url,
-            **({"sources": json.loads(args.sources)} if args.sources else {}),
+            **({"sources": json.loads(args.sources)} if args.sources and json.loads(args.sources) else {}),
             "renderedAt": now_utc().isoformat().replace("+00:00", "Z")},
             app_config_text=Path(args.app).read_text(),
             security_dir=Path(args.security_dir) if args.security_dir else None,
