@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "fxm-a",
-  "image": "localhost:5000/fxm-a@sha256:c71706781796e7fa037c2c168e46661c6570ecb516efca7ee7f440bdf3bdd2c4",
-  "commit": "246dc92d4b7258614f28494e0b4f46c1d5ebcd12",
-  "generated": "2026-11-21T23:48:02Z",
+  "image": "localhost:5000/fxm-a@sha256:1a0893c7e2cfff901462c5395f47eeff22a4cdbe710c44b30290b710877133ad",
+  "commit": "88d4143a6d72232c0ac83223efcc61fdec9bb52e",
+  "generated": "2026-11-21T23:55:49Z",
   "scans": {
     "source": {
-      "generated": "2026-11-21T23:46:22Z",
-      "commit": "246dc92d4b7258614f28494e0b4f46c1d5ebcd12",
+      "generated": "2026-11-21T23:54:07Z",
+      "commit": "88d4143a6d72232c0ac83223efcc61fdec9bb52e",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -21,18 +21,18 @@
         },
         "opengrep": {
           "file": "opengrep.sarif",
-          "sha256": "569ad33e9c90a85149cff640f51d07c1d8bf0a981cf71aa5180e798aadda2743"
+          "sha256": "58f584eb201d3203a3a22089ace9497b2351528bb565c275ade6fa2962e16469"
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "bd9bc81a74b1a7d246a3035d362dc0a55f276b66a2f949258d5be47a3701da02"
+          "sha256": "b109a504665c8ed177186ea31428cd6ffc623d14839909674ae0e0e15683c79f"
         }
       }
     },
     "image": {
-      "generated": "2026-11-21T23:48:02Z",
-      "commit": "246dc92d4b7258614f28494e0b4f46c1d5ebcd12",
-      "image": "localhost:5000/fxm-a@sha256:c71706781796e7fa037c2c168e46661c6570ecb516efca7ee7f440bdf3bdd2c4",
+      "generated": "2026-11-21T23:55:49Z",
+      "commit": "88d4143a6d72232c0ac83223efcc61fdec9bb52e",
+      "image": "localhost:5000/fxm-a@sha256:1a0893c7e2cfff901462c5395f47eeff22a4cdbe710c44b30290b710877133ad",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "4229c9fef2d2095001e1277cbda40c0bbcbc22270818b3a15c082f2a5feca975"
+          "sha256": "440003e0a81afdc2539af2b9cf3dbbef0de67fe0c2bac320e7f9a91791f0472c"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "6db0fa5c26e511d0a66bc1769bbfa8bc174e5b05696f451ab1d02acc6ce0ad6c"
+          "sha256": "e2dc4836dc11343b4762583999a206ce114274b290088464d8b515124c9cf947"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "566d4774f73747e3102c18747e482993fec4aaf0c34d3a98639239b15d4df39e"
+          "sha256": "6f28e840bd0cdcf96969985fec03977f2c3e42200d6b1878d4603530510d8774"
         }
       }
     }
@@ -68,6 +68,21 @@
     "notes": []
   },
   "findings": [
+    {
+      "id": "185215c78dae",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/608df3cf59826f79/hostexecutor/app/apps/a/Dockerfile.)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
+        "expires": ""
+      }
+    },
     {
       "id": "b9b77e041ed9",
       "category": "config",
@@ -180,21 +195,6 @@
       "suppressed": {
         "by": "ignore (platform)",
         "reason": "the platform renders a default-deny NetworkPolicy for every environment",
-        "expires": ""
-      }
-    },
-    {
-      "id": "185215c78dae",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_2",
-      "severity": "high",
-      "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/92d6bf7387350217/hostexecutor/app/apps/a/Dockerfile.)",
-      "outcome": "suppressed",
-      "suppressed": {
-        "by": "ignore (platform)",
-        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
         "expires": ""
       }
     },

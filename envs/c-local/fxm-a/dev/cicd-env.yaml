@@ -7,12 +7,12 @@ namespace: fxm-a-dev
 branch: main
 hosts:
 - fxm-a-dev.c-local.k.ffwf.net
-image: localhost:5000/fxm-a@sha256:c71706781796e7fa037c2c168e46661c6570ecb516efca7ee7f440bdf3bdd2c4
+image: localhost:5000/fxm-a@sha256:1a0893c7e2cfff901462c5395f47eeff22a4cdbe710c44b30290b710877133ad
 repo: ffwf-fixtures/fx-mono
-commit: 60a9928599ce1d2bcaedc4eb155b2581c7ab53cc
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/948
+commit: 14d7cbec5a3e08a9709ae44187c9deb66f458f27
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/957
 sources:
 - path: svc-a
   repo: ffwf-fixtures/fx-svc-a
-  commit: 24beb0804a0ff03524e4c8c0a05e96a31d907003
-renderedAt: '2026-11-21T23:48:12Z'
+  commit: b9ff80b328905672b9a05efbf108a60db87d39ec
+renderedAt: '2026-11-21T23:55:56Z'
