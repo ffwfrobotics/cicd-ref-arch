@@ -1,20 +1,27 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "3a81fd1c1bfebcc5560a287029c710342778def0",
+  "sha": "e21bc41c06b200d5739673df58037439666cc80e",
   "ref": "refs/heads/master",
   "workflow": "hello",
   "job": "security",
   "status": "warn",
-  "started_at": "2026-11-20T20:36:37Z",
+  "started_at": "2026-11-21T02:34:14Z",
   "duration_s": null,
   "summary": {
     "total": 244,
-    "failed": 1,
-    "passed": 243,
+    "failed": 2,
+    "passed": 242,
     "skipped": 0
   },
   "failures": [
+    {
+      "test": "config/CKV_DOCKER_7",
+      "file": "Dockerfile:4",
+      "severity": "high",
+      "category": "config",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/9c2088fb1abdaa19/hostexecutor/examples/hello/Dockerfile.FROM)"
+    },
     {
       "test": "vuln/CVE-2026-85091",
       "file": "pkg:deb/debian/zlib1g@1%3A1.3.dfsg%2Breally1.3.1-1%2Bb1?arch=amd64&distro=debian-13.7&upstream=zlib%401%3A1.3.dfsg%2Breally1.3.1-1",
@@ -28,13 +35,13 @@
     "mode": "report",
     "blocking": 0,
     "counts": {
-      "suppressed": 7,
+      "fail": 2,
+      "suppressed": 6,
       "no-fix-available": 80,
-      "below-threshold": 156,
-      "fail": 1
+      "below-threshold": 156
     },
-    "image": "localhost:5000/hello@sha256:d97a654891878d72f9e7e81168f47838a2aaad842061742dc02a842e8dd4dc59"
+    "image": "localhost:5000/hello@sha256:bb9960c87cd54753992cb964de6f4159cf0ec9e7ab8808627d7ad1242b3ef34f"
   },
   "external": [],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/515"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/600"
 }
