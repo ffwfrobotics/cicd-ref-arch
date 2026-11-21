@@ -201,7 +201,23 @@ def scan_source(args) -> int:
         except json.JSONDecodeError:
             print("checkov output is not JSON; treated as missing", file=sys.stderr)
 
+    for f in findings:
+        f["location"] = app_relative(f["location"], app)
     return write_findings(out / "findings-source.json", "source", findings, tools, evidence, out, args)
+
+
+def app_relative(location: str, app: Path, cwd: Path | None = None) -> str:
+    """Name a file in the app from the app's root, as its suppressions and .gitleaksignore do, wherever
+    the runner checked it out (the platform pipeline puts it under app/). Other files keep their name."""
+    path, sep, line = location.rpartition(":")
+    if not sep or not line.isdigit():
+        path, sep, line = location, "", ""
+    p = Path(path) if os.path.isabs(path) else (cwd or Path.cwd()) / path
+    try:
+        rel = p.resolve().relative_to(app.resolve())
+    except ValueError:
+        return location
+    return f"{rel}{sep}{line}"
 
 
 def scan_image(args) -> int:
