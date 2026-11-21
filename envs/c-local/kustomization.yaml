@@ -8,6 +8,7 @@ resources:
 - demo/dev
 - demo/prod
 - fxc-a/dev
+- fxc-b/dev
 - fxm-a/dev
 - fxm-b/dev
 - fxp/branch-bump-src-4553d97
