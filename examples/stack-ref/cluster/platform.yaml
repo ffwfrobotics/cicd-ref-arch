@@ -1,0 +1,66 @@
+# What the nested cluster runs: the platform layer of the pinned cicd-ref-arch (the platform/ submodule, which
+# tools/stack.py gives Flux as the GitRepository "platform" at the pinned commit),
+# in its own dependency order. The Gateway is left out: it needs the host's cert-manager issuer.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: cicd-sources, namespace: flux-system}
+spec:
+  interval: 30m
+  retryInterval: 20s
+  path: ./platform/sources
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef: {kind: GitRepository, name: platform}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: gateway-api, namespace: flux-system}
+spec:
+  dependsOn: [{name: cicd-sources}]
+  interval: 30m
+  retryInterval: 20s
+  path: ./config/crd/standard
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef: {kind: GitRepository, name: gateway-api}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: traefik, namespace: flux-system}
+spec:
+  dependsOn: [{name: gateway-api}]
+  interval: 30m
+  retryInterval: 20s
+  path: ./platform/traefik
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef: {kind: GitRepository, name: platform}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: keda, namespace: flux-system}
+spec:
+  dependsOn: [{name: cicd-sources}]
+  interval: 30m
+  retryInterval: 20s
+  path: ./platform/keda
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef: {kind: GitRepository, name: platform}
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata: {name: keda-http, namespace: flux-system}
+spec:
+  dependsOn: [{name: keda}]
+  interval: 30m
+  retryInterval: 20s
+  path: ./platform/keda-http
+  prune: true
+  wait: true
+  timeout: 10m
+  sourceRef: {kind: GitRepository, name: platform}

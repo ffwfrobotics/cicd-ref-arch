@@ -123,14 +123,19 @@ def write_with_submodules(repo: str, files: dict[str, str], subs: dict[str, tupl
         for path, (sub, sha) in subs.items():
             rel = os.path.relpath(f"/{sub}.git", f"/{repo}")
             gm.append(f'[submodule "{path}"]\n\tpath = {path}\n\turl = {rel}\n\tbranch = main\n')
-            e2e.git(d, "update-index", "--add", "--cacheinfo", f"160000,{sha},{path}")
         (d / ".gitmodules").write_text("".join(gm))
         for path, text in files.items():
             p = d / path
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(text)
         e2e.git(d, "add", "-A")
+        # the gitlinks last: `add -A` would record a submodule with no checkout as deleted
+        for path, (sub, sha) in subs.items():
+            e2e.git(d, "update-index", "--add", "--cacheinfo", f"160000,{sha},{path}")
         e2e.git(d, "commit", "-q", "-m", message)
+        for path in subs:
+            if not e2e.git(d, "ls-tree", "HEAD", path):
+                raise e2e.Fail(f"{repo}: submodule {path} is not in the commit")
         e2e.git(d, "push", "-q", "-f", f"{e2e.SERVER}/{repo}.git", "HEAD:refs/heads/main")
         return e2e.git(d, "rev-parse", "HEAD")
     finally:

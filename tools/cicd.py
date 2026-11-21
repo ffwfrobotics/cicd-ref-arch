@@ -939,6 +939,7 @@ def bump(root: Path, args) -> str:
     if code != 200:
         sys.exit(f"cannot read the IaC root {spec['repo']}: {code}")
     dev = repo.get("default_branch") or "main"
+    args.branch = args.branch.removeprefix("refs/heads/")
     target = dev if args.branch == src["branch"] else "src/" + slug(args.branch, 40)
     auth = "AUTHORIZATION: basic " + __import__("base64").b64encode(f"{user}:{token}".encode()).decode()
     work = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / f"bump-{args.app}-{os.getpid()}"

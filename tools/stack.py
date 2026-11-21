@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -119,14 +120,52 @@ def bootstrap(a, rec, slot):
     src = {"apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository",
            "metadata": {"name": "stack", "namespace": "flux-system"},
            "spec": {"interval": "10m", "url": f"{a.server.rstrip('/')}/{a.repo}.git", "ref": {"commit": a.sha},
-                    "recurseSubmodules": True, "secretRef": {"name": "forge"}}}
+                    "secretRef": {"name": "forge"}}}
+    # each submodule the stack pins becomes its own GitRepository at the pinned commit, named for its path
+    # (Flux's recurseSubmodules can't check out a submodule of a specific commit: "entry not found")
+    subs = pinned_submodules(a.server, a.repo, a.sha, token)
+    extra = [{"apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository",
+              "metadata": {"name": name, "namespace": "flux-system"},
+              "spec": {"interval": "10m", "url": f"{a.server.rstrip('/')}/{x['repo']}.git", "ref": {"commit": x["commit"]},
+                       "secretRef": {"name": "forge"}}} for name, x in subs.items()]
     ks = {"apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization",
           "metadata": {"name": "stack", "namespace": "flux-system"},
           "spec": {"interval": "10m", "retryInterval": "20s", "path": f"./{a.path.strip('./')}", "prune": True,
                    "sourceRef": {"kind": "GitRepository", "name": "stack"}}}
-    nested(slot, "apply", "-f", "-", input=json.dumps({"apiVersion": "v1", "kind": "List", "items": [secret, src, ks]}))
-    rec["steps"]["bootstrap"] = {"result": "ok", "seconds": round(time.time() - t0), "repo": a.repo, "commit": a.sha, "path": a.path}
+    nested(slot, "apply", "-f", "-", input=json.dumps({"apiVersion": "v1", "kind": "List", "items": [secret, src, *extra, ks]}))
+    rec["steps"]["bootstrap"] = {"result": "ok", "seconds": round(time.time() - t0), "repo": a.repo, "commit": a.sha, "path": a.path,
+                                 "sources": [{"name": n, **x} for n, x in subs.items()]}
     print(f"bootstrap: Flux at {a.repo}@{a.sha[:7]} ./{a.path}")
+
+
+def pinned_submodules(server: str, repo: str, sha: str, token: str) -> dict[str, dict]:
+    """name -> {path, repo, commit} for the stack commit's top-level submodules on this forge."""
+    import urllib.request
+
+    def get(path):
+        req = urllib.request.Request(f"{server.rstrip('/')}/api/v1/repos/{repo}/{path}", headers={"Authorization": f"token {token}"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return r.read()
+    tree = json.loads(get(f"git/trees/{sha}")).get("tree") or []
+    links = {x["path"]: x["sha"] for x in tree if x.get("type") == "commit"}
+    if not links:
+        return {}
+    gm = get(f"raw/.gitmodules?ref={sha}").decode()
+    urls, cur = {}, None
+    for line in gm.splitlines():
+        line = line.strip()
+        if line.startswith("path"):
+            cur = line.split("=", 1)[1].strip()
+        elif line.startswith("url") and cur:
+            urls[cur] = line.split("=", 1)[1].strip()
+    out = {}
+    for path, commit in links.items():
+        u = urls.get(path, "")
+        full = (os.path.normpath(os.path.join("/" + repo, u)) if u.startswith(".") else "/" + "/".join(u.split("://", 1)[-1].split("/")[1:]))
+        full = full[:-4] if full.endswith(".git") else full
+        name = re.sub(r"[^a-z0-9-]+", "-", path.lower()).strip("-")[:63]
+        out[name] = {"path": path, "repo": "/".join(full.strip("/").split("/")[-2:]), "commit": commit}
+    return out
 
 
 def kustomizations(slot) -> list[dict]:
