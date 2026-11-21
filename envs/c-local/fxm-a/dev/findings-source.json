@@ -1,8 +1,8 @@
 {
   "schema": "security-findings/v1",
   "scope": "source",
-  "generated": "2026-11-21T23:38:58Z",
-  "commit": "a09e81318090d838800853c25fbe22ed43b8e1b6",
+  "generated": "2026-11-21T23:46:22Z",
+  "commit": "246dc92d4b7258614f28494e0b4f46c1d5ebcd12",
   "image": null,
   "tools": {
     "gitleaks": "8.30.1",
@@ -16,23 +16,14 @@
     },
     "opengrep": {
       "file": "opengrep.sarif",
-      "sha256": "38dde1aa712a1de65966897c37250982fe35d651911abc2d90a3b3dece89a485"
+      "sha256": "569ad33e9c90a85149cff640f51d07c1d8bf0a981cf71aa5180e798aadda2743"
     },
     "checkov": {
       "file": "checkov.json",
-      "sha256": "9149e2b8600df18ee5cbc3d6ccd177bbb23c55aa45c6ee42c4d6d06d3291505f"
+      "sha256": "bd9bc81a74b1a7d246a3035d362dc0a55f276b66a2f949258d5be47a3701da02"
     }
   },
   "findings": [
-    {
-      "id": "185215c78dae",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_2",
-      "severity": "high",
-      "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/ae3342320524b39a/hostexecutor/app/apps/a/Dockerfile.)"
-    },
     {
       "id": "b9b77e041ed9",
       "category": "config",
@@ -113,6 +104,15 @@
       "severity": "high",
       "location": "build/app.yaml:13",
       "message": "Minimize the admission of pods which lack an associated NetworkPolicy (Pod.default.fxm-a.app-fxm-a)"
+    },
+    {
+      "id": "185215c78dae",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/92d6bf7387350217/hostexecutor/app/apps/a/Dockerfile.)"
     }
   ],
   "scanned": [
