@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: fxw-dev
+labels:
+- pairs:
+    cicd.ffwf.net/app: fxw
+    cicd.ffwf.net/env: dev
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/fxw
+  digest: sha256:ac88a9dae79bd36684dbf3f71051badb9dc38f7cd6eca4f8c57017183dda2d51
