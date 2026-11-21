@@ -1,0 +1,21 @@
+{
+  "schema": "ci-result/v1",
+  "repo": "ffwf/cicd-ref-arch",
+  "sha": "db3c5ddf5301c0a42682146064c28b3cd6b096a2",
+  "ref": "refs/heads/master",
+  "workflow": "pipeline",
+  "job": "test",
+  "status": "pass",
+  "started_at": "2026-11-21T16:19:13Z",
+  "duration_s": 17,
+  "runner": "forgejo-runner-5db5d4bd97-q4g9z",
+  "summary": {
+    "total": 45,
+    "passed": 44,
+    "failed": 0,
+    "skipped": 1
+  },
+  "failures": [],
+  "log_tail": "test_hints_warn_but_the_run_goes_on (test_destiny.Contract.test_hints_warn_but_the_run_goes_on) ... ok\ntest_nothing_to_run_stops_develop (test_destiny.Contract.test_nothing_to_run_stops_develop) ... ok\ntest_runs_before_the_check_existed (test_destiny.Contract.test_runs_before_the_check_existed) ... ok\ntest_assess_detail_is_the_score_without_findings_from_it_security (test_destiny.Destiny.test_assess_detail_is_the_score_without_findings_from_it_security) ... ok\ntest_branch_commit_cannot_be_promoted (test_destiny.Destiny.test_branch_commit_cannot_be_promoted) ... ok\ntest_deliver_failed (test_destiny.Destiny.test_deliver_failed) ... ok\ntest_dev_with_findings_warns_and_previews_prod_blockers (test_destiny.Destiny.test_dev_with_findings_warns_and_previews_prod_blockers) ... ok\ntest_just_pushed (test_destiny.Destiny.test_just_pushed) ... ok\ntest_live_dev_commit_offers_a_request (test_destiny.Destiny.test_live_dev_commit_offers_a_request) ... ok\ntest_merged_and_due_then_applied (test_destiny.Destiny.test_merged_and_due_then_applied) ... ok\ntest_no_request_for_branch_superseded_or_prod (test_destiny.Destiny.test_no_request_for_branch_superseded_or_prod) ... ok\ntest_promotion_waiting_for_second_person (test_destiny.Destiny.test_promotion_waiting_for_second_person) ... ok\ntest_self_merged_promotion_is_refused (test_destiny.Destiny.test_self_merged_promotion_is_refused) ... ok\ntest_skipped_later_job_does_not_hide_result (test_destiny.Destiny.test_skipped_later_job_does_not_hide_result) ... ok\ntest_superseded_dev_build (test_destiny.Destiny.test_superseded_dev_build) ... ok\ntest_tests_failed_skips_delivery (test_destiny.Destiny.test_tests_failed_skips_delivery) ... ok\ntest_failure_names_the_step (test_destiny.Phases.test_failure_names_the_step) ... ok\ntest_findings_warn_assess_and_blockers_reach_release (test_destiny.Phases.test_findings_warn_assess_and_blockers_reach_release) ... ok\ntest_running_tests_make_develop_run (test_destiny.Phases.test_running_tests_make_develop_run) ... ok\ntest_three_phases_cover_every_stage_once (test_destiny.Phases.test_three_phases_cover_every_stage_once) ... ok\ntest_unpromotable_commit_skips_release_quietly (test_destiny.Phases.test_unpromotable_commit_skips_release_quietly) ... ok\ntest_before_the_check_existed (test_destiny.Runtime.test_before_the_check_existed) ... ok\ntest_checking_while_the_job_runs (test_destiny.Runtime.test_checking_while_the_job_runs) ... ok\ntest_crash_names_the_class_and_links_the_run (test_destiny.Runtime.test_crash_names_the_class_and_links_the_run) ... ok\ntest_running (test_destiny.Runtime.test_running) ... ok\ntest_same_as_cicd_ref_arch (test_destiny.Slug.test_same_as_cicd_ref_arch) ... ok\ntest_only_the_latest_runs_checks (test_enroll.ContractStatuses.test_only_the_latest_runs_checks) ... ok\ntest_local_repo (test_enroll.Names.test_local_repo) ... ok\ntest_names (test_enroll.Names.test_names) ... ok\ntest_pending_record (test_enroll.Names.test_pending_record) ... ok\ntest_a_redelivery_of_a_built_commit_is_not_rebuilt_but_a_failed_one_is (test_platform.Hook.test_a_redelivery_of_a_built_commit_is_not_rebuilt_but_a_failed_one_is) ... ok\ntest_other_repos_and_tags_are_ignored (test_platform.Hook.test_other_repos_and_tags_are_ignored) ... ok\ntest_push_to_an_enrolled_repo_dispatches_its_app (test_platform.Hook.test_push_to_an_enrolled_repo_dispatches_its_app) ... ok\ntest_signature (test_platform.Hook.test_signature) ... ok\ntest_jobs_are_keyed_by_the_app_commit_in_the_inputs (test_platform.Runs.test_jobs_are_keyed_by_the_app_commit_in_the_inputs) ... ok\n\n----------------------------------------------------------------------\nRan 45 tests in 0.070s\n\nOK (skipped=1)",
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/775"
+}

@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: dashboard-prod-20261121T162634Z
+app: dashboard
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/dashboard@sha256:48ff37d2282c9bb47b8e5ca0c9c01d8e79c433b048cd7eeeafff20cc66ce73fa
+commit: 573528b292688837d189f434e75713ab608a99bf
+notBefore: '2026-11-21T16:26:34Z'
+requestedBy: john
+reason: ''
