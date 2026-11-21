@@ -3,7 +3,7 @@
   "app": "demo",
   "image": "localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310",
   "commit": "30fe1b938949eb290fffddc1fde6f69772bace98",
-  "generated": "2026-11-20T20:51:55Z",
+  "generated": "2026-11-21T05:18:52Z",
   "scans": {
     "source": {
       "generated": "2026-11-20T20:46:54Z",
@@ -30,8 +30,8 @@
       }
     },
     "image": {
-      "generated": "2026-11-20T20:51:55Z",
-      "commit": "e385eb06f2d008701964a3d72f2ae0b73bab22ee",
+      "generated": "2026-11-21T05:18:51Z",
+      "commit": "8260c52e6888846ec7369809eb8c1ab200879b9f",
       "image": "localhost:5000/demo@sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310",
       "tools": {
         "syft": "(SBOM kept from the build)",
@@ -41,7 +41,7 @@
       "evidence": {
         "grype": {
           "file": "grype.json",
-          "sha256": "a8ef3d13154192675a79e7aaf2a27d67292912f6a8175b8c39beaea755019e3e"
+          "sha256": "f1e9dd4f65b70e2dc65d29b8d949ef1cbf5d0ad4d1c10d1acf49cb34097aa572"
         }
       }
     }
