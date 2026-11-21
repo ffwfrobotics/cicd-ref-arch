@@ -1,8 +1,8 @@
 {
   "schema": "security-findings/v1",
   "scope": "source",
-  "generated": "2026-11-20T20:46:41Z",
-  "commit": "3f65c550f6e41f3738050eba852ba8481801a109",
+  "generated": "2026-11-21T02:49:44Z",
+  "commit": "855e282d53d190e6ab4c630c96ed7eff7f7540c7",
   "image": null,
   "tools": {
     "gitleaks": "8.30.1",
@@ -16,11 +16,11 @@
     },
     "opengrep": {
       "file": "opengrep.sarif",
-      "sha256": "1be0fd014d3dc14bc35ef4d843527eb6e82667d0474e346c03473510e5aed187"
+      "sha256": "ae088c094ab80b5edacc0a3bdb02f7babf9015e5e7542ca9022c8dbcd8cffaed"
     },
     "checkov": {
       "file": "checkov.json",
-      "sha256": "67c0ffd9e2c6beeb92b482e3b861aaa609441648eeaa4421ad633f7d82924fc0"
+      "sha256": "6cfbae1d65f29f5aeb1e2289acfeb948921624ff22379f7e1a657ed7496fcb81"
     }
   },
   "findings": [
@@ -30,8 +30,8 @@
       "tool": "checkov",
       "rule": "CKV_DOCKER_7",
       "severity": "high",
-      "location": "app/Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/3d6457524586baba/hostexecutor/app/Dockerfile.FROM)"
+      "location": "Dockerfile:7",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/ea47567c90442a29/hostexecutor/app/Dockerfile.FROM)"
     },
     {
       "id": "a50e12c4d749",
@@ -39,8 +39,8 @@
       "tool": "checkov",
       "rule": "CKV_DOCKER_2",
       "severity": "high",
-      "location": "app/Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/3d6457524586baba/hostexecutor/app/Dockerfile.)"
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/ea47567c90442a29/hostexecutor/app/Dockerfile.)"
     },
     {
       "id": "b9b77e041ed9",
