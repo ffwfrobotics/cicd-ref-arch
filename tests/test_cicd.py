@@ -1,4 +1,5 @@
 """Unit tests for tools/cicd.py: names, hosts, render, promotion, gc. Run: python3 -m unittest -v"""
+import json
 import os
 import shutil
 import subprocess
@@ -95,7 +96,6 @@ class Render(unittest.TestCase):
 
         class B:
             cluster = "c-local"
-        os.environ["CICD_SKIP_APPROVAL_CHECK"] = "1"
         real_security_of = cicd.security_of
         try:
             self.assertEqual(cicd.apply_due(self.root, B), (0, 0))     # not due
@@ -104,18 +104,17 @@ class Render(unittest.TestCase):
             d["notBefore"] = "2000-01-01T00:00:00Z"
             p.write_text(yaml.safe_dump(d))
             cicd.security_of = lambda *a: (False, "security gate fail (1 blocking: vuln/CVE-X)")
-            self.assertEqual(cicd.apply_due(self.root, B), (0, 1))     # due, approved, fails the gate
-            self.assertTrue(p.exists())                                # stays pending
-            cicd.security_of = lambda *a: (True, "security gate pass")
-            self.assertEqual(cicd.apply_due(self.root, B), (1, 0))
+            self.assertEqual(cicd.apply_due(self.root, B), (1, 0))     # merged is applied; the failed re-scan is recorded
         finally:
             cicd.security_of = real_security_of
-            del os.environ["CICD_SKIP_APPROVAL_CHECK"]
+        done = yaml.safe_load(next((self.root / "promotions/done").glob("*/promotion.yaml")).read_text())
+        self.assertTrue(done["security"].startswith("applied with security gate fail"))
+        self.assertFalse(list((self.root / "promotions/pending").glob("*")))
         meta = yaml.safe_load((self.root / "envs/c-local/hello/prod/cicd-env.yaml").read_text())
         self.assertEqual(meta["image"], "localhost:5000/hello@" + DIGEST)
         self.assertEqual(meta["hosts"], ["hello.c-local.k.ffwf.net"])
 
-    def test_unapproved_promotion_is_not_applied(self):
+    def test_unapproved_promotion_is_applied_and_recorded(self):
         self.render("dev")
         git = ["git", "-C", str(self.root), "-c", "user.name=t", "-c", "user.email=t@t"]
 
@@ -128,11 +127,42 @@ class Render(unittest.TestCase):
         class B:
             cluster = "c-local"
         os.environ.update(FORGEJO_API="http://127.0.0.1:9/api/v1/repos/x/y", FORGEJO_TOKEN="t")
+        real_security_of = cicd.security_of
+        cicd.security_of = lambda *a: (True, "security gate pass")
         try:
-            self.assertEqual(cicd.apply_due(self.root, B), (0, 1))
+            self.assertEqual(cicd.apply_due(self.root, B), (1, 0))     # master says so: the cluster follows
         finally:
+            cicd.security_of = real_security_of
             del os.environ["FORGEJO_API"], os.environ["FORGEJO_TOKEN"]
-        self.assertFalse((self.root / "envs/c-local/hello/prod").exists())
+        self.assertTrue((self.root / "envs/c-local/hello/prod/app.yaml").exists())
+        ev = json.loads((self.root / "envs/c-local/hello/prod/evidence/approval.json").read_text())
+        self.assertEqual((ev["requestedBy"], ev["pr"]), ("a", None))
+        self.assertIn(ev["separated"], (False, None))                   # no PR: no second person on record
+
+    def test_approval_record_names_the_second_person(self):
+        promo = {"requestedBy": "john"}
+        pr = {"number": 12, "user": {"login": "ffwfbot"}, "merged_by": {"login": "john"}}
+        real = (cicd.merged_pr_for, cicd.forgejo)
+        cicd.merged_pr_for = lambda root, sha: (pr, "")
+        try:
+            d = self.root / "promotions/pending/x"
+            d.mkdir(parents=True)
+            (d / "promotion.yaml").write_text("id: x\n")
+            git = ["git", "-C", str(self.root), "-c", "user.name=t", "-c", "user.email=t@t"]
+            subprocess.run(git + ["add", "-A"], check=True)
+            subprocess.run(git + ["commit", "-qm", "x"], check=True)
+            cicd.forgejo = lambda m, path: []
+            r = cicd.approval_record(self.root, d, promo)
+            self.assertEqual((r["separated"], r["mergedBy"], r["pr"]), (False, "john", 12))    # self-merged
+            cicd.forgejo = lambda m, path: [{"user": {"login": "ffwfbot"}, "state": "APPROVED"}]
+            self.assertFalse(cicd.approval_record(self.root, d, promo)["separated"])           # the pipeline's own account
+            cicd.forgejo = lambda m, path: [{"user": {"login": "ada"}, "state": "APPROVED"}]
+            r = cicd.approval_record(self.root, d, promo)
+            self.assertEqual((r["separated"], r["approvedBy"]), (True, ["ada"]))
+        finally:
+            cicd.merged_pr_for, cicd.forgejo = real
+
+
 
 
 class Routing(unittest.TestCase):

@@ -8,7 +8,7 @@ title: cicd-ref-arch pipeline (build, scan, gate, deploy, promote)
 type: service
 description: >-
   Every push is tested, built, scanned (gitleaks, opengrep, checkov, syft, grype), gated by policy
-  and deployed from git; prod changes only through a two-person promotion that re-scans the image.
+  and deployed from git; prod changes only through a promotion PR that re-scans the image; who approved and merged it is recorded.
 objectives:
   # CM-2 Baseline configuration
   cm-2_obj.a-1:

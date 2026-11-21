@@ -15,7 +15,7 @@ The demo story, end to end:
 4. **Security.**
    - Every build is scanned: secrets, code, config, an SBOM, and known vulnerabilities in the image.
    - Dev and branch deploys report findings and go ahead. A secret is the exception: it stops any deploy, and a forge hook refuses it at push.
-   - A prod promotion is re-scanned and refused if it fails the policy.
+   - A prod promotion is re-scanned; a failure is a failing check on its PR. What is merged is applied, with its approval and re-scan recorded.
    - False positives are records with a reason and an expiry, never code changes, and the promotion PR shows them. See [docs/security.md](docs/security.md).
    - Every build also makes the commit's OSCAL self-assessment; IT Security's findings, imported by the owner, become failing tests without a developer PR; advisories re-scan only the environments they affect. See [docs/oscal.md](docs/oscal.md).
 5. **Approved, scheduled promotion.**

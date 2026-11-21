@@ -93,4 +93,4 @@ It is dispatched by:
 
 At request and again at apply, a promotion is re-scanned and gated with IT Security's findings and the advisories; endpoint checks look at the source environment, which runs the same image. The promotion PR shows the self-assessment.
 
-If `apps/<app>/app.yaml` says `promotion.require_assessment: true`, any unsatisfied objective whose failing evidence is a finding, scan, SBOM, test record, gate, database age or expired attestation also refuses the promotion. Uncovered objectives, and a release not made yet, are shown but never block.
+If `apps/<app>/app.yaml` says `promotion.require_assessment: true`, any unsatisfied objective whose failing evidence is a finding, scan, SBOM, test record, gate, database age or expired attestation also fails the promotion PR's `cicd/promotion` check. Uncovered objectives, and a release not made yet, are shown but never block.

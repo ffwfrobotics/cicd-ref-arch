@@ -65,9 +65,16 @@ runs:
       git commit -q -m "promote $app ${{ inputs.from }} -> prod ($id)" -m "requested by $who: $REASON"
       git -c http.extraHeader="$auth" push -q origin "promote/$id"
       body=$(jq -n --arg id "$id" --arg p "$(cat "$dir/promotion.yaml")" --arg sec "$sec_md" --arg diff "${sup_diff:-no changes}" --arg who "$who" --arg assess "$assess_md" \
-        '"Promotion request `\($id)`, requested by **\($who)**.\n\n```yaml\n\($p)\n```\n\nApproving and merging this queues it; the `environments` workflow applies it at or after `notBefore`. The approval or the merge must come from someone other than \($who).\n\n`app.yaml` in this PR is exactly what will run in prod.\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\n\nThe `environments` workflow scans the image again when it applies the promotion, and refuses it if the gate fails then.\n\n## Self-assessment (OSCAL, the owner'"'"'s evidence)\n\n\($assess)\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
+        '"Promotion request `\($id)`, requested by **\($who)**.\n\n```yaml\n\($p)\n```\n\nMerging this queues it: the `environments` workflow applies whatever is merged, at or after `notBefore`. Who approved and merged it is recorded with it in prod; a second person (not \($who)) is the expected path.\n\n`app.yaml` in this PR is exactly what will run in prod.\n\n## Security (re-scanned now, prod policy)\n\n\($sec)\n\nThe commit status `cicd/promotion` carries this result. The `environments` workflow scans the image again when it applies the promotion and records the result in prod.\n\n## Self-assessment (OSCAL, the owner'"'"'s evidence)\n\n\($assess)\n\n## Suppressions this carries to prod (diff against prod)\n\n```diff\n\($diff)\n```"')
       title="Promote $app to prod ($id)"; [ "$sec_rc" = 0 ] || title="[security: fail] $title"
       url=$(jq -n --arg head "promote/$id" --arg title "$title" --argjson body "$body" \
         '{head: $head, base: "master", title: $title, body: $body}' \
         | curl -fsS -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' -d @- "$api/pulls" | jq -r .html_url)
+      # the re-scan as a commit status on the PR: shown everywhere, and a forge that wants it enforced
+      # before the merge makes cicd/promotion a required check on master (docs/security.md)
+      st=success; [ "$sec_rc" = 0 ] || st=failure
+      jq -n --arg s "$st" --arg u "$url" --arg d "$(printf '%s' "$sec" | tail -n1 | cut -c1-120)" \
+        '{state: $s, context: "cicd/promotion", description: $d, target_url: $u}' \
+        | curl -fsS -o /dev/null -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' -d @- \
+          "$api/statuses/$(git rev-parse HEAD)" || echo "::warning::could not set the cicd/promotion status"
       echo "opened $url"; echo "url=$url" >> "$GITHUB_OUTPUT"

@@ -9,7 +9,7 @@ Subcommands:
   index             regenerate envs/<cluster>/kustomization.yaml from the env directories present
   request-promotion write promotions/pending/<id>/ pinned to what the source environment runs now
   check-security    re-scan a pending promotion's image and gate it under the prod policy
-  apply-due         apply pending promotions that are due, approved, and pass the prod security gate
+  apply-due         apply the merged promotions that are due; record their approval and prod re-scan
   assess-evidence   OSCAL self-assessment of one build's evidence (actions/security)
   reassess          re-gate and re-assess environments from their kept evidence, without a rebuild
                     (after IT Security's findings or an advisory change, and daily)
@@ -413,36 +413,43 @@ def merged_pr_for(root: Path, sha: str):
     return None, "; ".join(errors) or "no candidate commits"
 
 
-def approval_of(root: Path, promo_dir: Path, promo: dict) -> tuple[bool, str]:
-    """A promotion counts only if it reached the branch through a merged PR that someone other
-    than the PR's author and the requester authorized: an approving review, or the merge itself.
-    Branch protection (required approvals) should already enforce this; this is the second check,
-    done by the job that actually changes prod."""
-    if os.environ.get("CICD_SKIP_APPROVAL_CHECK") == "1":
-        return True, "approval check skipped (CICD_SKIP_APPROVAL_CHECK=1)"
+def approval_record(root: Path, promo_dir: Path, promo: dict) -> dict:
+    """Who requested, approved and merged a promotion: evidence, never a gate. What reached master is
+    what the cluster runs, so a promotion that was merged is applied however it got there; whether a
+    second person authorized it is recorded here (and shown) for whoever judges it. A deployment that
+    wants it enforced does so before the merge, in the forge (required approvals, docs/security.md).
+    `separated`: someone other than the requester and the pipeline's own account (the PR's author)
+    approved or merged it. None when it can't be told (no forge to ask)."""
+    rec = {"requestedBy": promo.get("requestedBy"), "pr": None, "author": None, "approvedBy": [], "mergedBy": None,
+           "separated": None}
     rel = str((promo_dir / "promotion.yaml").relative_to(root))
     sha = subprocess.run(["git", "-C", str(root), "log", "--diff-filter=A", "--format=%H", "-1", "--", rel],
-                         capture_output=True, text=True, check=True).stdout.strip()
+                         capture_output=True, text=True).stdout.strip()
     if not sha:
-        return False, f"{rel} is not committed"
-    pr, err = merged_pr_for(root, sha)
+        return {**rec, "summary": f"{rel} is not committed"}
+    try:
+        pr, err = merged_pr_for(root, sha)
+    except Exception as e:  # no forge configured or reachable
+        pr, err = None, str(e)
     if pr is None:
-        return False, f"commit {sha[:7]} did not arrive through a merged pull request ({err})"
+        return {**rec, "separated": False if "404" in err or "Not Found" in err else None,
+                "summary": f"commit {sha[:7]} did not arrive through a merged pull request ({err})"}
     author = pr["user"]["login"]
-    excluded = {author, promo.get("requestedBy")}
-    reviews = forgejo("GET", f"/pulls/{pr['number']}/reviews")
-    approvers = {r["user"]["login"] for r in reviews
-                 if r.get("state") == "APPROVED" and not r.get("dismissed") and not r.get("stale")} - excluded
+    try:
+        reviews = forgejo("GET", f"/pulls/{pr['number']}/reviews")
+    except Exception:
+        reviews = []
+    approvers = sorted({r["user"]["login"] for r in reviews
+                        if r.get("state") == "APPROVED" and not r.get("dismissed") and not r.get("stale")})
     merger = (pr.get("merged_by") or {}).get("login")
-    how = []
-    if approvers:
-        how.append("approved by " + ", ".join(sorted(approvers)))
-    if merger and merger not in excluded:
-        how.append(f"merged by {merger}")
-    if not how:
-        return False, (f"PR #{pr['number']} was approved and merged only by its author/requester "
-                       f"({', '.join(sorted(x for x in excluded if x))})")
-    return True, f"PR #{pr['number']} " + ", ".join(how)
+    excluded = {author, promo.get("requestedBy")}
+    second = [x for x in approvers + [merger] if x and x not in excluded]
+    how = ([f"approved by {', '.join(approvers)}"] if approvers else []) + ([f"merged by {merger}"] if merger else [])
+    summary = f"PR #{pr['number']} " + ", ".join(how or ["merged"])
+    if not second:
+        summary += f": no second person (requested by {promo.get('requestedBy')})"
+    return {**rec, "pr": pr["number"], "author": author, "approvedBy": approvers, "mergedBy": merger,
+            "separated": bool(second), "summary": summary}
 
 
 # ---------------------------------------------------------------- compliance (docs/oscal.md)
@@ -653,7 +660,8 @@ def reassess(root: Path, args) -> list[str]:
 
 
 def apply_due(root: Path, args) -> tuple[int, int]:
-    """Returns (applied, refused). A refused promotion is one that is due but failed a check."""
+    """Returns (applied, refused). Every due promotion on master is applied: the merge decided. Its
+    approval and its security re-scan are recorded with it. Refused means only a malformed record."""
     pending = sorted((root / "promotions" / "pending").glob("*/promotion.yaml"))
     applied = refused = 0
     for p in pending:
@@ -665,24 +673,20 @@ def apply_due(root: Path, args) -> tuple[int, int]:
         if due > now_utc():
             print(f"{promo['id']}: not due until {promo['notBefore']}")
             continue
-        ok, why = approval_of(root, d, promo)
-        if not ok:
-            print(f"{promo['id']}: NOT applied: {why}")
-            refused += 1
-            continue
+        approval = approval_record(root, d, promo)
+        why = approval["summary"]
         app = load_app(str(d / "cicd.yaml"))
-        if app["metadata"]["name"] != promo["app"]:
+        if app["metadata"]["name"] != promo["app"]:      # a malformed record, not a decision: it can't be rendered
             print(f"{promo['id']}: NOT applied: cicd.yaml names {app['metadata']['name']!r}, not {promo['app']!r}")
             refused += 1
             continue
         cl = load_cluster(root, args.cluster)
         sec_ok, sec_why = security_of(root, d, promo, cl)
-        if not sec_ok:
-            print(f"{promo['id']}: NOT applied: {sec_why}")
-            refused += 1
-            continue
+        if not sec_ok:     # recorded, and shown on prod; the merge already decided (docs/security.md)
+            sec_why = "applied with " + sec_why
         render_env(root, app, cl, promo["to"], None, promo["image"], (d / "app.yaml").read_text(), {
-            "commit": promo.get("commit"), "promotion": promo["id"], "approval": why, "security": sec_why,
+            "commit": promo.get("commit"), "promotion": promo["id"], "approval": why, "separated": approval["separated"],
+            "security": sec_why,
             "renderedAt": now_utc().isoformat().replace("+00:00", "Z")},
             app_config_text=(d / "cicd.yaml").read_text())
         out_env = root / "envs" / args.cluster / promo["app"] / promo["to"]
@@ -699,8 +703,11 @@ def apply_due(root: Path, args) -> tuple[int, int]:
         rec = load_yaml(done / "promotion.yaml")
         rec["appliedAt"] = now_utc().isoformat().replace("+00:00", "Z")
         rec["approval"] = why
+        rec["approvalRecord"] = approval
         rec["security"] = sec_why
         write(done / "promotion.yaml", dump_yaml(rec))
+        (out_env / "evidence").mkdir(exist_ok=True)     # who authorized what runs in prod, next to its other evidence
+        write(out_env / "evidence" / "approval.json", json.dumps({**approval, "promotion": promo["id"]}, indent=2) + "\n")
         print(f"{promo['id']}: applied ({why}; {sec_why})")
         applied += 1
     build_index(root, args.cluster)

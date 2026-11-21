@@ -1,6 +1,8 @@
 # Security: scans that report in dev and gate prod
 
-Every build is scanned. Development keeps moving: in dev and branch environments, findings are recorded and shown, and the deploy goes ahead. Prod is where findings block: a promotion is re-scanned when it is requested and again when it is applied, and it is refused if it fails the prod policy. A secret is the one exception, and blocks everywhere.
+Every build is scanned. Development keeps moving: in dev and branch environments, findings are recorded and shown, and the deploy goes ahead. Prod is where findings count: a promotion is re-scanned under the prod policy when it is requested, and the result is a failing check on its PR (`cicd/promotion`) that should stop the merge. What is merged is applied: master is what the cluster runs, so the platform never refuses a merged promotion afterwards. It re-scans again when it applies, and records the result in prod. A secret is the one exception, and blocks every deploy.
+
+Where the merge is the decision, the forge enforces it, if the deployment wants that: on master, require one approval and the `cicd/promotion` check. A deployment whose forge is set up differently still gets the same records: who requested, approved and merged each promotion (`evidence/approval.json` in prod, with `separated: false` when no second person did), and the gate at request and at apply.
 
 ```
 build ─▶ scan the tree           gitleaks (secrets), opengrep (code), checkov (Dockerfile, manifests)
@@ -9,7 +11,7 @@ build ─▶ scan the tree           gitleaks (secrets), opengrep (code), checko
       ─▶ deploy dev or branch    the record stays with the environment
 
 request-promotion ─▶ re-scan the pinned digest, gate as prod, show it in the PR
-apply-due         ─▶ re-scan again when due; refuse on fail (the run goes red, the request stays pending)
+apply-due         ─▶ apply what is merged, when due; re-scan and record the result and the approval in prod
 ```
 
 ## The tools
@@ -29,7 +31,7 @@ They are pinned with checksums in `actions/setup/tools.txt`. Each one only repor
 
 | | dev, branch | prod |
 |---|---|---|
-| mode | `report`: the job stays green and the record says `warn` | `enforce`: a failing finding refuses the promotion |
+| mode | `report`: the job stays green and the record says `warn` | `enforce`: a failing finding fails the promotion PR's `cicd/promotion` check |
 | `secrets` | always blocks, at any severity | always blocks |
 | `vuln` | high and critical, only when a fixed version exists | same |
 | `sast`, `config` | high | high |
