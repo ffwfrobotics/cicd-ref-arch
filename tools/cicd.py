@@ -377,6 +377,7 @@ def request_promotion(root: Path, args) -> Path:
         "id": pid, "app": args.app, "cluster": args.cluster,
         "from": args.source, "to": args.to,
         "image": meta["image"], "commit": meta.get("commit"),
+        **({"sources": meta["sources"]} if meta.get("sources") else {}),
         "notBefore": not_before.isoformat().replace("+00:00", "Z"),
         "requestedBy": args.requested_by or os.environ.get("USER", "unknown"),
         "reason": args.reason or "",
@@ -686,6 +687,7 @@ def apply_due(root: Path, args) -> tuple[int, int]:
             sec_why = "applied with " + sec_why
         render_env(root, app, cl, promo["to"], None, promo["image"], (d / "app.yaml").read_text(), {
             "commit": promo.get("commit"), "promotion": promo["id"], "approval": why, "separated": approval["separated"],
+            **({"sources": promo["sources"]} if promo.get("sources") else {}),
             "security": sec_why,
             "renderedAt": now_utc().isoformat().replace("+00:00", "Z")},
             app_config_text=(d / "cicd.yaml").read_text())
@@ -852,6 +854,137 @@ def load_tenants(root: Path) -> dict[str, dict]:
     return out
 
 
+MODES = ("direct", "wrapped", "monorepo")
+KINDS = ("App", "Stack")
+UPDATES = ("follow", "pin")
+
+
+def tenant_spec(t: dict) -> dict:
+    """A tenant record's spec with its defaults filled in and checked (docs/enrollment.md). Records
+    written before modes existed are direct apps with no sources."""
+    name = t["metadata"]["name"]
+    spec = dict(t.get("spec") or {})
+    spec.setdefault("kind", "App")
+    spec.setdefault("mode", "direct")
+    spec.setdefault("path", ".")
+    spec["sources"] = [dict(x) for x in (spec.get("sources") or [])]
+    if spec["kind"] not in KINDS:
+        raise ValueError(f"{name}: kind must be one of {', '.join(KINDS)}")
+    if spec["mode"] not in MODES:
+        raise ValueError(f"{name}: mode must be one of {', '.join(MODES)}")
+    if spec["mode"] == "direct" and spec["sources"]:
+        raise ValueError(f"{name}: a direct app has no sources (its code is in its own repo)")
+    seen = set()
+    for x in spec["sources"]:
+        for k in ("path", "repo"):
+            if not x.get(k):
+                raise ValueError(f"{name}: each source needs {k}")
+        x.setdefault("branch", "main")
+        x.setdefault("update", "follow")
+        if x["update"] not in UPDATES:
+            raise ValueError(f"{name}: source {x['path']}: update must be follow or pin")
+        if x["path"].startswith(("/", "..")) or "/../" in x["path"]:
+            raise ValueError(f"{name}: source path {x['path']!r} must be inside the IaC root")
+        if x["path"] in seen:
+            raise ValueError(f"{name}: source path {x['path']!r} is listed twice")
+        seen.add(x["path"])
+    return spec
+
+
+def sources_of(root: Path, repo_dir: Path, spec: dict) -> list[dict]:
+    """The commit each source submodule is pinned to in a checkout of the IaC root."""
+    out = []
+    for x in spec["sources"]:
+        path = os.path.normpath(os.path.join(spec["path"], x["path"]))
+        r = subprocess.run(["git", "-C", str(repo_dir), "rev-parse", f"HEAD:{path}"], capture_output=True, text=True)
+        out.append({"path": x["path"], "repo": x["repo"], "commit": r.stdout.strip() if r.returncode == 0 else None})
+    return out
+
+
+def api(method: str, server: str, path: str, token: str, body=None):
+    """The forge's API: (status, json or text)."""
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(server.rstrip("/") + "/api/v1" + path, data=data, method=method, headers={
+        "Authorization": f"token {token}", "Accept": "application/json", "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read()
+            return r.status, (json.loads(raw) if raw else None)
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode(errors="replace")[:300]
+
+
+ZERO = "0" * 40
+
+
+def bump(root: Path, args) -> str:
+    """Move a source submodule of an app's IaC root to the commit just pushed to the source
+    (docs/enrollment.md): a commit on the IaC branch (follow) or a PR (pin). The gitlink is written
+    straight into the index, so the source is never fetched here. A deleted source branch removes
+    its IaC branch src/<slug>."""
+    tenants = load_tenants(root)
+    if args.app not in tenants:
+        sys.exit(f"{args.app} is not enrolled")
+    spec = tenant_spec(tenants[args.app])
+    src = next((x for x in spec["sources"] if x["repo"] == args.source), None)
+    if src is None:
+        sys.exit(f"{args.source} is not a source of {args.app}")
+    server, token, user = args.server, os.environ["FORGEJO_TOKEN"], os.environ.get("BOT", "cicd-bot")
+    code, repo = api("GET", server, f"/repos/{spec['repo']}", token)
+    if code != 200:
+        sys.exit(f"cannot read the IaC root {spec['repo']}: {code}")
+    dev = repo.get("default_branch") or "main"
+    target = dev if args.branch == src["branch"] else "src/" + slug(args.branch, 40)
+    auth = "AUTHORIZATION: basic " + __import__("base64").b64encode(f"{user}:{token}".encode()).decode()
+    work = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / f"bump-{args.app}-{os.getpid()}"
+    shutil.rmtree(work, ignore_errors=True)
+
+    def git(*a, check=True):
+        return subprocess.run(["git", "-c", f"http.extraHeader={auth}", "-C", str(work), *a],
+                              capture_output=True, text=True, check=check)
+
+    url = f"{server.rstrip('/')}/{spec['repo']}.git"
+    subprocess.run(["git", "-c", f"http.extraHeader={auth}", "clone", "-q", "--no-recurse-submodules", "--depth", "20",
+                    "--no-single-branch", url, str(work)], check=True, capture_output=True)
+    git("config", "user.name", "cicd-bot")
+    git("config", "user.email", "cicd-bot@noreply.invalid")
+    has_target = git("rev-parse", "--verify", "-q", f"origin/{target}", check=False).returncode == 0
+    if args.sha == ZERO:      # the source branch was deleted
+        if target != dev and has_target:
+            git("push", "-q", "origin", f":{target}")
+            return f"removed {target} (source branch {args.branch} deleted)"
+        return "nothing to remove"
+    if not re.fullmatch(r"[0-9a-f]{40}", args.sha):
+        sys.exit("sha must be a full commit id")
+    code, _ = api("GET", server, f"/repos/{src['repo']}/git/commits/{args.sha}", token)
+    if code != 200:
+        sys.exit(f"{args.sha[:7]} is not a commit of {src['repo']} ({code})")
+    git("checkout", "-q", "-B", target, f"origin/{target}" if has_target else f"origin/{dev}")
+    path = os.path.normpath(os.path.join(spec["path"], src["path"]))
+    cur = git("rev-parse", f"HEAD:{path}", check=False).stdout.strip()
+    if cur == args.sha:
+        return f"{path} is already at {args.sha[:7]} on {target}"
+    git("update-index", "--add", "--cacheinfo", f"160000,{args.sha},{path}")
+    msg = [f"bump {src['path']} to {args.sha[:7]}", "",
+           f"Source-Repo: {src['repo']}", f"Source-Branch: {args.branch}", f"Source-Commit: {args.sha}"]
+    if args.actor:
+        msg.append(f"Requested-by: {args.actor}")
+    git("commit", "-q", "-m", "\n".join(msg))
+    if src["update"] == "follow":
+        git("push", "-q", "origin", f"HEAD:refs/heads/{target}")
+        return f"{target}: {path} -> {args.sha[:7]}"
+    if not has_target:         # a pin PR needs its base to exist: the src/<slug> branch starts at dev
+        git("push", "-q", "origin", f"origin/{dev}:refs/heads/{target}")
+    head = f"bump/{slug(src['path'], 20)}-{args.sha[:7]}"
+    git("push", "-q", "-f", "origin", f"HEAD:refs/heads/{head}")
+    code, pr = api("POST", server, f"/repos/{spec['repo']}/pulls", token, {
+        "head": head, "base": target, "title": f"bump {src['path']} to {args.sha[:7]}",
+        "body": "\n".join(msg[2:]) + "\n\nMerging deploys it (docs/enrollment.md, pin)."})
+    if code not in (200, 201):
+        sys.exit(f"could not open the bump PR: {code} {pr}")
+    return f"PR #{pr['number']}: {path} -> {args.sha[:7]} into {target}"
+
+
 def approved(t: dict) -> bool:
     """An app enrolled through the dashboard is pending until an admin approves it: until then every
     branch, its dev branch too, gets a branch environment only (no dev host, no promotion).
@@ -989,6 +1122,19 @@ def main():
     r.add_argument("--repo", default="")
     r.add_argument("--run-url", default="")
     r.add_argument("--security-dir", help="build/security from actions/security (kept with the environment)")
+    r.add_argument("--sources", default="", help="JSON list of {path, repo, commit}: the source commits this build is from")
+
+    tn = sub.add_parser("tenant", help="print an enrolled app's normalized tenant spec (JSON), or key=value lines")
+    tn.add_argument("app")
+    tn.add_argument("--github-output", action="store_true")
+
+    bp = sub.add_parser("bump", help="move a source submodule of an app's IaC root to a pushed commit")
+    bp.add_argument("--app", required=True)
+    bp.add_argument("--source", required=True, help="the source repo, owner/name")
+    bp.add_argument("--branch", required=True)
+    bp.add_argument("--sha", required=True)
+    bp.add_argument("--actor", default="")
+    bp.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
 
     i = sub.add_parser("index")
     i.add_argument("--cluster", required=True)
@@ -1050,6 +1196,23 @@ def main():
             print("skip")
     elif args.cmd == "manage":
         print(manage(root, args))
+    elif args.cmd == "tenant":
+        t = load_tenants(root).get(args.app)
+        if t is None:
+            sys.exit(f"{args.app} is not enrolled (no tenants/{args.app}.yaml)")
+        try:
+            spec = tenant_spec(t)
+        except ValueError as e:
+            sys.exit(str(e))
+        if args.github_output:
+            for k in ("repo", "path", "mode", "kind"):
+                print(f"{k}={spec[k]}")
+            print(f"status={spec.get('status', 'approved')}")
+            print(f"sources={json.dumps(spec['sources'], separators=(',', ':'))}")
+        else:
+            print(json.dumps(spec, indent=2))
+    elif args.cmd == "bump":
+        print(bump(root, args))
     elif args.cmd == "render":
         app = load_app(args.app)
         cl = load_cluster(root, args.cluster)
@@ -1060,6 +1223,7 @@ def main():
                 sys.exit(f"app {app['metadata']['name']!r} is pending approval: branch environments only")
         out = render_env(root, app, cl, args.env, args.branch, args.image, Path(args.manifests).read_text(), {
             "repo": args.repo, "commit": args.commit, "runUrl": args.run_url,
+            **({"sources": json.loads(args.sources)} if args.sources else {}),
             "renderedAt": now_utc().isoformat().replace("+00:00", "Z")},
             app_config_text=Path(args.app).read_text(),
             security_dir=Path(args.security_dir) if args.security_dir else None,

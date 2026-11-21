@@ -45,11 +45,11 @@ def checks_by_id(c: dict) -> dict[str, dict]:
 # ---------------------------------------------------------------- defaults
 
 
-def default_cicd(app: str, dev_branch: str, port: int) -> dict:
+def default_cicd(app: str, dev_branch: str, port: int, context: str = ".", dockerfile: str = "Dockerfile") -> dict:
     return {
         "apiVersion": "cicd.ffwf.net/v1alpha1", "kind": "App", "metadata": {"name": app},
         "spec": {
-            "build": {"context": ".", "dockerfile": "Dockerfile"},
+            "build": {"context": context, "dockerfile": dockerfile},
             "deploy": {"path": "deploy"},
             "service": {"name": app, "port": 80},
             "workload": {"kind": "Deployment", "name": app},
@@ -181,7 +181,8 @@ def check(app_dir: Path, app: str, dev_branch: str, fill: bool) -> tuple[list[di
 
     # 9. something to build (checked before the base: its EXPOSE sets the generated port)
     b = spec.get("build") or {}
-    dockerfile = app_dir / (b.get("context") or ".") / (b.get("dockerfile") or "Dockerfile")
+    # the Dockerfile is named from the IaC root, like the build does (actions/build); the context may be elsewhere
+    dockerfile = app_dir / (b.get("dockerfile") or "Dockerfile")
     if b.get("dockerfile") and "/" in b["dockerfile"]:
         dockerfile = app_dir / b["dockerfile"]
     if dockerfile.is_file():

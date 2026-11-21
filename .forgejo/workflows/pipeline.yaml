@@ -19,10 +19,11 @@ on:
       app: {description: "the enrolled app (tenants/<app>.yaml)", required: true}
       branch: {description: "the app repo's branch", required: true}
       sha: {description: "the commit (default: the branch's head)", default: ""}
-      action: {description: "deploy | pause | resume | remove-env | request-promotion", default: deploy}
+      action: {description: "deploy | pause | resume | remove-env | request-promotion | bump", default: deploy}
       actor: {description: "who asked (self-service), or who pushed", default: ""}
       not_before: {description: "request-promotion: earliest UTC time, e.g. 2026-11-20T15:00:00Z", default: ""}
       reason: {description: "request-promotion: why", default: ""}
+      source: {description: "bump: the source repo (owner/name) that was pushed; branch and sha are its own", default: ""}
 
 env:
   CLUSTER: ${{ vars.CICD_CLUSTER || 'c-local' }}
@@ -33,35 +34,43 @@ jobs:
   route:
     runs-on: ffwf-k8s
     outputs:
-      env: ${{ steps.route.outputs.env }}
+      env: ${{ steps.route.outputs.env || steps.app.outputs.env }}
       repo: ${{ steps.app.outputs.repo }}
       path: ${{ steps.app.outputs.path }}
       sha: ${{ steps.route.outputs.sha }}
+      sources: ${{ steps.app.outputs.sources }}
       dev_branch: ${{ steps.intake.outputs.dev_branch }}
     steps:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
     - uses: ./.cicd/actions/setup
     - id: app
-      env: {APP_NAME: "${{ inputs.app }}", BRANCH: "${{ inputs.branch }}", SHA: "${{ inputs.sha }}", ACTION: "${{ inputs.action }}"}
+      env: {APP_NAME: "${{ inputs.app }}", BRANCH: "${{ inputs.branch }}", SHA: "${{ inputs.sha }}", ACTION: "${{ inputs.action }}",
+            SOURCE: "${{ inputs.source }}"}
       run: |
         set -eu
         [[ "$APP_NAME" =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]] || { echo "::error::bad app name"; exit 1; }
         [[ -z "$SHA" || "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full commit id"; exit 1; }
         git check-ref-format --branch "$BRANCH" >/dev/null || { echo "::error::bad branch name"; exit 1; }
-        case "$ACTION" in deploy|pause|resume|remove-env|request-promotion) ;; *) echo "::error::unknown action $ACTION"; exit 1 ;; esac
-        t=".cicd/tenants/$APP_NAME.yaml"
-        [ -f "$t" ] || { echo "::error::$APP_NAME is not enrolled (no tenants/$APP_NAME.yaml)"; exit 1; }
-        python3 -c "import yaml,sys;s=yaml.safe_load(open(sys.argv[1]))['spec'];print('repo='+s['repo']);print('path='+(s.get('path') or '.'));print('status='+s.get('status','approved'))" "$t" >> "$GITHUB_OUTPUT"
+        case "$ACTION" in deploy|pause|resume|remove-env|request-promotion|bump) ;; *) echo "::error::unknown action $ACTION"; exit 1 ;; esac
+        # the tenant record, checked and with its defaults (docs/enrollment.md): the IaC root, its mode and sources
+        python3 .cicd/tools/cicd.py --root .cicd tenant "$APP_NAME" --github-output >> "$GITHUB_OUTPUT" || { echo "::error::$APP_NAME: bad or missing tenant record"; exit 1; }
+        if [ "$ACTION" = bump ]; then
+          [[ "$SOURCE" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || { echo "::error::bump needs source=owner/name"; exit 1; }
+          [ -n "$SHA" ] || { echo "::error::bump needs the pushed sha"; exit 1; }
+          echo "env=bump" >> "$GITHUB_OUTPUT"; exit 0
+        fi
         if [ "$ACTION" = request-promotion ] && grep -q '^status=pending$' "$GITHUB_OUTPUT"; then
           echo "::error::$APP_NAME is pending: an admin approves it before it can be promoted"; exit 1
         fi
-    - uses: actions/checkout@v4
-      with: {repository: "${{ steps.app.outputs.repo }}", ref: "${{ inputs.sha || inputs.branch }}", path: app,
+    - if: inputs.action != 'bump'
+      uses: actions/checkout@v4
+      with: {repository: "${{ steps.app.outputs.repo }}", ref: "${{ inputs.sha || inputs.branch }}", path: app, submodules: recursive,
              token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
     # the contract (contract.yaml): fills in cicd.yaml and deploy/ when they're missing, and says
     # what to fix as commit statuses on the app repo. Never fails; nothing to run stops the run here.
     - id: intake
+      if: inputs.action != 'bump'
       env: {APP_NAME: "${{ inputs.app }}", REPO: "${{ steps.app.outputs.repo }}", APP: "app/${{ steps.app.outputs.path }}",
             ACTION: "${{ inputs.action }}", TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", SERVER: "${{ github.server_url }}"}
       run: |
@@ -73,6 +82,7 @@ jobs:
             --server "$SERVER" --target-url "$SERVER/${{ github.repository }}/actions/runs/${{ github.run_number }}"
         fi
     - id: route
+      if: inputs.action != 'bump'
       env: {BRANCH: "${{ inputs.branch }}", APP: "app/${{ steps.app.outputs.path }}", ACTION: "${{ inputs.action }}", ACTOR: "${{ inputs.actor }}",
             RUNNABLE: "${{ steps.intake.outputs.runnable }}"}
       run: |
@@ -91,13 +101,13 @@ jobs:
 
   test:
     needs: route
-    if: needs.route.outputs.env != 'manage' && !startsWith(needs.route.outputs.env, 'skip')
+    if: needs.route.outputs.env != 'manage' && needs.route.outputs.env != 'bump' && !startsWith(needs.route.outputs.env, 'skip')
     runs-on: ffwf-k8s
     steps:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
     - uses: actions/checkout@v4
-      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app,
+      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app, submodules: recursive,
              token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
     - uses: ./.cicd/actions/setup
     - name: contract defaults
@@ -120,7 +130,7 @@ jobs:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
     - uses: actions/checkout@v4
-      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app,
+      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app, submodules: recursive,
              token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
     - uses: ./.cicd/actions/setup
     - name: contract defaults
@@ -137,6 +147,18 @@ jobs:
              token: "${{ secrets.CICD_BOT_TOKEN }}", user: "${{ vars.CICD_BOT_USER }}", commit: "${{ needs.route.outputs.sha }}"}
     - uses: ./.cicd/actions/sign
       with: {image: "${{ steps.build.outputs.image }}", out: build/security}
+    - id: sources       # which commit of each source this build is from (docs/enrollment.md)
+      env: {SPEC: "${{ needs.route.outputs.sources }}", IACPATH: "${{ needs.route.outputs.path }}"}
+      run: |
+        python3 - <<'PY' >> "$GITHUB_OUTPUT"
+        import json, os, subprocess
+        out = []
+        for x in json.loads(os.environ.get("SPEC") or "[]"):
+            p = os.path.normpath(os.path.join(os.environ["IACPATH"], x["path"]))
+            r = subprocess.run(["git", "-C", "app", "rev-parse", f"HEAD:{p}"], capture_output=True, text=True)
+            out.append({"path": x["path"], "repo": x["repo"], "commit": r.stdout.strip() or None})
+        print("json=" + json.dumps(out, separators=(",", ":")))
+        PY
     - id: deploy
       uses: ./.cicd/actions/deploy-env
       with:
@@ -151,6 +173,7 @@ jobs:
         state-repo: ${{ env.STATE_REPO }}
         commit: ${{ needs.route.outputs.sha }}
         source-repo: ${{ needs.route.outputs.repo }}
+        sources: ${{ steps.sources.outputs.json }}
     # endpoint checks (IT Security's findings about the running app) need the new version live:
     # re-assess this environment once it has rolled out
     - if: success()
@@ -200,6 +223,21 @@ jobs:
     - if: steps.watch.outputs.state == 'fail'
       run: exit 1
 
+  # a push to one of the app's sources: move its submodule in the IaC root (docs/enrollment.md). The
+  # resulting push to the IaC root is an ordinary push: it builds and deploys through its own run.
+  bump:
+    needs: route
+    if: needs.route.outputs.env == 'bump'
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+      with: {path: .cicd, persist-credentials: false}
+    - uses: ./.cicd/actions/setup
+    - env: {FORGEJO_TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", BOT: "${{ vars.CICD_BOT_USER }}"}
+      run: |
+        python3 .cicd/tools/cicd.py --root .cicd bump --app "${{ inputs.app }}" --source "${{ inputs.source }}" \
+          --branch "${{ inputs.branch }}" --sha "${{ inputs.sha }}" --actor "${{ inputs.actor }}" --server "${{ github.server_url }}"
+
   # self-service, for whoever the dashboard says asked (it checked their write on the app repo)
   manage:
     needs: route
@@ -209,7 +247,7 @@ jobs:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
     - uses: actions/checkout@v4
-      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app,
+      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app, submodules: recursive,
              token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
     - uses: ./.cicd/actions/setup
     - name: contract defaults
