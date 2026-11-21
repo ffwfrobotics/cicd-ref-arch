@@ -1,0 +1,18 @@
+# e2e fixture
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata:
+  name: fxc-b
+spec:
+  tenant: ffwf
+  clusters:
+  - c-local
+  enrolled: '2026-11-21'
+  mode: monorepo
+  repo: ffwf-fixtures/fx-mono-cfg
+  path: config/apps/b
+  sources:
+  - path: svc-b
+    repo: ffwf-fixtures/fx-svc-b
+  - path: config
+    repo: ffwf-fixtures/fx-config
