@@ -1,0 +1,191 @@
+{
+  "schema": "security-findings/v1",
+  "app": "fxm-b",
+  "image": "localhost:5000/fxm-b@sha256:3f166a6aebc268749d563fe74e99316e10f0f73b6f5b030e4db740680eeb0102",
+  "commit": "a09e81318090d838800853c25fbe22ed43b8e1b6",
+  "generated": "2026-11-21T23:40:26Z",
+  "scans": {
+    "source": {
+      "generated": "2026-11-21T23:39:06Z",
+      "commit": "a09e81318090d838800853c25fbe22ed43b8e1b6",
+      "image": null,
+      "tools": {
+        "gitleaks": "8.30.1",
+        "opengrep": "1.33.1",
+        "checkov": "3.4.6"
+      },
+      "evidence": {
+        "gitleaks": {
+          "file": "gitleaks.json",
+          "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        },
+        "opengrep": {
+          "file": "opengrep.sarif",
+          "sha256": "9b67679d5be386ceb3bc204a659877774f3d91bd21ef232f0b37e2e96c870097"
+        },
+        "checkov": {
+          "file": "checkov.json",
+          "sha256": "ab1c61df7554451cd9613c6a312672f670fea8f20a336875be625dd1a3a7f7ea"
+        }
+      }
+    },
+    "image": {
+      "generated": "2026-11-21T23:40:26Z",
+      "commit": "a09e81318090d838800853c25fbe22ed43b8e1b6",
+      "image": "localhost:5000/fxm-b@sha256:3f166a6aebc268749d563fe74e99316e10f0f73b6f5b030e4db740680eeb0102",
+      "tools": {
+        "syft": "16.1.13",
+        "grype": "6",
+        "grype-db": "2026-11-21T06:20:06Z"
+      },
+      "evidence": {
+        "sbom-cyclonedx": {
+          "file": "sbom.cdx.json",
+          "sha256": "d21216a14ba7f8c66d99ebe34849abe8b3c67ed1b0c1233797b3ddfb59fc0fbf"
+        },
+        "sbom-spdx": {
+          "file": "sbom.spdx.json",
+          "sha256": "89c6ec3a7fa03227cf89b1bfa12506d3fc0bac9c164718dfe0e89f1307247ab8"
+        },
+        "grype": {
+          "file": "grype.json",
+          "sha256": "009e05bd68660db8d403343a89337853ef0d25c285ddb3838f069bbf6a31e0c6"
+        }
+      }
+    }
+  },
+  "gate": {
+    "env": "dev",
+    "mode": "report",
+    "status": "warn",
+    "blocking": 0,
+    "counts": {
+      "suppressed": 6,
+      "fail": 3,
+      "below-threshold": 8
+    },
+    "notes": []
+  },
+  "findings": [
+    {
+      "id": "78f4a1de708c",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/96d24af08eda717c/hostexecutor/app/apps/b/Dockerfile.)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
+        "expires": ""
+      }
+    },
+    {
+      "id": "b9b77e041ed9",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_21",
+      "severity": "high",
+      "location": "build/app.yaml:1",
+      "message": "The default namespace should not be used (Service.default.fxm-b)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform sets the namespace when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "f375b98427d7",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_8",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Liveness Probe Should be Configured (Deployment.default.fxm-b)",
+      "outcome": "fail"
+    },
+    {
+      "id": "52a7b84f5cda",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_11",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "CPU limits should be set (Deployment.default.fxm-b)",
+      "outcome": "fail"
+    },
+    {
+      "id": "9a99e240c143",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_43",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Image should use digest (Deployment.default.fxm-b)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform pins the image by digest when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "8a8fc7325250",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_22",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Use read-only filesystem for containers where possible (Deployment.default.fxm-b)",
+      "outcome": "fail"
+    },
+    {
+      "id": "cbf3f491bc56",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_14",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Image Tag should be fixed - not latest or blank (Deployment.default.fxm-b)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform pins the image by digest when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "5a34b7c50fd9",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_K8S_21",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "The default namespace should not be used (Deployment.default.fxm-b)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform sets the namespace when it renders the environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "e6cbf5b0a8ee",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV2_K8S_6",
+      "severity": "high",
+      "location": "build/app.yaml:13",
+      "message": "Minimize the admission of pods which lack an associated NetworkPolicy (Pod.default.fxm-b.app-fxm-b)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "the platform renders a default-deny NetworkPolicy for every environment",
+        "expires": ""
+      }
+    }
+  ]
+}
