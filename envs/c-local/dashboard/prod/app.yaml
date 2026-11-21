@@ -66,6 +66,9 @@ spec:
         - mountPath: /var/run/secrets/dashboard-oauth
           name: oauth
           readOnly: true
+        - mountPath: /var/run/secrets/dashboard-platform
+          name: platform
+          readOnly: true
       enableServiceLinks: false
       securityContext:
         fsGroup: 65532
@@ -84,3 +87,8 @@ spec:
           defaultMode: 288
           optional: true
           secretName: dashboard-oauth
+      - name: platform
+        secret:
+          defaultMode: 288
+          optional: true
+          secretName: dashboard-platform

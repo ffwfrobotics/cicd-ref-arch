@@ -5,7 +5,7 @@
  "env": "prod",
  "commit": "eaadb673a0b1f4e30bf3aa4d5a5c2cbc7724ac50",
  "image": "localhost:5000/dashboard@sha256:98843fa9bbd2412fce6fa207e114620e685356d2b2c3b056921697c7469ea096",
- "generated": "2026-11-21T16:38:48Z",
+ "generated": "2026-11-21T17:46:54Z",
  "counts": {
   "satisfied": 34,
   "not-satisfied": 6
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (10 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (11 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (10 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (11 h old)"
     }
    ]
   },
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (10 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (11 h old)"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/tmp/tmp.nm4izMPYhV/oscal/platform.yaml"
+   "path": "/runner/work/b8bdd475fd2bda28/hostexecutor/oscal/platform.yaml"
   }
  ]
 }
