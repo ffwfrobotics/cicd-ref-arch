@@ -32,6 +32,7 @@ The `intake` step (`tools/intake.py`) checks each pushed commit before anything 
 | `tests` | 1 | spec.test.run is set | warn. No test command: set spec.test.run in cicd.yaml |
 | `deploy-base` | 2 | the deploy path holds a kustomization.yaml | assumed: default used. No deploy base: one Deployment and Service generated. Commit them (in the run log) to change them |
 | `no-namespace` | 2 | no metadata.namespace in the base | warn. Remove metadata.namespace: each environment sets its own |
+| `overlays` | 2 | each deploy-<env>/ overlay builds, passes the same checks as the base, and changes only what spec.overlays.allow lists | warn. Fix the overlay named: it is what that environment would run (an overlay that doesn't build stops the run) |
 | `app-image` | 3 | a container's image is `app-image` | warn. Set the app container's image to app-image: the pipeline swaps in what it built |
 | `no-replicas` | 4 | the workload sets no spec.replicas | warn. Remove spec.replicas: KEDA sets the count |
 | `restricted` | 5 | runAsNonRoot, seccompProfile RuntimeDefault, allowPrivilegeEscalation false, capabilities drop ALL | warn. The pod will be refused: add the securityContext fields named (see templates/app/deploy/deployment.yaml) |

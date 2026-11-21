@@ -29,6 +29,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -363,7 +364,8 @@ def request_promotion(root: Path, args) -> Path:
     pid = f"{args.app}-{args.to}-{now_utc().strftime('%Y%m%dT%H%M%SZ')}"
     out = root / "promotions" / "pending" / pid
     out.mkdir(parents=True)
-    shutil.copy(src / "app.yaml", out / "app.yaml")  # the exact manifests running in the source env
+    # the exact manifests prod will run: the deploy-prod/ overlay built with this commit if it has one, else what the source env runs
+    shutil.copy(src / ("app-prod.yaml" if (src / "app-prod.yaml").exists() else "app.yaml"), out / "app.yaml")
     shutil.copy(src / "cicd.yaml", out / "cicd.yaml")
     for extra in ("findings-source.json", "security-record.json"):
         if (src / extra).exists():
@@ -884,7 +886,7 @@ def tenant_spec(t: dict) -> dict:
         if x["update"] not in UPDATES:
             raise ValueError(f"{name}: source {x['path']}: update must be follow or pin")
         if x["path"].startswith(("/", "..")) or "/../" in x["path"]:
-            raise ValueError(f"{name}: source path {x['path']!r} must be inside the IaC root")
+            raise ValueError(f"{name}: source path {x['path']!r} is a submodule path in the IaC repo (no .., not absolute)")
         if x["path"] in seen:
             raise ValueError(f"{name}: source path {x['path']!r} is listed twice")
         seen.add(x["path"])
@@ -895,7 +897,7 @@ def sources_of(root: Path, repo_dir: Path, spec: dict) -> list[dict]:
     """The commit each source submodule is pinned to in a checkout of the IaC root."""
     out = []
     for x in spec["sources"]:
-        path = os.path.normpath(os.path.join(spec["path"], x["path"]))
+        path = os.path.normpath(x["path"])      # a submodule path in the IaC repo (not relative to spec.path)
         r = subprocess.run(["git", "-C", str(repo_dir), "rev-parse", f"HEAD:{path}"], capture_output=True, text=True)
         out.append({"path": x["path"], "repo": x["repo"], "commit": r.stdout.strip() if r.returncode == 0 else None})
     return out
@@ -909,7 +911,10 @@ def api(method: str, server: str, path: str, token: str, body=None):
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             raw = r.read()
-            return r.status, (json.loads(raw) if raw else None)
+            try:
+                return r.status, (json.loads(raw) if raw else None)
+            except ValueError:          # a raw file, not JSON
+                return r.status, raw.decode(errors="replace")
     except urllib.error.HTTPError as e:
         return e.code, e.read().decode(errors="replace")[:300]
 
@@ -960,7 +965,7 @@ def bump(root: Path, args) -> str:
     if code != 200:
         sys.exit(f"{args.sha[:7]} is not a commit of {src['repo']} ({code})")
     git("checkout", "-q", "-B", target, f"origin/{target}" if has_target else f"origin/{dev}")
-    path = os.path.normpath(os.path.join(spec["path"], src["path"]))
+    path = os.path.normpath(src["path"])        # the submodule's path in the IaC repo
     cur = git("rev-parse", f"HEAD:{path}", check=False).stdout.strip()
     if cur == args.sha:
         return f"{path} is already at {args.sha[:7]} on {target}"
@@ -971,7 +976,14 @@ def bump(root: Path, args) -> str:
         msg.append(f"Requested-by: {args.actor}")
     git("commit", "-q", "-m", "\n".join(msg))
     if src["update"] == "follow":
-        git("push", "-q", "origin", f"HEAD:refs/heads/{target}")
+        if git("push", "-q", "origin", f"HEAD:refs/heads/{target}", check=False).returncode != 0:
+            # another push got there first (two apps bumping one shared source, or a new commit): start again on top
+            if getattr(args, "_attempt", 0) >= 4:
+                sys.exit(f"could not push {target} after 5 attempts")
+            args._attempt = getattr(args, "_attempt", 0) + 1
+            time.sleep(2 * args._attempt)
+            shutil.rmtree(work, ignore_errors=True)
+            return bump(root, args)
         return f"{target}: {path} -> {args.sha[:7]}"
     if not has_target:         # a pin PR needs its base to exist: the src/<slug> branch starts at dev
         git("push", "-q", "origin", f"origin/{dev}:refs/heads/{target}")
@@ -1122,6 +1134,7 @@ def main():
     r.add_argument("--repo", default="")
     r.add_argument("--run-url", default="")
     r.add_argument("--security-dir", help="build/security from actions/security (kept with the environment)")
+    r.add_argument("--prod-manifests", help="the deploy-prod/ overlay built for this commit: kept as app-prod.yaml for its promotion")
     r.add_argument("--sources", default="", help="JSON list of {path, repo, commit}: the source commits this build is from")
 
     tn = sub.add_parser("tenant", help="print an enrolled app's normalized tenant spec (JSON), or key=value lines")
@@ -1221,6 +1234,7 @@ def main():
             t = load_tenants(root)[app["metadata"]["name"]]
             if args.env in ("dev", "prod") and not approved(t):
                 sys.exit(f"app {app['metadata']['name']!r} is pending approval: branch environments only")
+        prod_text = Path(args.prod_manifests).read_text() if args.prod_manifests and args.env != "prod" else None
         out = render_env(root, app, cl, args.env, args.branch, args.image, Path(args.manifests).read_text(), {
             "repo": args.repo, "commit": args.commit, "runUrl": args.run_url,
             **({"sources": json.loads(args.sources)} if args.sources and json.loads(args.sources) else {}),
@@ -1228,6 +1242,8 @@ def main():
             app_config_text=Path(args.app).read_text(),
             security_dir=Path(args.security_dir) if args.security_dir else None,
             app_dir=Path(args.app).resolve().parent)
+        if prod_text:      # not in the environment's kustomization: kept for the promotion, never applied here
+            write(out / "app-prod.yaml", prod_text)
         build_index(root, args.cluster)
         print(out)
     elif args.cmd == "index":

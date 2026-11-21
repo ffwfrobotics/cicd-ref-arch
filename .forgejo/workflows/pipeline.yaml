@@ -148,17 +148,21 @@ jobs:
     - uses: ./.cicd/actions/sign
       with: {image: "${{ steps.build.outputs.image }}", out: build/security}
     - id: sources       # which commit of each source this build is from (docs/enrollment.md)
-      env: {SPEC: "${{ needs.route.outputs.sources }}", IACPATH: "${{ needs.route.outputs.path }}"}
+      env: {SPEC: "${{ needs.route.outputs.sources }}"}
       run: |
         python3 - <<'PY' >> "$GITHUB_OUTPUT"
         import json, os, subprocess
         out = []
         for x in json.loads(os.environ.get("SPEC") or "[]"):
-            p = os.path.normpath(os.path.join(os.environ["IACPATH"], x["path"]))
+            p = os.path.normpath(x["path"])      # the submodule's path in the IaC repo
             r = subprocess.run(["git", "-C", "app", "rev-parse", f"HEAD:{p}"], capture_output=True, text=True)
             out.append({"path": x["path"], "repo": x["repo"], "commit": r.stdout.strip() or None})
         print("json=" + json.dumps(out, separators=(",", ":")))
         PY
+    - id: manifests     # this environment's overlay if it has one, else the base; prod's is kept for promotion
+      run: |
+        m="build/app-${{ needs.route.outputs.env }}.yaml"; [ -f "$m" ] || m=build/app.yaml
+        echo "path=$m" >> "$GITHUB_OUTPUT"; echo "manifests: $m"
     - id: deploy
       uses: ./.cicd/actions/deploy-env
       with:
@@ -167,7 +171,8 @@ jobs:
         env: ${{ needs.route.outputs.env }}
         branch: ${{ inputs.branch }}
         image: ${{ steps.build.outputs.image }}
-        manifests: build/app.yaml
+        manifests: ${{ steps.manifests.outputs.path }}
+        prod-manifests: build/app-prod.yaml
         token: ${{ secrets.CICD_BOT_TOKEN }}
         user: ${{ vars.CICD_BOT_USER }}
         state-repo: ${{ env.STATE_REPO }}
@@ -192,7 +197,7 @@ jobs:
         fi
     - if: always()
       uses: actions/upload-artifact@v3
-      with: {name: deliver, path: "build/security/\nbuild/app.yaml\nbuild/build-metadata.json"}
+      with: {name: deliver, path: "build/security/\nbuild/app*.yaml\nbuild/build-metadata.json"}
 
   # after the deploy: is it running? (tools/runtime.py, contract.yaml `runtime`) One word as the commit
   # status cicd/runtime; the pod states, events and last log lines it decided from as the artifact

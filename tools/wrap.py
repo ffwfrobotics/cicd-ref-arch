@@ -162,13 +162,13 @@ def main():
 
     if a.hook_url:
         for repo in (iac, a.source):
-            hook = {"type": "forgejo", "active": True, "events": ["push"], "branch_filter": "*",
+            hook = {"type": "forgejo", "active": True, "events": ["push", "delete"], "branch_filter": "*",
                     "config": {"url": a.hook_url, "content_type": "json", "secret": hook_secret}}
             code, hooks = cicd.api("GET", a.server, f"/repos/{repo}/hooks", token)
             same = [h for h in (hooks if code == 200 else []) if (h.get("config") or {}).get("url") == a.hook_url]
             if same:
                 code, _ = cicd.api("PATCH", a.server, f"/repos/{repo}/hooks/{same[0]['id']}", token, {
-                    "active": True, "events": ["push"], "branch_filter": "*", "config": hook["config"]})
+                    "active": True, "events": ["push", "delete"], "branch_filter": "*", "config": hook["config"]})
             else:
                 code, _ = cicd.api("POST", a.server, f"/repos/{repo}/hooks", token, hook)
             print(f"webhook on {repo}: {code}")

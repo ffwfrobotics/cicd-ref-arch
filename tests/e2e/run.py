@@ -163,6 +163,240 @@ def v1_direct():
     check(rt == "success", "cicd/runtime: running")
 
 
+DEV_HOOK = os.environ.get("E2E_HOOK_URL", "https://dashboard-dev.c-local.k.ffwf.net/hooks/forge")
+ROOT = HERE.parent.parent
+
+
+def platform_change(message, fn):
+    """Clone the platform repo, let fn(root) change it, commit and push (retrying on a concurrent push)."""
+    for attempt in range(5):
+        d = clone(STATE)
+        fn(d)
+        subprocess.run([sys.executable, str(ROOT / "tools/cicd.py"), "--root", str(d), "index", "--cluster", CLUSTER],
+                       check=True, capture_output=True)
+        git(d, "add", "-A")
+        if not git(d, "status", "--porcelain"):
+            return
+        git(d, "commit", "-q", "-m", message)
+        if subprocess.run(["git", "-c", f"http.extraHeader={auth()}", "-C", str(d), "push", "-q", "origin", "HEAD:master"],
+                          capture_output=True).returncode == 0:
+            return
+        time.sleep(3 * (attempt + 1))
+    raise Fail("could not push to the platform repo")
+
+
+def unenroll(app, iac=None):
+    """Remove an app's tenant record and environments, and its IaC repo: a clean start for a scenario."""
+    def drop(d):
+        for p in (d / "tenants" / f"{app}.yaml", d / "envs" / CLUSTER / app):
+            if p.is_dir():
+                __import__("shutil").rmtree(p)
+            elif p.exists():
+                p.unlink()
+    platform_change(f"e2e: unenroll {app}", drop)
+    if iac:
+        api("DELETE", f"/repos/{iac}")
+
+
+def enroll_wrapped(app, source, update="follow"):
+    def wrap(d):
+        env = dict(os.environ, FORGEJO_TOKEN=TOKEN, BOT=BOT)
+        r = subprocess.run([sys.executable, str(ROOT / "tools/wrap.py"), "--app", app, "--source", source, "--update", update,
+                            "--approved", "--hook-url", DEV_HOOK, "--requested-by", "cicd-e2e", "--root", str(d),
+                            "--server", SERVER], env=env, capture_output=True, text=True)
+        print("\n".join("      " + x for x in (r.stdout + r.stderr).strip().splitlines()))
+        if r.returncode != 0:
+            raise Fail(f"wrap failed: {r.stderr.strip()[-300:]}")
+    platform_change(f"e2e: wrap {source} as {app}", wrap)
+
+
+def fetch(url):
+    import ssl
+    import urllib.request
+    ctx = ssl.create_default_context()
+    ctx.check_hostname, ctx.verify_mode = False, ssl.CERT_NONE      # the cluster CA isn't in this trust store
+    try:
+        with urllib.request.urlopen(url, timeout=60, context=ctx) as r:
+            return r.status, r.read().decode(errors="replace")
+    except Exception as e:
+        return 0, str(e)
+
+
+def iac_head(iac, branch="main"):
+    code, c = api("GET", f"/repos/{iac}/commits?sha={branch}&limit=1")
+    return c[0] if code == 200 and c else None
+
+
+@scenario
+def v3_wrapped_follow():
+    """fx-vibe wrapped (follow): IaC repo owns build and deploy; a source push bumps and redeploys; branches map."""
+    import fixtures
+    app, iac = "fxw", "ffwf-iac/fxw"
+    src = fixtures.ensure_repo("fx-vibe")
+    unenroll(app, iac)
+    m1 = f"m1-{int(time.time())}"
+    s1 = fixtures.write_tree(src, fixtures.vibe(m1), f"fixture: {m1}", reset=True)
+    enroll_wrapped(app, src)
+    head1 = iac_head(iac)
+    check(head1 and f"Source-Commit: {s1}" in head1["commit"]["message"], "the IaC repo's first commit pins the source head")
+    code, tree = api("GET", f"/repos/{iac}/git/trees/main?recursive=1")
+    names = {x["path"] for x in tree["tree"]}
+    check({"Dockerfile", "cicd.yaml", "deploy/deployment.yaml", "src"} <= names, "Dockerfile, cicd.yaml, deploy/ and src are in the IaC repo")
+    # the IaC push happened before the tenant record existed: start its first run, as the environments workflow would
+    dispatch(app=app, branch="main", sha=head1["sha"], action="deploy", actor="cicd-e2e")
+    run = finished(app, head1["sha"])
+    check(run["status"] == "success", f"the first build succeeded ({run['url']})")
+    meta, rt = deployed(app, "dev", head1["sha"], iac)
+    check(meta.get("sources") == [{"path": "src", "repo": src, "commit": s1}], "dev records the source commit it runs")
+    check(rt == "success", "cicd/runtime: running")
+    host = meta["hosts"][0]
+    code, body = wait(f"{host} to serve {m1}", lambda: (lambda r: r if m1 in r[1] else None)(fetch(f"https://{host}/")), timeout=300)
+    check(code == 200, f"https://{host}/ serves the source's page")
+    code, dep = api("GET", f"/repos/{iac}/raw/deploy/deployment.yaml")
+    check("replicas" not in str(dep) and "namespace: prod" not in str(dep), "the source's own deploy/ is not what runs")
+
+    # a push to the source: the webhook bumps the IaC repo, which redeploys
+    m2 = f"m2-{int(time.time())}"
+    s2 = fixtures.write_tree(src, fixtures.vibe(m2), f"fixture: {m2}")
+    head2 = wait("the bump commit in the IaC repo",
+                 lambda: (lambda h: h if h and f"Source-Commit: {s2}" in h["commit"]["message"] else None)(iac_head(iac)), timeout=600)
+    check("Requested-by:" in head2["commit"]["message"], "the bump names who pushed")
+    meta, rt = deployed(app, "dev", head2["sha"], iac)
+    check(meta.get("sources", [{}])[0].get("commit") == s2 and rt == "success", "dev runs the new source commit")
+    wait(f"{host} to serve {m2}", lambda: m2 in fetch(f"https://{host}/")[1], timeout=300)
+    check(True, "the new page is served")
+
+    # a source branch: its own IaC branch and branch environment; deleting it removes both
+    s3 = fixtures.write_tree(src, fixtures.vibe("m3-branch"), "fixture: branch", branch="feat-x")
+    bh = wait("IaC branch src/feat-x", lambda: (lambda h: h if h and f"Source-Commit: {s3}" in h["commit"]["message"] else None)(
+        iac_head(iac, "src/feat-x")), timeout=600)
+    env_dir = "branch-" + cicd.branch_slug(app, "src/feat-x")
+    meta, rt = deployed(app, env_dir, bh["sha"], iac)
+    check(meta.get("sources", [{}])[0].get("commit") == s3, f"{env_dir} runs the branch's source commit")
+    fixtures.delete_branch(src, "feat-x")
+    wait("IaC branch src/feat-x to be removed", lambda: api("GET", f"/repos/{iac}/branches/src/feat-x")[0] == 404, timeout=600)
+    wait(f"{env_dir} to be removed", lambda: env_meta_text(app, env_dir) is None, timeout=900, every=20)
+    check(True, "the branch environment is gone")
+
+
+@scenario
+def v4_wrapped_pin():
+    """fx-vibe-pin wrapped (pin): a source push opens a bump PR; dev doesn't move until it is merged."""
+    import fixtures
+    app, iac = "fxp", "ffwf-iac/fxp"
+    src = fixtures.ensure_repo("fx-vibe-pin")
+    unenroll(app, iac)
+    s1 = fixtures.write_tree(src, fixtures.vibe("p1"), "fixture: p1", reset=True)
+    enroll_wrapped(app, src, update="pin")
+    head1 = iac_head(iac)
+    dispatch(app=app, branch="main", sha=head1["sha"], action="deploy", actor="cicd-e2e")
+    meta, rt = deployed(app, "dev", head1["sha"], iac)
+    check(meta["sources"][0]["commit"] == s1 and rt == "success", "dev runs the wrapped source")
+    s2 = fixtures.write_tree(src, fixtures.vibe("p2"), "fixture: p2")
+    pr = wait("a bump PR in the IaC repo", lambda: next((p for p in api("GET", f"/repos/{iac}/pulls?state=open")[1] or []
+                                                         if s2[:7] in p["title"]), None), timeout=600)
+    check(iac_head(iac)["sha"] == head1["sha"], "main has not moved")
+    time.sleep(60)
+    check((env_meta_text(app, "dev") or {}).get("commit") == head1["sha"], "dev still runs the old commit")
+    code, _ = api("POST", f"/repos/{iac}/pulls/{pr['number']}/merge", {"Do": "merge", "MergeTitleField": pr["title"]})
+    check(code in (200, 204), f"merged PR #{pr['number']}")
+    head2 = wait("main to have the merge", lambda: (lambda h: h if h["sha"] != head1["sha"] else None)(iac_head(iac)), timeout=120)
+    meta, rt = deployed(app, "dev", head2["sha"], iac)
+    check(meta["sources"][0]["commit"] == s2 and rt == "success", "after the merge dev runs the new source")
+
+
+def enroll_record(app, spec):
+    def put(d):
+        t = {"apiVersion": cicd.API, "kind": "Tenant", "metadata": {"name": app},
+             "spec": {"tenant": "ffwf", "clusters": [CLUSTER], "enrolled": time.strftime("%Y-%m-%d"), **spec}}
+        cicd.tenant_spec(t)
+        (d / "tenants" / f"{app}.yaml").write_text("# e2e fixture\n" + yaml.safe_dump(t, sort_keys=False))
+    platform_change(f"e2e: enroll {app}", put)
+
+
+def mono_sources():
+    import fixtures
+    a, b = fixtures.ensure_repo("fx-svc-a"), fixtures.ensure_repo("fx-svc-b")
+    sa = fixtures.write_tree(a, fixtures.fill(fixtures.SVC_A, "a1"), "fixture: a1", reset=True)
+    sb = fixtures.write_tree(b, fixtures.fill(fixtures.SVC_B, "b1"), "fixture: b1", reset=True)
+    for r in (a, b):
+        fixtures.hook(r)
+    return (a, sa), (b, sb)
+
+
+def check_mono(apps, repo):
+    """Each app of a monorepo deploys from the monorepo head and serves its own source."""
+    h = head(repo, "main")
+    for app, marker in apps:
+        dispatch(app=app, branch="main", sha=h, action="deploy", actor="cicd-e2e")
+    hosts = {}
+    for app, marker in apps:
+        meta, rt = deployed(app, "dev", h, repo)
+        check(rt == "success" and meta.get("sources"), f"{app}: dev runs, with its sources recorded")
+        hosts[app] = meta["hosts"][0]
+        wait(f"{hosts[app]} to serve {marker}", lambda: marker in fetch(f"https://{hosts[app]}/")[1], timeout=300)
+        check(True, f"{app} serves its own source")
+    return hosts
+
+
+@scenario
+def v5_monorepo():
+    """fx-mono: one repo, two projects (apps/a static, apps/b Python) built from submodules svc-a, svc-b."""
+    import fixtures
+    (a, sa), (b, sb) = mono_sources()
+    repo = fixtures.ensure_repo("fx-mono")
+    for app in ("fxm-a", "fxm-b"):
+        unenroll(app)
+    files = {f"apps/a/{k}": v for k, v in fixtures.iac_files("fxm-a", fixtures.source_dir(fixtures.fill(fixtures.SVC_A, "a1")), "../../svc-a").items()}
+    files.update({f"apps/b/{k}": v for k, v in fixtures.iac_files("fxm-b", fixtures.source_dir(fixtures.fill(fixtures.SVC_B, "b1")), "../../svc-b").items()})
+    files["README.md"] = "# fx-mono\n\nA monorepo fixture: projects in apps/, code in submodules.\n"
+    fixtures.write_with_submodules(repo, files, {"svc-a": (a, sa), "svc-b": (b, sb)}, "fixture: monorepo")
+    fixtures.hook(repo)
+    enroll_record("fxm-a", {"mode": "monorepo", "repo": repo, "path": "apps/a", "sources": [{"path": "svc-a", "repo": a}]})
+    enroll_record("fxm-b", {"mode": "monorepo", "repo": repo, "path": "apps/b", "sources": [{"path": "svc-b", "repo": b}]})
+    hosts = check_mono([("fxm-a", "a1"), ("fxm-b", "b1")], repo)
+    # a push to svc-a bumps the monorepo; both projects redeploy from the new monorepo commit, a serves a2
+    sa2 = fixtures.write_tree(a, fixtures.fill(fixtures.SVC_A, "a2"), "fixture: a2")
+    h2 = wait("the monorepo bump", lambda: (lambda c: c if c and f"Source-Commit: {sa2}" in c["commit"]["message"] else None)(
+        iac_head(repo)), timeout=600)
+    meta, rt = deployed("fxm-a", "dev", h2["sha"], repo)
+    check(meta["sources"][0]["commit"] == sa2 and rt == "success", "fxm-a runs svc-a's new commit")
+    wait("a2 to be served", lambda: "a2" in fetch(f"https://{hosts['fxm-a']}/")[1], timeout=300)
+    check(True, "fxm-a serves a2")
+
+
+@scenario
+def v6_monorepo_config_repo():
+    """fx-mono-cfg: the IaC roots live in a config repo that is itself a submodule; pushes to it bump it."""
+    import fixtures
+    (a, sa), (b, sb) = mono_sources()
+    cfg = fixtures.ensure_repo("fx-config")
+    repo = fixtures.ensure_repo("fx-mono-cfg")
+    for app in ("fxc-a", "fxc-b"):
+        unenroll(app)
+    files = {f"apps/a/{k}": v for k, v in fixtures.iac_files("fxc-a", fixtures.source_dir(fixtures.fill(fixtures.SVC_A, "a1")), "../../../svc-a").items()}
+    files.update({f"apps/b/{k}": v for k, v in fixtures.iac_files("fxc-b", fixtures.source_dir(fixtures.fill(fixtures.SVC_B, "b1")), "../../../svc-b").items()})
+    sc = fixtures.write_tree(cfg, files, "fixture: config", reset=True)
+    fixtures.hook(cfg)
+    fixtures.write_with_submodules(repo, {"README.md": "# fx-mono-cfg\n"}, {"svc-a": (a, sa), "svc-b": (b, sb), "config": (cfg, sc)},
+                                   "fixture: monorepo with a config repo")
+    fixtures.hook(repo)
+    for app, p, s in (("fxc-a", "a", a), ("fxc-b", "b", b)):
+        enroll_record(app, {"mode": "monorepo", "repo": repo, "path": f"config/apps/{p}",
+                            "sources": [{"path": f"svc-{p}", "repo": s}, {"path": "config", "repo": cfg}]})
+    check_mono([("fxc-a", "a1"), ("fxc-b", "b1")], repo)
+    # a config change (more memory for b): both apps' bumps of `config` land as one commit, b redeploys with it
+    code, dep = api("GET", f"/repos/{cfg}/raw/apps/b/deploy/deployment.yaml")
+    sc2 = fixtures.write_tree(cfg, {"apps/b/deploy/deployment.yaml": dep.replace("memory: 32Mi", "memory: 48Mi")}, "fixture: b gets 48Mi")
+    h2 = wait("the config bump", lambda: (lambda c: c if c and f"Source-Commit: {sc2}" in c["commit"]["message"] else None)(
+        iac_head(repo)), timeout=600)
+    meta, rt = deployed("fxc-b", "dev", h2["sha"], repo)
+    srcs = {x["path"]: x["commit"] for x in meta["sources"]}
+    check(srcs.get("config") == sc2 and rt == "success", "fxc-b runs the new config")
+    code, app_yaml = api("GET", f"/repos/{STATE}/raw/envs/{CLUSTER}/fxc-b/dev/app.yaml")
+    check("48Mi" in str(app_yaml), "the rendered environment has the new request")
+
+
 def raw_state(path):
     req = __import__("urllib.request").request.Request(f"{SERVER}/api/v1/repos/{STATE}/raw/{path}?ref=master",
                                                        headers={"Authorization": f"token {TOKEN}"})

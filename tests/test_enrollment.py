@@ -181,7 +181,7 @@ class Detect(unittest.TestCase):
         self.put("requirements.txt")
         self.assertEqual(self.kind()["kind"], "none")          # no entry point to run
         self.put("app.py")
-        self.assertIn('CMD ["python", "app.py"]', self.kind()["text"])
+        self.assertIn('ENTRYPOINT ["python", "app.py"]', self.kind()["text"])
         other = Path(tempfile.mkdtemp())
         (other / "package.json").write_text('{"scripts": {"start": "node s.js"}}')
         self.assertEqual(self.wrap.detect(other)["kind"], "node")

@@ -31,6 +31,9 @@ rules:
   - id: no-namespace
     what: no metadata.namespace in the base
     hint: "Remove metadata.namespace: each environment sets its own"
+  - id: overlays
+    what: "each deploy-<env>/ overlay builds, passes the same checks as the base, and changes only what spec.overlays.allow lists"
+    hint: "Fix the overlay named: it is what that environment would run (an overlay that doesn't build stops the run)"
 - n: 3
   rule: "**The container image is the literal name `app-image`.**"
   why: "The environment overlay replaces it with `<registry>/<app>@sha256:...`. Deploys are by digest, never by tag."

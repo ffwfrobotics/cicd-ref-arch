@@ -33,6 +33,12 @@ runs:
       sha7=$(git -C "$app" rev-parse --short=7 HEAD)
       kustomize build "$app/$DEPLOY" > "$out/app.yaml"
       kubeconform -strict -summary -ignore-missing-schemas "$out/app.yaml"
+      # per-environment overlays (docs/enrollment.md): every one is built and validated on every push
+      for e in dev branch prod; do
+        [ -f "$app/deploy-$e/kustomization.yaml" ] || continue
+        kustomize build "$app/deploy-$e" > "$out/app-$e.yaml"
+        kubeconform -strict -summary -ignore-missing-schemas "$out/app-$e.yaml"
+      done
       # one build, two outputs: pushed to the cluster registry, and an OCI tarball for sbom/scan
       buildctl --addr "$BUILDKIT" build --frontend dockerfile.v0 \
         --local context="$app/$CONTEXT" --local dockerfile="$app/$(dirname "$DOCKERFILE")" \

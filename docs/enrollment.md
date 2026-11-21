@@ -11,7 +11,7 @@ Where the IaC root sits is the only difference between the modes. The pipeline d
 | **monorepo** | the monorepo, `apps/<project>` | submodules of the monorepo, or code inline | the monorepo's owners |
 | **monorepo with a config repo** | the monorepo, `<config>/apps/<project>` | sibling submodules of the monorepo | the config repo's owners |
 
-`cicd.yaml` says where the code is: `spec.build.context` is relative to the IaC root, for example `src` or `../../services/api`. `spec.build.dockerfile` names the IaC root's Dockerfile. The test command runs in the IaC root, so it can test the code in `src/` with tests the owners wrote.
+`cicd.yaml` says where the code is: `spec.build.context` is relative to the IaC root, for example `src` or `../../services/api`. A source's `path` in the tenant record is its submodule path in the IaC *repo*, so in a monorepo enrolled at `apps/api` the source `services/api` is built with context `../../services/api`. `spec.build.dockerfile` names the IaC root's Dockerfile. The test command runs in the IaC root, so it can test the code in `src/` with tests the owners wrote.
 
 ## The tenant record
 
@@ -25,8 +25,8 @@ spec:
   tenant: ffwf
   repo: ffwf-iac/mabel              # the IaC root's repo
   path: .                           # the IaC root inside it
-  sources:                          # submodules of the IaC root that hold code (none in direct mode)
-  - path: src
+  sources:                          # submodules of the IaC repo that hold code (none in direct mode)
+  - path: src                       # the submodule's path in the IaC repo (not relative to spec.path)
     repo: ffwf/mabel-deploy         # the submodule's repo on this forge
     branch: main                    # the source branch that maps to the IaC root's dev branch
     update: follow                  # follow | pin

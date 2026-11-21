@@ -85,7 +85,7 @@ def main():
 
     # 2. the push webhook
     if a.hook_url:
-        hook = {"type": "forgejo", "active": True, "events": ["push"], "branch_filter": "*",
+        hook = {"type": "forgejo", "active": True, "events": ["push", "delete"], "branch_filter": "*",
                 "config": {"url": a.hook_url, "content_type": "json", "secret": hook_secret}}
         code, hooks = api("GET", f"{base}/hooks", token)
         same = [h for h in (hooks if code == 200 else []) if (h.get("config") or {}).get("url") == a.hook_url]

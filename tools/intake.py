@@ -22,6 +22,8 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -256,6 +258,8 @@ def check(app_dir: Path, app: str, dev_branch: str, fill: bool) -> tuple[list[di
     no_req = [ctr.get("name") for _, ctr in containers if not (ctr.get("resources") or {}).get("requests")]
     put("requests", "warn" if no_req else "ok", ", ".join(map(str, no_req)), containers[0][0] if no_req else None)
 
+    overlay_check(app_dir, deploy, spec, put)
+
     want = spec.get("service") or {}
     svcs = {(d.get("metadata") or {}).get("name"): (p, d) for p, d in docs if d.get("kind") == "Service"}
     if want.get("name") not in svcs:
@@ -266,6 +270,84 @@ def check(app_dir: Path, app: str, dev_branch: str, fill: bool) -> tuple[list[di
     else:
         put("service", "ok")
     return results, filled
+
+
+OVERLAY_ENVS = ("dev", "branch", "prod")
+# what an allowlist entry in spec.overlays.allow permits an overlay to change (paths in the rendered objects)
+ALLOW = {
+    "resources": lambda p: ".resources" in p,
+    "replicas": lambda p: p.endswith("spec.replicas"),
+    "env": lambda p: ".env[" in p or ".env." in p or p.endswith(".env") or ".envFrom" in p,
+    "labels": lambda p: ".labels" in p,
+    "annotations": lambda p: ".annotations" in p,
+    "probes": lambda p: "Probe" in p,
+}
+
+
+def kustomize(d: Path) -> tuple[list[dict] | None, str]:
+    cmd = ["kustomize", "build", str(d)] if shutil.which("kustomize") else ["kubectl", "kustomize", str(d)]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        return None, (r.stderr.strip().splitlines() or ["kustomize failed"])[-1][:160]
+    return [x for x in yaml.safe_load_all(r.stdout) if isinstance(x, dict)], ""
+
+
+def flat(obj, prefix="") -> dict[str, object]:
+    out = {}
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            out.update(flat(v, f"{prefix}.{k}" if prefix else str(k)))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            key = (v.get("name") if isinstance(v, dict) and "name" in v else i)
+            out.update(flat(v, f"{prefix}[{key}]"))
+    else:
+        out[prefix] = obj
+    return out
+
+
+def overlay_check(app_dir: Path, deploy: Path, spec: dict, put):
+    """deploy-<env>/ overlays (docs/enrollment.md): each must build, pass the base's pod checks, and change only
+    what spec.overlays.allow names (when it names anything). Checked on every push, whatever env this run deploys,
+    so a broken prod overlay fails the push that broke it, not the promotion."""
+    found = [d for d in (app_dir / f"deploy-{e}" for e in OVERLAY_ENVS) if (d / "kustomization.yaml").is_file()]
+    if not found:
+        put("overlays", "ok")
+        return
+    allow = ((spec.get("overlays") or {}).get("allow")) or []
+    base, _ = kustomize(deploy)
+    base_flat = {(o.get("kind"), (o.get("metadata") or {}).get("name")): flat(o) for o in base or []}
+    broken, problems = [], []
+    for d in found:
+        docs, err = kustomize(d)
+        if docs is None:
+            broken.append(f"{d.name}/: {err}")
+            continue
+        for o in docs:
+            if (o.get("metadata") or {}).get("namespace"):
+                problems.append(f"{d.name}/ sets a namespace")
+        for _, _, ps in pod_specs([(d, o) for o in docs]):
+            for ctr in ps.get("containers") or []:
+                if not (ctr.get("resources") or {}).get("requests"):
+                    problems.append(f"{d.name}/ drops resources.requests")
+                sc = ctr.get("securityContext") or {}
+                if sc.get("allowPrivilegeEscalation") is not False or "ALL" not in ((sc.get("capabilities") or {}).get("drop") or []):
+                    problems.append(f"{d.name}/ loosens the container securityContext")
+        if allow:
+            for o in docs:
+                key = (o.get("kind"), (o.get("metadata") or {}).get("name"))
+                before, after = base_flat.get(key, {}), flat(o)
+                changed = [p for p in set(before) | set(after) if before.get(p) != after.get(p)]
+                bad = [p for p in changed if not any(ALLOW.get(a, lambda _: False)(p) for a in allow)]
+                if bad:
+                    problems.append(f"{d.name}/ changes {sorted(bad)[0]} (allowed: {', '.join(allow)})")
+    names = ", ".join(d.name + "/" for d in found)
+    if broken:
+        put("overlays", "missing", "; ".join(broken), found[0])
+    elif problems:
+        put("overlays", "warn", "; ".join(dict.fromkeys(problems)), found[0])
+    else:
+        put("overlays", "ok", names)
 
 
 def runnable(results: list[dict]) -> bool:

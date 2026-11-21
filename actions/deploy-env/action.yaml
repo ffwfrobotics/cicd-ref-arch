@@ -15,6 +15,7 @@ inputs:
   security-dir: {description: "actions/security output, kept with the environment", default: build/security}
   commit: {description: "the app commit deployed (default: the commit this run is for)", default: ""}
   source-repo: {description: "the app repo, owner/name (default: the repo this run is in)", default: ""}
+  prod-manifests: {description: "the deploy-prod/ overlay built for this commit, kept for its promotion (if the file exists)", default: ""}
   sources: {description: "JSON [{path, repo, commit}]: the source submodules this build is from (docs/enrollment.md)", default: ""}
 outputs:
   hosts: {value: "${{ steps.deploy.outputs.hosts }}"}
@@ -39,6 +40,8 @@ runs:
       auth="AUTHORIZATION: basic $(printf '%s:%s' '${{ inputs.user }}' "$TOKEN" | base64 -w0)"
       git -c http.extraHeader="$auth" clone -q --depth 20 "$url" "$state"
       cp '${{ inputs.manifests }}' "$state/.manifests.yaml"
+      prodm=(); if [ -n '${{ inputs.prod-manifests }}' ] && [ -f '${{ inputs.prod-manifests }}' ]; then
+        cp '${{ inputs.prod-manifests }}' "$state/.manifests-prod.yaml"; prodm=(--prod-manifests .manifests-prod.yaml); fi
       sec='${{ inputs.security-dir }}'; case "$sec" in /*) ;; *) sec="$GITHUB_WORKSPACE/$sec" ;; esac
       cd "$state"
       git config user.name 'cicd-bot'; git config user.email 'cicd-bot@noreply.invalid'
@@ -49,7 +52,7 @@ runs:
         envdir=$(python3 "$cicd/tools/cicd.py" render "$app_cfg" --env '${{ inputs.env }}' \
           --branch '${{ inputs.branch }}' --cluster '${{ inputs.cluster }}' --image '${{ inputs.image }}' \
           --manifests .manifests.yaml --commit "$commit" --repo "$src" --run-url "$run_url" --security-dir "$sec" \
-          --sources "$SOURCES" | tail -1)
+          --sources "$SOURCES" "${prodm[@]}" | tail -1)
         git add -A envs
         if git diff --cached --quiet; then echo "environment unchanged"; break; fi
         git commit -q -m "deploy ${{ inputs.env }}: $(python3 -c "import yaml,sys;print(yaml.safe_load(open(sys.argv[1]))['metadata']['name'])" "$app_cfg") ${{ inputs.image }}" \
