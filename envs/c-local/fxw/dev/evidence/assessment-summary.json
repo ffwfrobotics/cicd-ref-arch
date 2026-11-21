@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "fxw",
  "env": "dev",
- "commit": "4de518f1265005e4d3f79fce549d1db0b85d46fe",
- "image": "localhost:5000/fxw@sha256:12c84b2e019b9debacb70da607cca76a174d01cb7ea84f1fa734a65acca00e59",
- "generated": "2026-11-21T22:37:13Z",
+ "commit": "f1fbf9f37fa2aafc4b16fb1a2da665df6b33330b",
+ "image": "localhost:5000/fxw@sha256:0f329d0e9b54b48923b1718e7462a92263fcc5932aa314ab6d861d49484b79c4",
+ "generated": "2026-11-21T22:42:10Z",
  "counts": {
   "satisfied": 30,
   "not-satisfied": 10
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 4de518f12650, image pinned by digest"
+     "found": "commit f1fbf9f37fa2, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 4de518f12650, image pinned by digest"
+     "found": "commit f1fbf9f37fa2, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 4de518f12650, image pinned by digest"
+     "found": "commit f1fbf9f37fa2, image pinned by digest"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/6012f0bb3c9ed869/hostexecutor/.cicd/oscal/platform.yaml"
+   "path": "/runner/work/f8ccf7b473cf795a/hostexecutor/.cicd/oscal/platform.yaml"
   }
  ]
 }
