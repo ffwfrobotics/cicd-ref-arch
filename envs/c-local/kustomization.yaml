@@ -7,8 +7,6 @@ resources:
 - demo/branch-feature-third
 - demo/dev
 - demo/prod
-- fxw/branch-src-feat-x
-- fxw/dev
 - hello/dev
 - hello/prod
 - intake-sample/branch-rt-crash
