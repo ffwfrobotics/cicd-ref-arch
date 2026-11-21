@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "fxp",
-  "image": "localhost:5000/fxp@sha256:473f274af18dc504c6e340f7d34267cd535259d28ea683ae319f6110c20b5be8",
-  "commit": "476e9d53efdfd754fb8791e3ff119a0fe6779964",
-  "generated": "2026-11-21T23:01:26Z",
+  "image": "localhost:5000/fxp@sha256:ff0d40bef84cc890013ac9ba50cc63ac39ad4df3a3d0bd0fb2fafff9233d6444",
+  "commit": "d0386b5be516a2ec254252f4a0b1ac7f2b3004df",
+  "generated": "2026-11-21T23:08:07Z",
   "scans": {
     "source": {
-      "generated": "2026-11-21T23:00:17Z",
-      "commit": "476e9d53efdfd754fb8791e3ff119a0fe6779964",
+      "generated": "2026-11-21T23:06:46Z",
+      "commit": "d0386b5be516a2ec254252f4a0b1ac7f2b3004df",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -21,18 +21,18 @@
         },
         "opengrep": {
           "file": "opengrep.sarif",
-          "sha256": "41019dae942eecd8b1dc144c51293388a9f6cdeef41cf5bc3eeb532f6fd12cc2"
+          "sha256": "d04fb2e7c8b631fe944d8488db1b180d0e118616bb8040578ef46bc2739db7f7"
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "20e6a005f12f6cc79e6a95e7b987cf058e68b946ece6ab5cc8e6c52a386ff5b2"
+          "sha256": "81dd25b369b151087db9084dd0e3da7b52d8b27c7f4986097b4f18d99a06e9e9"
         }
       }
     },
     "image": {
-      "generated": "2026-11-21T23:01:26Z",
-      "commit": "476e9d53efdfd754fb8791e3ff119a0fe6779964",
-      "image": "localhost:5000/fxp@sha256:473f274af18dc504c6e340f7d34267cd535259d28ea683ae319f6110c20b5be8",
+      "generated": "2026-11-21T23:08:07Z",
+      "commit": "d0386b5be516a2ec254252f4a0b1ac7f2b3004df",
+      "image": "localhost:5000/fxp@sha256:ff0d40bef84cc890013ac9ba50cc63ac39ad4df3a3d0bd0fb2fafff9233d6444",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "cd0fc220139fa7e87ed0758cfcb84c5cbc55bab8950edac136bc9224499dc877"
+          "sha256": "fb51673784da0ed8071d154348883dce6d102487e7cc89bb0062f23e4c8b6036"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "9cea74fc17a6ba123432c1138e64d017779dc25e4e05fec8468c5bfe5d5e94b6"
+          "sha256": "796b014c377d31a9f264144c9f6af04fcadb0ef2ed327af05bba793cae1aadb2"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "b6b0e3f37fba052580ed087b8cce44285c46b46d88c6374477b912d1e94d387d"
+          "sha256": "407e81947a9476cf9d90730c2bce7123d94fb7ef1dce0949e3d5b3d2f56081d7"
         }
       }
     }
@@ -68,21 +68,6 @@
     "notes": []
   },
   "findings": [
-    {
-      "id": "a50e12c4d749",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_2",
-      "severity": "high",
-      "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/9f15ced44e771cc6/hostexecutor/app/Dockerfile.)",
-      "outcome": "suppressed",
-      "suppressed": {
-        "by": "ignore (platform)",
-        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
-        "expires": ""
-      }
-    },
     {
       "id": "b9b77e041ed9",
       "category": "config",
@@ -195,6 +180,21 @@
       "suppressed": {
         "by": "ignore (platform)",
         "reason": "the platform renders a default-deny NetworkPolicy for every environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "a50e12c4d749",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/c3c96b0391a46377/hostexecutor/app/Dockerfile.)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
         "expires": ""
       }
     },

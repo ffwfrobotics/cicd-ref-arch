@@ -7,12 +7,12 @@ namespace: fxp-dev
 branch: main
 hosts:
 - fxp-dev.c-local.k.ffwf.net
-image: localhost:5000/fxp@sha256:473f274af18dc504c6e340f7d34267cd535259d28ea683ae319f6110c20b5be8
+image: localhost:5000/fxp@sha256:ff0d40bef84cc890013ac9ba50cc63ac39ad4df3a3d0bd0fb2fafff9233d6444
 repo: ffwf-iac/fxp
-commit: 57198b1904d344ed97878d94c6f61744f7f38f58
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/907
+commit: f16a92eacd23e378686f94b326d40cebef5f758d
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/912
 sources:
 - path: src
   repo: ffwf-fixtures/fx-vibe-pin
-  commit: e2c4c5e4923cce98e822150fa0a7731622c2e428
-renderedAt: '2026-11-21T23:01:28Z'
+  commit: 4553d9772891479803776c734f7904feeb9abe5c
+renderedAt: '2026-11-21T23:08:08Z'
