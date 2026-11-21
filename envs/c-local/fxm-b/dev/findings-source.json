@@ -1,8 +1,8 @@
 {
   "schema": "security-findings/v1",
   "scope": "source",
-  "generated": "2026-11-21T23:46:28Z",
-  "commit": "246dc92d4b7258614f28494e0b4f46c1d5ebcd12",
+  "generated": "2026-11-21T23:54:07Z",
+  "commit": "88d4143a6d72232c0ac83223efcc61fdec9bb52e",
   "image": null,
   "tools": {
     "gitleaks": "8.30.1",
@@ -16,11 +16,11 @@
     },
     "opengrep": {
       "file": "opengrep.sarif",
-      "sha256": "9cfb9163055df7de540428a49afee692785bd599e4ecf7fa68d1229f3ce897c9"
+      "sha256": "f2daa0cf63fe1c4d2cd8c489486ec4c9c6e4a9c59a2fec152d25391bda2608c2"
     },
     "checkov": {
       "file": "checkov.json",
-      "sha256": "f476f4f38a7238d5b1434a77e61e145ae859d2d11a7635129348063fe1e9ce8c"
+      "sha256": "1c2edb504cbe130a300fc2fd86fce53a007bffd67b19762aada123692051be6b"
     }
   },
   "findings": [
@@ -31,7 +31,7 @@
       "rule": "CKV_DOCKER_2",
       "severity": "high",
       "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/424a3e8d68aef592/hostexecutor/app/apps/b/Dockerfile.)"
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/09a1429b5a61bffd/hostexecutor/app/apps/b/Dockerfile.)"
     },
     {
       "id": "b9b77e041ed9",

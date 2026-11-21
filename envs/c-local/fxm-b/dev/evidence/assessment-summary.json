@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "fxm-b",
  "env": "dev",
- "commit": "60a9928599ce1d2bcaedc4eb155b2581c7ab53cc",
+ "commit": "14d7cbec5a3e08a9709ae44187c9deb66f458f27",
  "image": "localhost:5000/fxm-b@sha256:3f166a6aebc268749d563fe74e99316e10f0f73b6f5b030e4db740680eeb0102",
- "generated": "2026-11-21T23:47:43Z",
+ "generated": "2026-11-21T23:56:03Z",
  "counts": {
   "satisfied": 32,
   "not-satisfied": 8
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 60a9928599ce, image pinned by digest"
+     "found": "commit 14d7cbec5a3e, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 60a9928599ce, image pinned by digest"
+     "found": "commit 14d7cbec5a3e, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (17 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (18 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (17 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (18 h old)"
     }
    ]
   },
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (17 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (18 h old)"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 60a9928599ce, image pinned by digest"
+     "found": "commit 14d7cbec5a3e, image pinned by digest"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/424a3e8d68aef592/hostexecutor/.cicd/oscal/platform.yaml"
+   "path": "/runner/work/09a1429b5a61bffd/hostexecutor/.cicd/oscal/platform.yaml"
   }
  ]
 }

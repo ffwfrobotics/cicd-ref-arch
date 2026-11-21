@@ -1,14 +1,14 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "246dc92d4b7258614f28494e0b4f46c1d5ebcd12",
+  "sha": "88d4143a6d72232c0ac83223efcc61fdec9bb52e",
   "ref": "refs/heads/master",
   "workflow": "pipeline",
   "job": "test",
   "status": "pass",
-  "started_at": "2026-11-21T23:45:21Z",
+  "started_at": "2026-11-21T23:52:53Z",
   "duration_s": 0,
-  "runner": "forgejo-runner-5db5d4bd97-q4g9z",
+  "runner": "forgejo-runner-5db5d4bd97-6hvvj",
   "summary": {
     "total": 0,
     "passed": 0,
@@ -17,5 +17,5 @@
   },
   "failures": [],
   "log_tail": "no tests (spec.test.run is not set)",
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/949"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/958"
 }
