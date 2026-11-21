@@ -9,6 +9,7 @@ resources:
 - demo/prod
 - fxp/branch-bump-src-4553d97
 - fxp/dev
+- fxw/branch-src-feat-x
 - fxw/dev
 - hello/dev
 - hello/prod

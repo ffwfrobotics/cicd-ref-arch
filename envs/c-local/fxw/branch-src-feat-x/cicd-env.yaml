@@ -1,0 +1,18 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: fxw
+env: branch
+dir: branch-src-feat-x
+namespace: fxw-src-feat-x
+branch: src/feat-x
+hosts:
+- fxw-src-feat-x.c-local.k.ffwf.net
+image: localhost:5000/fxw@sha256:2a598f4b2ba6aa6fd35ab43478f419f963fbf6ff53163f30c8a37bed7a8ce2b1
+repo: ffwf-iac/fxw
+commit: 7dbc809673c5b44a15f7f1828c9779929882c50d
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/933
+sources:
+- path: src
+  repo: ffwf-fixtures/fx-vibe
+  commit: 18833c4ff48bdfe89d8b686fcca8b0867335100a
+renderedAt: '2026-11-21T23:33:08Z'
