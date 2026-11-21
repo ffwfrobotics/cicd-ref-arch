@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: fxp-dev
+labels:
+- pairs:
+    cicd.ffwf.net/app: fxp
+    cicd.ffwf.net/env: dev
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/fxp
+  digest: sha256:473f274af18dc504c6e340f7d34267cd535259d28ea683ae319f6110c20b5be8

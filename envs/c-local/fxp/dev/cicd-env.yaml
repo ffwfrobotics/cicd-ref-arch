@@ -1,0 +1,18 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: fxp
+env: dev
+dir: dev
+namespace: fxp-dev
+branch: main
+hosts:
+- fxp-dev.c-local.k.ffwf.net
+image: localhost:5000/fxp@sha256:473f274af18dc504c6e340f7d34267cd535259d28ea683ae319f6110c20b5be8
+repo: ffwf-iac/fxp
+commit: 57198b1904d344ed97878d94c6f61744f7f38f58
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/907
+sources:
+- path: src
+  repo: ffwf-fixtures/fx-vibe-pin
+  commit: e2c4c5e4923cce98e822150fa0a7731622c2e428
+renderedAt: '2026-11-21T23:01:28Z'
