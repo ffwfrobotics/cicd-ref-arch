@@ -1,12 +1,12 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "0bc56d0a9a6133debaaec792c00b5a9171b5446e",
+  "sha": "ba10d23e194d4911cf3f0b2e7e7efdbe27902b76",
   "ref": "refs/heads/master",
   "workflow": "pipeline",
   "job": "security",
   "status": "pass",
-  "started_at": "2026-11-21T17:44:40Z",
+  "started_at": "2026-11-21T21:56:42Z",
   "duration_s": null,
   "summary": {
     "total": 16,
@@ -23,8 +23,8 @@
       "suppressed": 8,
       "below-threshold": 8
     },
-    "image": "localhost:5000/dashboard@sha256:88f75aa7b70724eac23192f7b7b050091d65f111c29badeef4f7cea76a783f8f"
+    "image": "localhost:5000/dashboard@sha256:b882ca5224c9168fc3c2b8c17f4fb8d19ed23d4b9e124b0ca07d241d7095bd42"
   },
   "external": [],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/801"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/862"
 }
