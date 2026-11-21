@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "dashboard",
  "env": "dev",
- "commit": "ee2553c09ec6a252d1f8b4f9dde9704ab1cc53b9",
- "image": "localhost:5000/dashboard@sha256:46fa19325cbef95dacf98f453dcaabc16db60d5b9dde72063ed82e276bf572e2",
- "generated": "2026-11-21T22:28:20Z",
+ "commit": "3f8c3927ad8f2ae060a8299f56cd4eb7d684b9f7",
+ "image": "localhost:5000/dashboard@sha256:cc8772b93a87fe06788e35486bc7f957fdc98c98bb9228a8e7c39ef1d3ddf9fc",
+ "generated": "2026-11-21T23:19:31Z",
  "counts": {
   "satisfied": 34,
   "not-satisfied": 6
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit ee2553c09ec6, image pinned by digest"
+     "found": "commit 3f8c3927ad8f, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit ee2553c09ec6, image pinned by digest"
+     "found": "commit 3f8c3927ad8f, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (16 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (17 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (16 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (17 h old)"
     }
    ]
   },
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (16 h old)"
+     "found": "grype database built 2026-11-21T06:20:06Z (17 h old)"
     }
    ]
   },
@@ -423,7 +423,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (48/49 checks passed)"
+     "found": "test ran: pass (49/50 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
@@ -444,7 +444,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (48/49 checks passed)"
+     "found": "test ran: pass (49/50 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
@@ -465,7 +465,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (48/49 checks passed)"
+     "found": "test ran: pass (49/50 checks passed)"
     },
     {
      "selector": "gate",
@@ -581,7 +581,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (48/49 checks passed)"
+     "found": "test ran: pass (49/50 checks passed)"
     }
    ]
   },
@@ -597,7 +597,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (48/49 checks passed)"
+     "found": "test ran: pass (49/50 checks passed)"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit ee2553c09ec6, image pinned by digest"
+     "found": "commit 3f8c3927ad8f, image pinned by digest"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/23b5d63a3d63432e/hostexecutor/.cicd/oscal/platform.yaml"
+   "path": "/runner/work/b056658d97350ce5/hostexecutor/.cicd/oscal/platform.yaml"
   }
  ]
 }
