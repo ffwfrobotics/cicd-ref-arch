@@ -1,12 +1,12 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "b81d72bceaacd61bac742aebc132f2f768c79378",
+  "sha": "05662d8abda5444a62bc1ef41ed97dc86935eddd",
   "ref": "refs/heads/master",
   "workflow": "pipeline",
   "job": "security",
   "status": "warn",
-  "started_at": "2026-11-21T21:51:22Z",
+  "started_at": "2026-11-21T22:31:48Z",
   "duration_s": null,
   "summary": {
     "total": 18,
@@ -15,13 +15,6 @@
     "skipped": 0
   },
   "failures": [
-    {
-      "test": "config/CKV_DOCKER_7",
-      "file": "Dockerfile:3",
-      "severity": "high",
-      "category": "config",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/75cfeb247f92e141/hostexecutor/app/Dockerfile.FROM)"
-    },
     {
       "test": "config/CKV_K8S_8",
       "file": "build/app.yaml:13",
@@ -42,6 +35,13 @@
       "severity": "high",
       "category": "config",
       "message": "Use read-only filesystem for containers where possible (Deployment.default.intake-sample)"
+    },
+    {
+      "test": "config/CKV_DOCKER_7",
+      "file": "Dockerfile:3",
+      "severity": "high",
+      "category": "config",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/076b892f7edc0b83/hostexecutor/app/Dockerfile.FROM)"
     }
   ],
   "security": {
@@ -49,12 +49,12 @@
     "mode": "report",
     "blocking": 0,
     "counts": {
-      "fail": 4,
       "suppressed": 6,
+      "fail": 4,
       "below-threshold": 8
     },
     "image": "localhost:5000/intake-sample@sha256:f258f85f3c445155bd596d44e9f3131be0aaf9ee1b03170828c5637006d1f4d2"
   },
   "external": [],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/857"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/886"
 }

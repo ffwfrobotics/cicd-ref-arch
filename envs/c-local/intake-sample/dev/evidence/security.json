@@ -2,12 +2,12 @@
   "schema": "security-findings/v1",
   "app": "intake-sample",
   "image": "localhost:5000/intake-sample@sha256:f258f85f3c445155bd596d44e9f3131be0aaf9ee1b03170828c5637006d1f4d2",
-  "commit": "b81d72bceaacd61bac742aebc132f2f768c79378",
-  "generated": "2026-11-21T21:51:22Z",
+  "commit": "05662d8abda5444a62bc1ef41ed97dc86935eddd",
+  "generated": "2026-11-21T22:31:48Z",
   "scans": {
     "source": {
-      "generated": "2026-11-21T21:50:08Z",
-      "commit": "b81d72bceaacd61bac742aebc132f2f768c79378",
+      "generated": "2026-11-21T22:30:36Z",
+      "commit": "05662d8abda5444a62bc1ef41ed97dc86935eddd",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -21,17 +21,17 @@
         },
         "opengrep": {
           "file": "opengrep.sarif",
-          "sha256": "c0d4ceac9297c2ce806dbc60a0721e534a84cf4b500ad80b7b7b30c917f632c0"
+          "sha256": "6ef4c2f5e824c17ff59602af74860f28708e10741c613407f462284649368e2d"
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "552037b7708454c62f60bdacde65853bd186546ae93e0e26c5414b438b47e1a0"
+          "sha256": "cecd8fa9067d34f7ff0ba99ac69222fbc5153d720e9425db6b722e97936dc4b4"
         }
       }
     },
     "image": {
-      "generated": "2026-11-21T21:51:22Z",
-      "commit": "b81d72bceaacd61bac742aebc132f2f768c79378",
+      "generated": "2026-11-21T22:31:48Z",
+      "commit": "05662d8abda5444a62bc1ef41ed97dc86935eddd",
       "image": "localhost:5000/intake-sample@sha256:f258f85f3c445155bd596d44e9f3131be0aaf9ee1b03170828c5637006d1f4d2",
       "tools": {
         "syft": "16.1.13",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "146df72b640d3d8a82e9d766467b2c76a87fd793519424d27c0d4e7a0fdc04dd"
+          "sha256": "9a7dc48bb98262300552b1d9863ca8430cc40ca0197cea5792a3cfa4b9e64866"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "51ec9d06cc0508206c4470ec5bf2b21809ab68d9ba94ce02df99f60dffe183e2"
+          "sha256": "b9a8bf1da8a0f0c8f4e598d64e315155143994730d13ec70dd7879f8007aafe3"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "700b4df0b654c09e310851c3d5f62947526c0bbd82f68064253464c94fefee34"
+          "sha256": "087daebc9a11e6d898a128895c410bd8e578cc9bb0bc5b010d9f08aedf118883"
         }
       }
     }
@@ -60,38 +60,13 @@
     "status": "warn",
     "blocking": 0,
     "counts": {
-      "fail": 4,
       "suppressed": 6,
+      "fail": 4,
       "below-threshold": 8
     },
     "notes": []
   },
   "findings": [
-    {
-      "id": "38ad74d849fa",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_7",
-      "severity": "high",
-      "location": "Dockerfile:3",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/75cfeb247f92e141/hostexecutor/app/Dockerfile.FROM)",
-      "outcome": "fail"
-    },
-    {
-      "id": "a50e12c4d749",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_2",
-      "severity": "high",
-      "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/75cfeb247f92e141/hostexecutor/app/Dockerfile.)",
-      "outcome": "suppressed",
-      "suppressed": {
-        "by": "ignore (platform)",
-        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
-        "expires": ""
-      }
-    },
     {
       "id": "b9b77e041ed9",
       "category": "config",
@@ -194,6 +169,31 @@
       "suppressed": {
         "by": "ignore (platform)",
         "reason": "the platform renders a default-deny NetworkPolicy for every environment",
+        "expires": ""
+      }
+    },
+    {
+      "id": "38ad74d849fa",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_7",
+      "severity": "high",
+      "location": "Dockerfile:3",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/076b892f7edc0b83/hostexecutor/app/Dockerfile.FROM)",
+      "outcome": "fail"
+    },
+    {
+      "id": "a50e12c4d749",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/076b892f7edc0b83/hostexecutor/app/Dockerfile.)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
         "expires": ""
       }
     },
