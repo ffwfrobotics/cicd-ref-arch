@@ -1,0 +1,20 @@
+# Wrapped by tools/wrap.py (docs/enrollment.md): built and deployed from ffwf-iac/fxw, code from ffwf-fixtures/fx-vibe.
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata:
+  name: fxw
+spec:
+  kind: App
+  mode: wrapped
+  tenant: ffwf
+  repo: ffwf-iac/fxw
+  path: .
+  sources:
+  - path: src
+    repo: ffwf-fixtures/fx-vibe
+    branch: main
+    update: follow
+  clusters:
+  - c-local
+  enrolled: '2026-11-21'
+  requestedBy: cicd-e2e
