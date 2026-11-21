@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "fxw",
-  "image": "localhost:5000/fxw@sha256:4c0739c6b625c8f25877eca629a197e12baf80097819064308ccffe2c74f40fe",
-  "commit": "abce24427f1b9f6f7999330ff8d0651a8c485599",
-  "generated": "2026-11-21T22:02:22Z",
+  "image": "localhost:5000/fxw@sha256:a25c43fb1141d510ee2dac96339e537ba0040e293af179e9759d494486ed595c",
+  "commit": "ce1e4a44f83bb6d4f9df9b23d40a965a3e920185",
+  "generated": "2026-11-21T22:07:32Z",
   "scans": {
     "source": {
-      "generated": "2026-11-21T22:01:17Z",
-      "commit": "abce24427f1b9f6f7999330ff8d0651a8c485599",
+      "generated": "2026-11-21T22:06:27Z",
+      "commit": "ce1e4a44f83bb6d4f9df9b23d40a965a3e920185",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -21,18 +21,18 @@
         },
         "opengrep": {
           "file": "opengrep.sarif",
-          "sha256": "aee8f4144a43cf4015045306da45b2b3cf7e2cab169cb52d425e3f98ab8166b1"
+          "sha256": "fdffaeb58bcba175c8c951afa95f58f693b8f89f990537992d836d9363e467d7"
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "348eff4e93e69cde91c52cfe8ba4bbfba59faa5e4aa06bc5d3ea686e81fa152e"
+          "sha256": "e9e7f988d1f1284f475fe06c42bf01e5402b446c334384d23b09f1fc1b7b1612"
         }
       }
     },
     "image": {
-      "generated": "2026-11-21T22:02:22Z",
-      "commit": "abce24427f1b9f6f7999330ff8d0651a8c485599",
-      "image": "localhost:5000/fxw@sha256:4c0739c6b625c8f25877eca629a197e12baf80097819064308ccffe2c74f40fe",
+      "generated": "2026-11-21T22:07:32Z",
+      "commit": "ce1e4a44f83bb6d4f9df9b23d40a965a3e920185",
+      "image": "localhost:5000/fxw@sha256:a25c43fb1141d510ee2dac96339e537ba0040e293af179e9759d494486ed595c",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "59535fbbf404897786f3aab0dfef5a0e82bb94c9e235f57615a4cf4432294576"
+          "sha256": "7d451eca39170557ca909983fbe35e07f1fb5d45a767833eebe0aa8bd01e7197"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "559fc9f61dcb80f2cac23dd085b8a71dee79933a73e621b1fef76cf68c6f1992"
+          "sha256": "aed67ef4bc6b50e04d899ec8982ca4308e2ce45e36261df246bf16e61a9a59db"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "5041ce939504dcaf622ae7033ffb9b2767b88c04d3bda059096b8bb3cbf05853"
+          "sha256": "3431745a37931fa04c0b2568e059f5676d73b8def1502972eabac80ffdccd82b"
         }
       }
     }

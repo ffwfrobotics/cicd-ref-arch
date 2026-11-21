@@ -7,12 +7,12 @@ namespace: fxw-dev
 branch: main
 hosts:
 - fxw-dev.c-local.k.ffwf.net
-image: localhost:5000/fxw@sha256:4c0739c6b625c8f25877eca629a197e12baf80097819064308ccffe2c74f40fe
+image: localhost:5000/fxw@sha256:a25c43fb1141d510ee2dac96339e537ba0040e293af179e9759d494486ed595c
 repo: ffwf-iac/fxw
-commit: c9523501603d5211de84013b5da6889691adfbc7
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/868
+commit: 9fd2bbd44a411228cd7e75f0606812b1649cc165
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/872
 sources:
 - path: src
   repo: ffwf-fixtures/fx-vibe
-  commit: d5ebfeefbf97f9cc1b034b0260f60624a31dabe0
-renderedAt: '2026-11-21T22:02:23Z'
+  commit: cf336f5591afe9c220a6623cd905344b3938cb29
+renderedAt: '2026-11-21T22:07:33Z'
