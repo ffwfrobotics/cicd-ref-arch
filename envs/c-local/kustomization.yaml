@@ -12,6 +12,7 @@ resources:
 - fxm-a/dev
 - fxm-b/dev
 - fxo/dev
+- fxo/prod
 - fxp/branch-bump-src-4553d97
 - fxp/dev
 - fxw/dev

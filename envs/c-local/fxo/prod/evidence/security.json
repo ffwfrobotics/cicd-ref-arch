@@ -3,7 +3,7 @@
   "app": "fxo",
   "image": "localhost:5000/fxo@sha256:a3cf9904944ae2a545eb5f6d421cd7352df82d168f1262f3dc03d75102ee6c07",
   "commit": "cc1c6e09a7b1c021bcbb427dce23fcf7ac09addf",
-  "generated": "2026-11-22T00:10:43Z",
+  "generated": "2026-11-22T00:12:36Z",
   "scans": {
     "source": {
       "generated": "2026-11-22T00:06:33Z",
@@ -30,8 +30,8 @@
       }
     },
     "image": {
-      "generated": "2026-11-22T00:10:42Z",
-      "commit": "c29df5c5e94b29a43df02949cd9f2a5cf2d4bbef",
+      "generated": "2026-11-22T00:12:36Z",
+      "commit": "9ecca8a2268ca6b49d51b7e7d16f998dbf249f9d",
       "image": "registry.buildkit.svc.cluster.local:5000/fxo@sha256:a3cf9904944ae2a545eb5f6d421cd7352df82d168f1262f3dc03d75102ee6c07",
       "tools": {
         "syft": "16.1.13",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "91b22fbd0b587f0538b51bcfe3916cef33d1f2a46779e8d9c8751eda4cd864eb"
+          "sha256": "369478850f6a766aefb7960ec9233263d5ce84b417a5b79efd5c283469bbd649"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "46acb8b2ab4846c263af0e2fc02cb9c334c3adc9234c09e0dab8f9af596deaee"
+          "sha256": "58314f1a011c82b7017bc7e450caa450e6679f36fd63f904c821fa81209617b8"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "1071b9608499d0fa42b791d3b61d44beef037c34e2b51697d5a9656b68ebe563"
+          "sha256": "21cf30d0187845f0b5a7b5d22a2177c949286851417ec298842ed88b16c2cd7a"
         }
       }
     }
@@ -67,7 +67,6 @@
     },
     "notes": []
   },
-  "external": [],
   "findings": [
     {
       "id": "a50e12c4d749",
@@ -776,6 +775,34 @@
       "outcome": "fail"
     },
     {
+      "id": "4f6b00d974e5",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84782",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: The DTLS retransmission logic does not correctly handle\na handshake message write that is suspended part-way through.\nThe retransmitted message can be read past the message buffer and\nthe retransmission overwrites the internal state the suspended write\nneeds",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "1e381c0454d0",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84782",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: The DTLS retransmission logic does not correctly handle\na handshake message write that is suspended part-way through.\nThe retransmitted message can be read past the message buffer and\nthe retransmission overwrites the internal state the suspended write\nneeds to",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "7c4ff6730e1e",
       "category": "vuln",
       "tool": "grype",
@@ -1192,6 +1219,34 @@
       "outcome": "fail"
     },
     {
+      "id": "0dcb3a2ccfef",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-75806",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: An established DTLS 1.2 association using an AEAD cipher suite\ncan be terminated by a single unauthenticated datagram whose encrypted\nfragment is shorter than the mandatory explicit IV and authentication tag\noverhead.\n\nImpact summary: An attacker who can sen",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "27000652c3aa",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-75806",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: An established DTLS 1.2 association using an AEAD cipher suite\ncan be terminated by a single unauthenticated datagram whose encrypted\nfragment is shorter than the mandatory explicit IV and authentication tag\noverhead.\n\nImpact summary: An attacker who can send a",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "99226f0d364e",
       "category": "vuln",
       "tool": "grype",
@@ -1352,6 +1407,38 @@
       "outcome": "fail"
     },
     {
+      "id": "e7663b368d88",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42766",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42766",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "07019186726a",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42766",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42766",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "684f7bdf3107",
       "category": "vuln",
       "tool": "grype",
@@ -1478,6 +1565,34 @@
         "8.23.0-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "f0dcf14e8e34",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-54873",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: QUIC process may keep memory for QUIC packet\nbuffer for much longer period than necessary.\n\nImpact summary: Remote peer can exploit this vulnerability\nby sending maliciously crafted packets, making the local\nQUIC stack to keep the memory for packet buffers a",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "032fa19bd01d",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-54873",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: QUIC process may keep memory for QUIC packet\nbuffer for much longer period than necessary.\n\nImpact summary: Remote peer can exploit this vulnerability\nby sending maliciously crafted packets, making the local\nQUIC stack to keep the memory for packet buffers allo",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
     },
     {
       "id": "83eeeb8deadd",
@@ -1686,6 +1801,34 @@
         "4.7.2-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "27a607f231e1",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84784",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A malicious remote peer may flood the local QUIC\nstack with NEW_CONNECTION_ID frames by avoiding a limit check on\nhow many connection IDs the remote QUIC stack can use.\n\nImpact summary: The local QUIC stack sends a RETIRE_CONN_ID frame\nfor every NEW_CONNECTI",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "940edf96487e",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84784",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A malicious remote peer may flood the local QUIC\nstack with NEW_CONNECTION_ID frames by avoiding a limit check on\nhow many connection IDs the remote QUIC stack can use.\n\nImpact summary: The local QUIC stack sends a RETIRE_CONN_ID frame\nfor every NEW_CONNECTION_",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
     },
     {
       "id": "f5dd487540b4",
@@ -1944,6 +2087,34 @@
       "outcome": "fail"
     },
     {
+      "id": "da157ea97ccd",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-124709",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A QUIC server that rejects a stream opened by the peer may\nretain that stream's state for the lifetime of the connection if the peer\nresets the stream before the rejection is signalled, even though the peer's\nstream credit is returned.\n\nImpact summary: A rem",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "6e16a6083574",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-124709",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A QUIC server that rejects a stream opened by the peer may\nretain that stream's state for the lifetime of the connection if the peer\nresets the stream before the rejection is signalled, even though the peer's\nstream credit is returned.\n\nImpact summary: A remote",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "3aa2d4c22fbf",
       "category": "vuln",
       "tool": "grype",
@@ -2120,6 +2291,70 @@
       "outcome": "fail"
     },
     {
+      "id": "dbbc51c3c266",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-6253",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-6253",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "3b22de255f0a",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-6253",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-6253",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "81557293e0fa",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-14819",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2025-14819",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.18.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "620ac56299a1",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-14819",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2025-14819",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.18.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "970778547243",
       "category": "vuln",
       "tool": "grype",
@@ -2248,6 +2483,20 @@
       "outcome": "fail"
     },
     {
+      "id": "51fb294f35f8",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-69184",
+      "severity": "high",
+      "location": "pkg:apk/alpine/c-ares@1.34.6-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "c-ares 1.34.6-r0 (apk): c-ares is an asynchronous resolver library. Prior to 1.34.7, ares_dns_name_parse() enforces backward DNS compression pointers but does not bound the total pointer hops or assembled name length. A malicious DNS server can send a response containing a long descending pointer ch",
+      "package": "c-ares",
+      "version": "1.34.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "cb095d9674f6",
       "category": "vuln",
       "tool": "grype",
@@ -2280,6 +2529,66 @@
       "outcome": "fail"
     },
     {
+      "id": "b65a3c61cabe",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-14524",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2025-14524",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.18.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "962050cb2e36",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-14524",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2025-14524",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.18.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e44352f520d8",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-95692",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: Setting an AES-GCM-SIV IV shorter than the expected nonce\nlength via EVP_CipherInit_ex() may trigger a heap out-of-bounds read.\nSupplying a longer IV is silently truncated instead of rejected.\n\nImpact summary: An application passing a caller-supplied IV of t",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "42d4656d6f28",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-95692",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: Setting an AES-GCM-SIV IV shorter than the expected nonce\nlength via EVP_CipherInit_ex() may trigger a heap out-of-bounds read.\nSupplying a longer IV is silently truncated instead of rejected.\n\nImpact summary: An application passing a caller-supplied IV of the ",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "76d45bdcbe0f",
       "category": "vuln",
       "tool": "grype",
@@ -2310,6 +2619,38 @@
         "10.48-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "a702f83c16df",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-63074",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-63074",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.8-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "524e3d130280",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-63074",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-63074",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.8-r0"
+      ],
+      "outcome": "below-threshold"
     },
     {
       "id": "cc5bcbbacf12",
@@ -2488,6 +2829,38 @@
       "outcome": "fail"
     },
     {
+      "id": "5fabbc9613b4",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42767",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42767",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "2440ee0689b4",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42767",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42767",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "bae7b54224b7",
       "category": "vuln",
       "tool": "grype",
@@ -2552,6 +2925,34 @@
       "outcome": "fail"
     },
     {
+      "id": "adfa497b42df",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-72897",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A TLS server that calls SSL_set_SSL_CTX() to switch a\nconnection to a different SSL_CTX part way through a handshake may access\nmemory beyond the end of an internal array if the replacement context knows\nabout more provider signature algorithms than the cont",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "08e9b0edbf72",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-72897",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A TLS server that calls SSL_set_SSL_CTX() to switch a\nconnection to a different SSL_CTX part way through a handshake may access\nmemory beyond the end of an internal array if the replacement context knows\nabout more provider signature algorithms than the context",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "a0c0d4c894de",
       "category": "vuln",
       "tool": "grype",
@@ -2566,6 +2967,38 @@
         "2.8.4-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "49924762bbc8",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42769",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42769",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "3ce7e8374db5",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42769",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42769",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
     },
     {
       "id": "2088f9d8289b",
@@ -2632,6 +3065,34 @@
       "outcome": "fail"
     },
     {
+      "id": "5271810e52dc",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-75804",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: OpenSSL QUIC stack does not enforce connection\nlevel flow control for streams. Remote peers may send more bytes\nas long as they fit within the stream flow control limits.\n\nImpact summary: A malicious remote peer may exploit the lack of connection\nflow contro",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "62e27959eb0f",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-75804",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: OpenSSL QUIC stack does not enforce connection\nlevel flow control for streams. Remote peers may send more bytes\nas long as they fit within the stream flow control limits.\n\nImpact summary: A malicious remote peer may exploit the lack of connection\nflow control f",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "781aa0b4b65f",
       "category": "vuln",
       "tool": "grype",
@@ -2680,6 +3141,70 @@
       "outcome": "fail"
     },
     {
+      "id": "704b4c71baae",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42768",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42768",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "23b859a360f9",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42768",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42768",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "ea81b3b8e866",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-6429",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-6429",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "8f72d7640a41",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-6429",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-6429",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "1444d18edf0e",
       "category": "vuln",
       "tool": "grype",
@@ -2712,6 +3237,154 @@
       "outcome": "fail"
     },
     {
+      "id": "6db0c76cd0b4",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-3784",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-3784",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.19.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "c60696f7cc4f",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-3784",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-3784",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.19.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "a7b4542f4444",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42772",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: The QUIC stream reassembly algorithm performance deteriorates\nprogressively as packets are arriving out of order. The worst case has\na quadratic complexity proportional to the number of stream frames kept in\nthe buffer for the received stream data.\n\nImpact s",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "cb1df5aa0d46",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42772",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: The QUIC stream reassembly algorithm performance deteriorates\nprogressively as packets are arriving out of order. The worst case has\na quadratic complexity proportional to the number of stream frames kept in\nthe buffer for the received stream data.\n\nImpact summ",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "a2c2d587daeb",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-3783",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-3783",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.19.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "a82f1c9143d4",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-3783",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-3783",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.19.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "c1765613d2aa",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-107496",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: Encrypting a CMS message to an EC certificate whose group order\nis 1 may cause CMS_encrypt() or CMS_encrypt_ex() to loop indefinitely.\n\nImpact summary: An attacker able to supply the recipient certificate to an\napplication performing CMS encryption can cause",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "ff96fafab5d5",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-107496",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: Encrypting a CMS message to an EC certificate whose group order\nis 1 may cause CMS_encrypt() or CMS_encrypt_ex() to loop indefinitely.\n\nImpact summary: An attacker able to supply the recipient certificate to an\napplication performing CMS encryption can cause th",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "2d322b52bf1f",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35191",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: The OpenSSL QUIC server, when configured to not preform address\nvalidation, can be forced to count incoming packets multiple times in its\nunvalidated credit computation, leading to a violation of the RFC 9000\nunvalidated connection amplification limit of 3 t",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "c3e77cf24d37",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35191",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: The OpenSSL QUIC server, when configured to not preform address\nvalidation, can be forced to count incoming packets multiple times in its\nunvalidated credit computation, leading to a violation of the RFC 9000\nunvalidated connection amplification limit of 3 time",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "1fbe24f0b073",
       "category": "vuln",
       "tool": "grype",
@@ -2726,6 +3399,38 @@
         "1.1.43-r4"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "660e18d343d4",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-7168",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-7168",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "112c826bc217",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-7168",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-7168",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
     },
     {
       "id": "cebb14f93987",
@@ -2758,6 +3463,38 @@
         "8.22.0-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "293c72f1205a",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-5545",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-5545",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "c7351f05ce16",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-5545",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-5545",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
     },
     {
       "id": "c2c7b0075f22",
@@ -2824,6 +3561,34 @@
       "outcome": "fail"
     },
     {
+      "id": "2fea2deb460d",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-95691",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A retransmitted QUIC CRYPTO frame can release packet storage\nwhile the TLS record layer retains a direct pointer into that storage causing\nuse after free.\n\nImpact summary: A malicious QUIC server can cause a heap-use-after-free read\nin the OpenSSL QUIC clien",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "724cf3c2828d",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-95691",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A retransmitted QUIC CRYPTO frame can release packet storage\nwhile the TLS record layer retains a direct pointer into that storage causing\nuse after free.\n\nImpact summary: A malicious QUIC server can cause a heap-use-after-free read\nin the OpenSSL QUIC client. ",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "a0234670384c",
       "category": "vuln",
       "tool": "grype",
@@ -2856,6 +3621,34 @@
       "outcome": "fail"
     },
     {
+      "id": "6336234e8ed1",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-107494",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: The QUIC stack queues a RETIRE_CONNECTION_ID frame also for\nretransmitted NEW_CONNECTION_ID frames. This allows a remote malicious\nQUIC stack to queue an unlimited number of RETIRE_CONNECTION_ID frames.\n\nImpact summary: A malicious remote QUIC peer can trigg",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "e90efa8db145",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-107494",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: The QUIC stack queues a RETIRE_CONNECTION_ID frame also for\nretransmitted NEW_CONNECTION_ID frames. This allows a remote malicious\nQUIC stack to queue an unlimited number of RETIRE_CONNECTION_ID frames.\n\nImpact summary: A malicious remote QUIC peer can trigger ",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "d6943fb99ef4",
       "category": "vuln",
       "tool": "grype",
@@ -2870,6 +3663,70 @@
         "2.8.4-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "3e830b6742e0",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-45446",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-45446",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "65d61e81c56b",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-45446",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-45446",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "f77fe81045f4",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-8458",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-8458",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "5ca4f0f1ca7c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-8458",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-8458",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
+      ],
+      "outcome": "below-threshold"
     },
     {
       "id": "67030c99d085",
@@ -2888,6 +3745,118 @@
       "outcome": "fail"
     },
     {
+      "id": "c032360ec01f",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-88823",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: The AES-GCM-SIV implementation treats a zero-length Additional\nAuthenticated Data (AAD) update as a reset of all the AAD supplied so far,\ninstead of leaving the AAD unchanged. An application that supplies its AAD in\nseveral fragments, one of which is empty, ",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "196dfc6e58ab",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-88823",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: The AES-GCM-SIV implementation treats a zero-length Additional\nAuthenticated Data (AAD) update as a reset of all the AAD supplied so far,\ninstead of leaving the AAD unchanged. An application that supplies its AAD in\nseveral fragments, one of which is empty, the",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "6965c1837f9d",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-69186",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/c-ares@1.34.6-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "c-ares 1.34.6-r0 (apk): c-ares is an asynchronous resolver library. Prior to 1.34.7, ares_dns_parse() trusts the attacker-controlled ANCOUNT, NSCOUNT, and ARCOUNT fields before confirming that the DNS response contains enough bytes for the claimed records. Because process_answer() invokes parsing be",
+      "package": "c-ares",
+      "version": "1.34.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "adc3ca008120",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121482",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Verifying a maliciously crafted CMS or PKCS#7 SignedData message with CRL checking enabled may consume excessive CPU time, growing with the square of the message size.",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "cd3bede37c2c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121482",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Verifying a maliciously crafted CMS or PKCS#7 SignedData message with CRL checking enabled may consume excessive CPU time, growing with the square of the message size.",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "b6404349af62",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-75805",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A CMP client that requests certificate revocation on the basis\nof a PKCS#10 CSR may dereference a NULL pointer and terminate abnormally when\nprocessing a crafted revocation response. \n\nImpact summary: The NULL pointer dereference happens on a read which \nlea",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "edc658c9ed55",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-75805",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A CMP client that requests certificate revocation on the basis\nof a PKCS#10 CSR may dereference a NULL pointer and terminate abnormally when\nprocessing a crafted revocation response. \n\nImpact summary: The NULL pointer dereference happens on a read which \nleads ",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "55fc6077d34c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42926",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/nginx@1.29.8-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "nginx 1.29.8-r1 (apk): When NGINX Open Source is configured to proxy HTTP/2 traffic by setting proxy_http_version\u00a0to 2, and also uses proxy_set_body, an attacker may be able to inject frame headers and payload bytes to the upstream peer.\u00a0 Note: Software versions which have reached End of Technical S",
+      "package": "nginx",
+      "version": "1.29.8-r1",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "ab80b94a9ad7",
       "category": "vuln",
       "tool": "grype",
@@ -2902,6 +3871,136 @@
         "2.41.6-r1"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "4b041327b0fc",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35189",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A certificate with many nameRelativeToCRLIssuer CRL\ndistribution points causes disproportionate heap growth when OpenSSL caches\nX.509 extensions.\n\nImpact summary: Receiving a crafted certificate from a malicious peer can lead\nto significant memory pressure a",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "62c74d1ce4e8",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35189",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A certificate with many nameRelativeToCRLIssuer CRL\ndistribution points causes disproportionate heap growth when OpenSSL caches\nX.509 extensions.\n\nImpact summary: Receiving a crafted certificate from a malicious peer can lead\nto significant memory pressure and ",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "3a887c05ba48",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-95690",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: Receiving crafted out-of-sequence DTLS handshake fragments may\ncause OpenSSL to allocate a full message-length reassembly buffer for each\nbuffered message, so a small amount of wire data consumes a large amount of\nmemory.\n\nImpact summary: A remote attacker c",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "b79cdaa0d906",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-95690",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: Receiving crafted out-of-sequence DTLS handshake fragments may\ncause OpenSSL to allocate a full message-length reassembly buffer for each\nbuffered message, so a small amount of wire data consumes a large amount of\nmemory.\n\nImpact summary: A remote attacker can ",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "fc831cdaa916",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-60876",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/busybox@1.37.0-r30?arch=x86_64&distro=alpine-3.23.4",
+      "message": "busybox 1.37.0-r30 (apk): BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-t",
+      "package": "busybox",
+      "version": "1.37.0-r30",
+      "fix_state": "",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "800e6ad48c3a",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-60876",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/busybox-binsh@1.37.0-r30?arch=x86_64&distro=alpine-3.23.4&upstream=busybox",
+      "message": "busybox-binsh 1.37.0-r30 (apk): BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP req",
+      "package": "busybox-binsh",
+      "version": "1.37.0-r30",
+      "fix_state": "",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "5c12244cf534",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-60876",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/ssl_client@1.37.0-r30?arch=x86_64&distro=alpine-3.23.4&upstream=busybox",
+      "message": "ssl_client 1.37.0-r30 (apk): BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP reques",
+      "package": "ssl_client",
+      "version": "1.37.0-r30",
+      "fix_state": "",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "16aaa4c4c97a",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-4873",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-4873",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "4cb1e905037c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-4873",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-4873",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
     },
     {
       "id": "4f8ea78c1199",
@@ -2920,6 +4019,186 @@
       "outcome": "fail"
     },
     {
+      "id": "3fcfce0ce5a2",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-1965",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-1965",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.19.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "707d23719e1b",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-1965",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-1965",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.19.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "3fbcf63effd5",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42770",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42770",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "7c174f71b77e",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-42770",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-42770",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.7-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "813e8f6284e3",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-54875",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A non-constant-time optimized implementation of scalar\npoint multiplication is used for SM2 private key operations on ARM64 and\nRISC-V platforms.\n\nImpact summary: An attacker able to measure the time taken by, or to observe\nthe cache-line access pattern of S",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "3e0daea4e275",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-54875",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A non-constant-time optimized implementation of scalar\npoint multiplication is used for SM2 private key operations on ARM64 and\nRISC-V platforms.\n\nImpact summary: An attacker able to measure the time taken by, or to observe\nthe cache-line access pattern of SM2 ",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "d5ce85720e98",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-54872",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: The generic elliptic-curve scalar multiplication used for\nECDSA and SM2 signature operations with curves that do not have a dedicated\nimplementation leaks information about the secret nonce through timing.\n\nImpact summary: An attacker able to measure signing",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "fb366c499ca5",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-54872",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: The generic elliptic-curve scalar multiplication used for\nECDSA and SM2 signature operations with curves that do not have a dedicated\nimplementation leaks information about the secret nonce through timing.\n\nImpact summary: An attacker able to measure signing ti",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "a0685f94ce6f",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-89156",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/pcre2@10.47-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "pcre2 10.47-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-89156",
+      "package": "pcre2",
+      "version": "10.47-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "10.48-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e5425177a8bc",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-89160",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/pcre2@10.47-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "pcre2 10.47-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-89160",
+      "package": "pcre2",
+      "version": "10.47-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "10.48-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "a56124660f43",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-77696",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: SM2 signature generation uses non-constant-time arithmetic\non secret values, forming a timing side-channel.\n\nImpact summary: An attacker able to measure SM2 signing times may learn\ninformation about the per-signature secret nonce, which over many signatures\n",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e3b12dd3128b",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-77696",
+      "severity": "low",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: SM2 signature generation uses non-constant-time arithmetic\non secret values, forming a timing side-channel.\n\nImpact summary: An attacker able to measure SM2 signing times may learn\ninformation about the per-signature secret nonce, which over many signatures\ncan",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "3437fa996dfd",
       "category": "vuln",
       "tool": "grype",
@@ -2934,6 +4213,138 @@
         "2.41.6-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "19a324ee4ae1",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-90439",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/nginx@1.29.8-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "nginx 1.29.8-r1 (apk): NGINX Plus and NGINX Open Source have a vulnerability in the ngx_http_v3_module module. When using HTTP/3 with OpenSSL versions <= OpenSSL 3.5.0 under certain configurations, a limited heap buffer overflow could happen while processing a TLS handshake. This can happen in a non",
+      "package": "nginx",
+      "version": "1.29.8-r1",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "dda81e27f2aa",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-88822",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: QUIC, when performing automated peer detection, may allow\nuninitialized stack data to leak into the received address which is then used\nas the destination for outgoing packets.\n\nImpact summary: Applications using QUIC's automated peer detection mechanism\nmay",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "eaf05f9ab106",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-88822",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: QUIC, when performing automated peer detection, may allow\nuninitialized stack data to leak into the received address which is then used\nas the destination for outgoing packets.\n\nImpact summary: Applications using QUIC's automated peer detection mechanism\nmay re",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "74c3186ba83d",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-89158",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/pcre2@10.47-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "pcre2 10.47-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-89158",
+      "package": "pcre2",
+      "version": "10.47-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "10.48-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "7a503dff229b",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-7009",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-7009",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "d1f731fcaebd",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-7009",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-7009",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.20.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "d4a173caec3f",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-58055",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/nghttp2-libs@1.69.0-r0?arch=x86_64&distro=alpine-3.23.4&upstream=nghttp2",
+      "message": "nghttp2-libs 1.69.0-r0 (apk): nghttp2's nghttpx proxy through 1.69.0 forwards an HTTP/1.1 Upgrade request that also carries a Content-Length header and body onto reusable keep-alive backend connections, re-adding the Upgrade and Connection headers while passing Content-Length verbatim. A backend tha",
+      "package": "nghttp2-libs",
+      "version": "1.69.0-r0",
+      "fix_state": "",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "68fdcf269325",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84786",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A DANE-enabled TLS client may crash by dereferencing a NULL\npointer when processing an unusual combination of certificate and TLSA\nrecords.\n\nImpact summary: The impact is limited to a client crash (potential Denial\nof Service).\n\nCWE: CWE-476: NULL Pointer De",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "1f2127bbad07",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84786",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A DANE-enabled TLS client may crash by dereferencing a NULL\npointer when processing an unusual combination of certificate and TLSA\nrecords.\n\nImpact summary: The impact is limited to a client crash (potential Denial\nof Service).\n\nCWE: CWE-476: NULL Pointer Deref",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
     },
     {
       "id": "f20dab20ed43",
@@ -2952,6 +4363,38 @@
       "outcome": "fail"
     },
     {
+      "id": "aadfecd6c5d5",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56406",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56406",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "065ba504627a",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56407",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56407",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "0453049823d4",
       "category": "vuln",
       "tool": "grype",
@@ -2966,6 +4409,126 @@
         "2.41.6-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "7f434362e653",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-107493",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: When an application passes a stack to\nPEM_X509_INFO_read_bio_ex() to add entries to, and reading fails,\nOpenSSL frees every entry in the stack, both the old ones and any new\nones, but leaves them in the stack.\n\nImpact summary: An application that passes an e",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "e25373c93333",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-107493",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: When an application passes a stack to\nPEM_X509_INFO_read_bio_ex() to add entries to, and reading fails,\nOpenSSL frees every entry in the stack, both the old ones and any new\nones, but leaves them in the stack.\n\nImpact summary: An application that passes an exis",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "2bdf90babadd",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56403",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56403",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "bc0ddcf34870",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35190",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): Issue summary: A server configured with the Suite B certificate flag through\nSSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a\nfixed group list when it processes a ClientHello whose supported_groups and\nkey_share contain no Suite B group.\n\nImpact",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "4a4ee7d44307",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35190",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): Issue summary: A server configured with the Suite B certificate flag through\nSSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a\nfixed group list when it processes a ClientHello whose supported_groups and\nkey_share contain no Suite B group.\n\nImpact su",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "unknown",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e71050ce31dc",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56412",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56412",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "40558274c626",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-40930",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libpng@1.6.57-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "libpng 1.6.57-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-40930",
+      "package": "libpng",
+      "version": "1.6.57-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "1.6.58-r1"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "debaa9752808",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-50219",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-50219",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
     },
     {
       "id": "29f1e1c6270b",
@@ -3000,6 +4563,22 @@
       "outcome": "fail"
     },
     {
+      "id": "e263673130f3",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56132",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56132",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "e402397bfe16",
       "category": "vuln",
       "tool": "grype",
@@ -3014,6 +4593,245 @@
         "2.8.4-r0"
       ],
       "outcome": "fail"
+    },
+    {
+      "id": "70a1a5be4c22",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-10911",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libxslt@1.1.43-r3?arch=x86_64&distro=alpine-3.23.4",
+      "message": "libxslt 1.1.43-r3 (apk): https://security.alpinelinux.org/vuln/CVE-2025-10911",
+      "package": "libxslt",
+      "version": "1.1.43-r3",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "1.1.43-r4"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "6375280efa48",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56131",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56131",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "2eb964af1001",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56404",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56404",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "a2d36801c853",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56410",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56410",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "92dcfc39f31b",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56411",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56411",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "a621cfe6431c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-23865",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/freetype@2.14.1-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "freetype 2.14.1-r0 (apk): An integer overflow in the tt_var_load_item_variation_store function of the Freetype library in versions 2.13.2 and 2.13.3 may allow for an out of bounds read operation when parsing HVAR/VVAR/MVAR tables in OpenType variable fonts. This issue is fixed in version 2.14.2.",
+      "package": "freetype",
+      "version": "2.14.1-r0",
+      "fix_state": "",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "bf0cdad847bd",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56405",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56405",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "f6dfe349ad7c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56408",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56408",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "a13f95203c29",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-56409",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-56409",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.2-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "1ed1d8cebe32",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-14017",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2025-14017",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.18.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "4fe8ed540aa0",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2025-14017",
+      "severity": "medium",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2025-14017",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.18.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "cfaa1fca9419",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-89162",
+      "severity": "low",
+      "location": "pkg:apk/alpine/pcre2@10.47-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "pcre2 10.47-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-89162",
+      "package": "pcre2",
+      "version": "10.47-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "10.48-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e9e332bb1752",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-80256",
+      "severity": "unknown",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-80256",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "efa723c92658",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-80256",
+      "severity": "unknown",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-80256",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "d3c264748c27",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-46675",
+      "severity": "unknown",
+      "location": "pkg:apk/alpine/libpng@1.6.57-r0?arch=x86_64&distro=alpine-3.23.4",
+      "message": "libpng 1.6.57-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-46675",
+      "package": "libpng",
+      "version": "1.6.57-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "1.6.59-r0"
+      ],
+      "outcome": "below-threshold"
     }
-  ]
+  ],
+  "external": []
 }

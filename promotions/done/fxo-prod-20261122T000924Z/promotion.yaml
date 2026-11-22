@@ -1,0 +1,25 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: fxo-prod-20261122T000924Z
+app: fxo
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/fxo@sha256:a3cf9904944ae2a545eb5f6d421cd7352df82d168f1262f3dc03d75102ee6c07
+commit: cc1c6e09a7b1c021bcbb427dce23fcf7ac09addf
+notBefore: '2026-11-22T00:09:24Z'
+requestedBy: cicd-e2e
+reason: ''
+appliedAt: '2026-11-22T00:12:36Z'
+approval: 'PR #13 merged by ffwfbot: no second person (requested by cicd-e2e)'
+approvalRecord:
+  requestedBy: cicd-e2e
+  pr: 13
+  author: ffwfbot
+  approvedBy: []
+  mergedBy: ffwfbot
+  separated: false
+  summary: 'PR #13 merged by ffwfbot: no second person (requested by cicd-e2e)'
+security: 'applied with security gate fail (180 blocking: config/CKV_K8S_8, config/CKV_K8S_11,
+  config/CKV_K8S_40, config/CKV_K8S_22, vuln/CVE-2026-111497); self-assessment 30/40
+  satisfied'
