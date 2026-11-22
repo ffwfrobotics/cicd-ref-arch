@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: fxt-prod-20261122T020539Z
+app: fxt
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/fxt@sha256:d8d8ee42c9ecf2a7d448080ac290920eeda9dbcfe96d4deba5087a32fdf383fe
+commit: a9452ef5dca711c72e16b986079c19f08da69a98
+notBefore: '2026-11-22T02:05:39Z'
+requestedBy: cicd-e2e
+reason: ''
