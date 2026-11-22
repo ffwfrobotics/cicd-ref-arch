@@ -1,6 +1,6 @@
 {
   "stack": "stack-ref",
-  "run": "1042",
+  "run": "1048",
   "provider": "k0s-pod@1",
   "isolation": "none",
   "capabilities": [
@@ -8,35 +8,9 @@
     "cni",
     "nodes"
   ],
-  "steps": {
-    "up": {
-      "result": "ok",
-      "seconds": 33,
-      "api": "https://api.stack-slot-1.svc.cluster.local:6443",
-      "nodes": 1,
-      "ready": 1,
-      "version": "v1.37.2+k0s"
-    },
-    "down": {
-      "result": "ok",
-      "deploy_keys_removed": 0
-    }
-  },
-  "slot": {
-    "name": "stack-slot-1",
-    "pod_cidr": "10.250.0.0/16",
-    "svc_cidr": "10.251.0.0/16",
-    "api_port": 6443,
-    "dns_name": "api.stack-slot-1.svc.cluster.local",
-    "mirrors": [
-      [
-        "localhost:5000",
-        "http://172.17.0.6:5000"
-      ]
-    ]
-  },
-  "error": "Command '['flux', 'create', 'secret', 'git', 'key-stack', '--namespace', 'flux-system', '--export', '--url', 'ssh://git@forge.goblincorps.com:42222/ffwf-iac/stack-ref.git', '--ssh-key-algorithm', 'ed25519']' returned non-zero exit status 1.",
+  "steps": {},
+  "error": "no free stack slot: all are in use",
   "word": "error",
-  "commit": "5c216c1ba456ee49c67728ac68ec2dd4d687a8a5",
-  "runUrl": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1042"
+  "commit": "880f9076209f410e482f4a6d0d22283ba5e51e51",
+  "runUrl": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1048"
 }
