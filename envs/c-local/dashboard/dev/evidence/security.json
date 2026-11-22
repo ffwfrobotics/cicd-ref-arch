@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "dashboard",
-  "image": "localhost:5000/dashboard@sha256:cc8772b93a87fe06788e35486bc7f957fdc98c98bb9228a8e7c39ef1d3ddf9fc",
-  "commit": "eef97438a2898d234aec795ca4bbfa68dc18bd2a",
-  "generated": "2026-11-21T23:19:31Z",
+  "image": "localhost:5000/dashboard@sha256:949ea03861a3c45c8e40c4221096cec078ac1445cdbff1b2b21c0c2ac93a2242",
+  "commit": "f5de570d8ca52fd7910d42e1ee90e07d42522010",
+  "generated": "2026-11-22T01:40:01Z",
   "scans": {
     "source": {
-      "generated": "2026-11-21T23:18:04Z",
-      "commit": "eef97438a2898d234aec795ca4bbfa68dc18bd2a",
+      "generated": "2026-11-22T01:38:48Z",
+      "commit": "f5de570d8ca52fd7910d42e1ee90e07d42522010",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -21,18 +21,18 @@
         },
         "opengrep": {
           "file": "opengrep.sarif",
-          "sha256": "9f478845c57aec8fcc129b75a725679ce72e973b80f95c415ea6f2cc2db999ed"
+          "sha256": "779f2092bf0482b1fcbd0c3b572369ce372b72e50b3302765e80c3b3e8395f57"
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "a92a801a6acb5005c83b93932424e98f6a94af166656d29d3577ec8392b500d8"
+          "sha256": "feb0d783f7676c64c50df7fce5e5374ec2c575ce4e5148a27b7000fe5aba89d2"
         }
       }
     },
     "image": {
-      "generated": "2026-11-21T23:19:31Z",
-      "commit": "eef97438a2898d234aec795ca4bbfa68dc18bd2a",
-      "image": "localhost:5000/dashboard@sha256:cc8772b93a87fe06788e35486bc7f957fdc98c98bb9228a8e7c39ef1d3ddf9fc",
+      "generated": "2026-11-22T01:40:01Z",
+      "commit": "f5de570d8ca52fd7910d42e1ee90e07d42522010",
+      "image": "localhost:5000/dashboard@sha256:949ea03861a3c45c8e40c4221096cec078ac1445cdbff1b2b21c0c2ac93a2242",
       "tools": {
         "syft": "16.1.13",
         "grype": "6",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "c35940f9a298318ff553bc1c133732dfabc6bc7575b7abff67bddefa0b4578cb"
+          "sha256": "9752b0b59bd88d4738b5fc251c947384a817e280d41a53b18ea4ad52aaf0b71b"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "74b8f6aced69ebbdb0aedde8bae337a57c1293a0b5a9c750b357e7e995abad2a"
+          "sha256": "675c23f253ae31f902640298342025f36898e64e1a82accb08e6319895a0df47"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "46ec6ec5611df131017bf14f15338950a6df0d4f8a65293852b473f6896785a5"
+          "sha256": "2ceb1572ef377b6cddc780d4dc9bcef4e01aedb011da01088a0a16a084e98729"
         }
       }
     }
@@ -73,7 +73,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "Dockerfile:7",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/b056658d97350ce5/hostexecutor/app/Dockerfile.FROM)",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/cca6fdc8f1b70126/hostexecutor/app/Dockerfile.FROM)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (app)",
@@ -88,7 +88,7 @@
       "rule": "CKV_DOCKER_2",
       "severity": "high",
       "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/b056658d97350ce5/hostexecutor/app/Dockerfile.)",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/cca6fdc8f1b70126/hostexecutor/app/Dockerfile.)",
       "outcome": "suppressed",
       "suppressed": {
         "by": "ignore (platform)",
