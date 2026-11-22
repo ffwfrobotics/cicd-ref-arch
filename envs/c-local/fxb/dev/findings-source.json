@@ -1,8 +1,8 @@
 {
   "schema": "security-findings/v1",
   "scope": "source",
-  "generated": "2026-11-22T01:24:31Z",
-  "commit": "41999cfde63338535c54dc90b06fb4837889e44f",
+  "generated": "2026-11-22T01:32:43Z",
+  "commit": "f270adb71a8ffff1b9599c04e65147cd53fe9ccb",
   "image": null,
   "tools": {
     "gitleaks": "8.30.1",
@@ -16,11 +16,11 @@
     },
     "opengrep": {
       "file": "opengrep.sarif",
-      "sha256": "219b305c4b0b3e77695bbfac70fe3d3286a1cbbdf641639ab7d27a9366857bba"
+      "sha256": "d3857c3d2174f506102d6e59b7d97b7b3898158d8786e49c079073e44668c13f"
     },
     "checkov": {
       "file": "checkov.json",
-      "sha256": "32d20a4eb3804820869f17fdee76ce72550970c0ca9404eca4b161297ded3dbf"
+      "sha256": "4f099ba266df0a3f2ed5d949818a64145726ab2d697fc794a9064fa5429a7f7a"
     }
   },
   "findings": [

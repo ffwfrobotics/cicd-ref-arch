@@ -7,7 +7,6 @@ resources:
 - demo/branch-feature-third
 - demo/dev
 - demo/prod
-- fxb/branch-main
 - fxb/dev
 - fxc-a/dev
 - fxc-b/dev

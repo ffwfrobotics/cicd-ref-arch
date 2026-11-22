@@ -13,4 +13,4 @@ resources:
 images:
 - name: app-image
   newName: localhost:5000/fxb
-  digest: sha256:3f9a465ff4ca0d25db1a415f384576b1b0832ca681fbf03e2b575f24859b3ef0
+  digest: sha256:29a2526834499ccb4d48c1543aff04e4436b435c8a0f8958e6552e3583a832d5
