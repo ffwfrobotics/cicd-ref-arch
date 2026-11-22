@@ -42,7 +42,7 @@ A dev run is `up`, `check`, `down`, and `down` runs even when `check` failed. A 
 - **A check names the capabilities it needs.** On a provider without one, the check is recorded as **not exercised**, never as passed.
 - **The lifecycle is the provider's,** implemented here, never in the stack repo. The stack's own check script (`spec.check.smoke`) runs **inside** the nested cluster as a Job, with that cluster's kubectl and a read-only role without Secrets. It never runs on the platform's runner, next to the platform's credentials.
 
-**No platform credentials go into a stack's cluster.** Whoever writes a stack repo decides what Flux applies there, as cluster-admin, so they could read anything put there. Public repos need no credentials. A private stack, or a private submodule, is refused until it has a per-stack, read-only credential (`secrets_ref`, not built yet).
+**No platform credentials go into a stack's cluster.** Whoever writes a stack repo decides what Flux applies there, as cluster-admin, so they could read anything put there. A repo anyone can clone needs no credentials. Any other repo gets a **deploy key of its own for the run**: read-only, on that repo only, made when the cluster is bootstrapped and deleted when it goes down. A stack writer can then read only a key that reads their own repo, for as long as their cluster exists.
 
 ## Providers
 

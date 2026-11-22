@@ -251,10 +251,42 @@ def pinned_submodules(server: str, repo: str, sha: str, token: str) -> dict[str,
     return out
 
 
-def repo_private(server: str, repo: str, token: str) -> bool:
-    req = urllib.request.Request(f"{server.rstrip('/')}/api/v1/repos/{repo}", headers={"Authorization": f"token {token}"})
+def anonymous_ok(server: str, repo: str) -> bool:
+    """Can anyone clone it? (A repo shown as public in a private org can't be: try, don't read flags.)"""
+    try:
+        with urllib.request.urlopen(f"{server.rstrip('/')}/{repo}.git/info/refs?service=git-upload-pack", timeout=30) as r:
+            return r.status == 200
+    except urllib.error.HTTPError:
+        return False
+
+
+FORGE_SSH = os.environ.get("FORGE_SSH", "ssh://git@forge.goblincorps.com:42222")
+
+
+def deploy_key(a, secret_name: str, repo: str, token: str) -> tuple[dict, dict]:
+    """A read-only deploy key for one repo and one run: (the Secret for Flux, {repo, id} to delete at down)."""
+    out = subprocess.run(["flux", "create", "secret", "git", secret_name, "--namespace", "flux-system", "--export",
+                          "--url", f"{FORGE_SSH}/{repo}.git", "--ssh-key-algorithm", "ed25519"],
+                         capture_output=True, text=True, check=True).stdout
+    sec = yaml.safe_load(out)
+    data = sec.get("stringData") or {k: __import__("base64").b64decode(v).decode() for k, v in (sec.get("data") or {}).items()}
+    body = json.dumps({"title": f"stack {a.name} run {a.run}", "key": data["identity.pub"].strip(), "read_only": True}).encode()
+    req = urllib.request.Request(f"{a.server.rstrip('/')}/api/v1/repos/{repo}/keys", data=body, method="POST",
+                                 headers={"Authorization": f"token {token}", "Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as r:
-        return bool(json.loads(r.read()).get("private"))
+        key_id = json.loads(r.read())["id"]
+    return sec, {"repo": repo, "id": key_id}
+
+
+def drop_keys(a, keys: list[dict]):
+    token = os.environ.get("FORGEJO_TOKEN", "")
+    for k in keys:
+        req = urllib.request.Request(f"{a.server.rstrip('/')}/api/v1/repos/{k['repo']}/keys/{k['id']}", method="DELETE",
+                                     headers={"Authorization": f"token {token}"})
+        try:
+            urllib.request.urlopen(req, timeout=30)
+        except urllib.error.HTTPError:
+            pass
 
 
 def bootstrap(h: ClusterHandle, a) -> dict:
@@ -270,21 +302,27 @@ def bootstrap(h: ClusterHandle, a) -> dict:
     server = a.server.rstrip("/")
     subs = pinned_submodules(a.server, a.repo, a.sha, token)
     # No platform credentials go into a stack's cluster: whoever writes the stack repo decides what Flux applies
-    # there (as cluster-admin), so they could read them. Public repos need none; a private one needs a per-stack,
-    # read-only credential (ClusterRequest.secrets_ref, not built yet) and is refused until then.
-    private = [r for r in [a.repo, *[x["repo"] for x in subs.values()]] if repo_private(a.server, r, token)]
-    if private:
-        raise RuntimeError(f"private repos need per-stack read credentials (secrets_ref), not the platform's: {', '.join(private)}")
+    # there (as cluster-admin), so they could read them. A repo anyone can clone needs none; any other gets a
+    # deploy key of its own for this run: read-only, that repo only, deleted at down.
+    secrets = []
 
     def git(name, repo, commit):
-        return {"apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository", "metadata": {"name": name, "namespace": "flux-system"},
-                "spec": {"interval": "10m", "url": f"{server}/{repo}.git", "ref": {"commit": commit}}}
-    items = [git("stack", a.repo, a.sha), *[git(n, x["repo"], x["commit"]) for n, x in subs.items()],
+        spec = {"interval": "10m", "url": f"{server}/{repo}.git", "ref": {"commit": commit}}
+        if not anonymous_ok(a.server, repo):
+            sec, key = deploy_key(a, f"key-{name}", repo, token)
+            secrets.append(sec)
+            a.deploy_keys.append(key)
+            spec.update(url=f"{FORGE_SSH}/{repo}.git", secretRef={"name": f"key-{name}"})
+        return {"apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository",
+                "metadata": {"name": name, "namespace": "flux-system"}, "spec": spec}
+    sources = [git("stack", a.repo, a.sha), *[git(n, x["repo"], x["commit"]) for n, x in subs.items()]]
+    items = [*secrets, *sources,
              {"apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization", "metadata": {"name": "stack", "namespace": "flux-system"},
               "spec": {"interval": "10m", "retryInterval": "20s", "path": f"./{a.path.strip('./')}", "prune": True,
                        "sourceRef": {"kind": "GitRepository", "name": "stack"}}}]
     k("apply", "-f", "-", input=json.dumps({"apiVersion": "v1", "kind": "List", "items": items}))
-    return {"repo": a.repo, "commit": a.sha, "path": a.path, "sources": [{"name": n, **x} for n, x in subs.items()]}
+    return {"repo": a.repo, "commit": a.sha, "path": a.path, "sources": [{"name": n, **x} for n, x in subs.items()],
+            "deploy_keys": [k["repo"] for k in a.deploy_keys]}
 
 
 def repo_file(a, path: str) -> str:
@@ -402,6 +440,7 @@ def main():
     ap.add_argument("--out", default="stack.json")
     ap.add_argument("--keep", action="store_true", help="leave the cluster up (debugging)")
     a = ap.parse_args()
+    a.deploy_keys = []
     slots = {s.name: s for s in load_slots(Path(a.root), a.cluster)}
     prov = PROVIDERS[a.provider](port_forward=a.port_forward)
     rec = {"stack": a.name, "run": a.run, "provider": f"{prov.name}@{prov.version}", "isolation": prov.isolation,
@@ -446,8 +485,9 @@ def main():
     finally:
         if slot and not a.keep:
             prov.down(slot)
-            rec["steps"]["down"] = {"result": "ok"}
-            print(f"down: {slot.name} is free")
+            drop_keys(a, a.deploy_keys)
+            rec["steps"]["down"] = {"result": "ok", "deploy_keys_removed": len(a.deploy_keys)}
+            print(f"down: {slot.name} is free" + (f", {len(a.deploy_keys)} deploy key(s) removed" if a.deploy_keys else ""))
     word = (rec["steps"].get("check") or {}).get("result") or ("error" if rc == 2 else "ok")
     if word == "ready" and (rec["steps"].get("smoke") or {}).get("result") in ("failed", "timeout"):
         word = f"smoke-{rec['steps']['smoke']['result']}"
