@@ -3,7 +3,7 @@
   "uuid": "d41f3667-9b80-5e58-9321-735fa7ab50b2",
   "metadata": {
    "title": "System security plan: cicd demo guestbook",
-   "last-modified": "2026-11-21T05:18:52Z",
+   "last-modified": "2026-11-22T05:19:14Z",
    "version": "1",
    "oscal-version": "1.2.3",
    "props": [
@@ -90,7 +90,7 @@
      "uuid": "6eeb63e5-6acf-56ab-a3fb-1ed0895d4b56",
      "type": "service",
      "title": "cicd-ref-arch pipeline (build, scan, gate, deploy, promote)",
-     "description": "Every push is tested, built, scanned (gitleaks, opengrep, checkov, syft, grype), gated by policy and deployed from git; prod changes only through a two-person promotion that re-scans the image.",
+     "description": "Every push is tested, built, scanned (gitleaks, opengrep, checkov, syft, grype), gated by policy and deployed from git; prod changes only through a promotion PR that re-scans the image; who approved and merged it is recorded.",
      "props": [
       {
        "name": "layer",

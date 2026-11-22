@@ -1,12 +1,12 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "8260c52e6888846ec7369809eb8c1ab200879b9f",
+  "sha": "d285401e21bfa56c8ffe6d45fe9a5d3adfe1e173",
   "ref": "master",
   "workflow": "assess",
   "job": "security",
   "status": "pass",
-  "started_at": "2026-11-21T05:18:56Z",
+  "started_at": "2026-11-22T05:19:19Z",
   "duration_s": null,
   "summary": {
     "total": 16,
@@ -43,5 +43,5 @@
       "source": "tenable-csv"
     }
   ],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/639"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1098"
 }
