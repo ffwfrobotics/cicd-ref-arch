@@ -24,11 +24,13 @@ The dashboard reads the SBOM for its packages and advisories (once per sha256), 
 
 Who can read the scans is decided by who can read the evidence repo. Where per-app restriction matters, a tenant can name a repo of its own, with its own readers.
 
+Here the evidence repo is the compliance repo (`ffwf/cicd-compliance`), so scans and IT Security's records share one set of readers. Its releases are the scans; its git tree is still the OSCAL content, the ledger, the advisories and the release packages. Release tags don't start its `assess` workflow, which runs only on pushes to `main`.
+
 ## Configuration
 
 ```yaml
 # clusters/<cluster>/cicd-cluster.yaml: the default for every app on the cluster
-evidence: {repo: ffwfbot/cicd-evidence, keep: 1}          # keep: versions per environment ("latest only")
+evidence: {repo: ffwf/cicd-compliance, keep: 1}           # keep: versions per environment ("latest only")
 
 # tenants/<app>.yaml: overrides any key; on its own it turns evidence releases on for that app alone
 spec:

@@ -4,7 +4,7 @@ kind: Tenant
 metadata:
   name: fxw
 spec:
-  evidence: {repo: ffwfbot/cicd-evidence, keep: 1}   # the trial of docs/evidence.md
+  evidence: {repo: ffwf/cicd-compliance, keep: 1}   # the trial of docs/evidence.md
   kind: App
   tenant: ffwf
   mode: wrapped
