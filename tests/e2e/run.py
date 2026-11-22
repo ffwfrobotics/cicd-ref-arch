@@ -540,8 +540,8 @@ def v8_target():
     code, _ = api("POST", f"/repos/{STATE}/pulls/{pr['number']}/merge", {"Do": "merge", "MergeTitleField": pr["title"]})
     check(code in (200, 204), f"merged promotion PR #{pr['number']}")
     path = f"envs/{target}/{app}/prod/cicd-env.yaml"
-    meta = wait(f"{path}", lambda: (lambda c: yaml.safe_load(c) if isinstance(c, str) else None)(
-        api("GET", f"/repos/{STATE}/raw/{path}")[1]), timeout=900, every=20)
+    meta = wait(f"{path}", lambda: (lambda r: yaml.safe_load(r[1]) if r[0] == 200 else None)(
+        api("GET", f"/repos/{STATE}/raw/{path}")), timeout=900, every=20)
     check(meta.get("commit") == s1 and meta.get("builtOn") == CLUSTER, f"prod is rendered for {target}, built on {CLUSTER}")
     check("@sha256:" in meta["image"] and meta["image"].startswith("localhost:5000/"), "the same digest, pulled through the slot's mirror")
     wait(f"{app} to be Available on {target}", lambda: "True" in nested(slot, "k0s", "kubectl", "-n", app, "get", "deploy", app, "-o",

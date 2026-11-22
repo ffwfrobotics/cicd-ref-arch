@@ -55,6 +55,10 @@ jobs:
         case "$ACTION" in deploy|pause|resume|remove-env|request-promotion|bump) ;; *) echo "::error::unknown action $ACTION"; exit 1 ;; esac
         # the tenant record, checked and with its defaults (docs/enrollment.md): the IaC root, its mode and sources
         python3 .cicd/tools/cicd.py --root .cicd tenant "$APP_NAME" --github-output >> "$GITHUB_OUTPUT" || { echo "::error::$APP_NAME: bad or missing tenant record"; exit 1; }
+        # a stack (docs/stacks.md): no app contract, no build; its own job stands a cluster up and checks it
+        if grep -q '^kind=Stack$' "$GITHUB_OUTPUT" && [ "$ACTION" = deploy ]; then
+          echo "env=stack" >> "$GITHUB_OUTPUT"; exit 0
+        fi
         if [ "$ACTION" = bump ]; then
           [[ "$SOURCE" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || { echo "::error::bump needs source=owner/name"; exit 1; }
           [ -n "$SHA" ] || { echo "::error::bump needs the pushed sha"; exit 1; }
@@ -63,14 +67,14 @@ jobs:
         if [ "$ACTION" = request-promotion ] && grep -q '^status=pending$' "$GITHUB_OUTPUT"; then
           echo "::error::$APP_NAME is pending: an admin approves it before it can be promoted"; exit 1
         fi
-    - if: inputs.action != 'bump'
+    - if: inputs.action != 'bump' && steps.app.outputs.env != 'stack'
       uses: actions/checkout@v4
       with: {repository: "${{ steps.app.outputs.repo }}", ref: "${{ inputs.sha || inputs.branch }}", path: app, submodules: recursive,
              token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
     # the contract (contract.yaml): fills in cicd.yaml and deploy/ when they're missing, and says
     # what to fix as commit statuses on the app repo. Never fails; nothing to run stops the run here.
     - id: intake
-      if: inputs.action != 'bump'
+      if: inputs.action != 'bump' && steps.app.outputs.env != 'stack'
       env: {APP_NAME: "${{ inputs.app }}", REPO: "${{ steps.app.outputs.repo }}", APP: "app/${{ steps.app.outputs.path }}",
             ACTION: "${{ inputs.action }}", TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", SERVER: "${{ github.server_url }}"}
       run: |
@@ -82,7 +86,7 @@ jobs:
             --server "$SERVER" --target-url "$SERVER/${{ github.repository }}/actions/runs/${{ github.run_number }}"
         fi
     - id: route
-      if: inputs.action != 'bump'
+      if: inputs.action != 'bump' && steps.app.outputs.env != 'stack'
       env: {BRANCH: "${{ inputs.branch }}", APP: "app/${{ steps.app.outputs.path }}", ACTION: "${{ inputs.action }}", ACTOR: "${{ inputs.actor }}",
             RUNNABLE: "${{ steps.intake.outputs.runnable }}"}
       run: |
@@ -101,7 +105,7 @@ jobs:
 
   test:
     needs: route
-    if: needs.route.outputs.env != 'manage' && needs.route.outputs.env != 'bump' && !startsWith(needs.route.outputs.env, 'skip')
+    if: needs.route.outputs.env != 'manage' && needs.route.outputs.env != 'bump' && needs.route.outputs.env != 'stack' && !startsWith(needs.route.outputs.env, 'skip')
     runs-on: ffwf-k8s
     steps:
     - uses: actions/checkout@v4
@@ -242,6 +246,84 @@ jobs:
       run: |
         python3 .cicd/tools/cicd.py --root .cicd bump --app "${{ inputs.app }}" --source "${{ inputs.source }}" \
           --branch "${{ inputs.branch }}" --sha "${{ inputs.sha }}" --actor "${{ inputs.actor }}" --server "${{ github.server_url }}"
+
+  # a stack's dev run (docs/stacks.md): a nested cluster in a free slot of this cluster, from the stack's commit,
+  # bootstrapped and checked, then stood down. The lifecycle is the provider's (tools/stack.py), never the stack
+  # repo's; the stack's own check script runs inside the nested cluster. Evidence: stacks/<cluster>/<name>/ here.
+  stack:
+    needs: route
+    if: needs.route.outputs.env == 'stack'
+    runs-on: ffwf-k8s
+    steps:
+    - uses: actions/checkout@v4
+      with: {path: .cicd, persist-credentials: false}
+    - uses: ./.cicd/actions/setup
+    - id: run
+      env:
+        FORGEJO_TOKEN: ${{ secrets.CICD_BOT_TOKEN }}
+        BOT: ${{ vars.CICD_BOT_USER }}
+        STACK_KUBECONFIG: ${{ secrets.CICD_STACK_KUBECONFIG }}
+        REPO: ${{ needs.route.outputs.repo }}
+        IPATH: ${{ needs.route.outputs.path }}
+        SHA: ${{ inputs.sha }}
+        BRANCH: ${{ inputs.branch }}
+        SERVER: ${{ github.server_url }}
+      run: |
+        set -eu
+        [ -n "$SHA" ] || SHA=$(curl -fsS -H "Authorization: token $FORGEJO_TOKEN" "$SERVER/api/v1/repos/$REPO/branches/$BRANCH" | jq -r .commit.id)
+        echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+        umask 077; printf '%s' "$STACK_KUBECONFIG" > "$RUNNER_TEMP/stack.kubeconfig"
+        cfg=$(curl -fsS -H "Authorization: token $FORGEJO_TOKEN" "$SERVER/api/v1/repos/$REPO/raw/$IPATH/cicd.yaml?ref=$SHA")
+        args=$(printf '%s' "$cfg" | python3 -c "
+        import sys, yaml, shlex, os
+        c = yaml.safe_load(sys.stdin.read()); s = c.get('spec') or {}; ck = s.get('check') or {}
+        env = (s.get('environments') or {}).get('dev') or {}
+        p = os.path.normpath(os.path.join(os.environ['IPATH'], s.get('definition', 'cluster')))
+        a = ['--name', c['metadata']['name'], '--definition', p, '--provider', env.get('provider', 'k0s-pod'),
+             '--min-kustomizations', str(ck.get('minKustomizations', 2)), '--timeout', str(ck.get('timeout', '900s')).rstrip('s')]
+        sm = ck.get('smoke') or {}
+        if sm.get('run'):
+            a += ['--smoke', os.path.normpath(os.path.join(os.environ['IPATH'], sm['run'])), '--smoke-needs', *(sm.get('needs') or ['api'])]
+        print(' '.join(shlex.quote(x) for x in a))")
+        rc=0
+        eval "KUBECONFIG=$RUNNER_TEMP/stack.kubeconfig python3 .cicd/tools/stack.py lifecycle $args --run '${{ github.run_number }}' \
+          --cluster '$CLUSTER' --repo '$REPO' --sha '$SHA' --server '$SERVER' --root .cicd --out stack.json" || rc=$?
+        rm -f "$RUNNER_TEMP/stack.kubeconfig"
+        echo "word=$(jq -r .word stack.json)" >> "$GITHUB_OUTPUT"
+        echo "rc=$rc" >> "$GITHUB_OUTPUT"
+    - if: always() && steps.run.outputs.word != ''
+      env: {TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", REPO: "${{ needs.route.outputs.repo }}", SHA: "${{ steps.run.outputs.sha }}",
+            WORD: "${{ steps.run.outputs.word }}"}
+      run: |
+        st=failure; [ "$WORD" = ready ] && st=success
+        jq -n --arg s "$st" --arg d "$WORD" --arg u '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_number }}' \
+          '{state: $s, context: "cicd/stack", description: $d, target_url: $u}' \
+          | curl -fsS -o /dev/null -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' -d @- \
+            '${{ github.server_url }}'"/api/v1/repos/$REPO/statuses/$SHA"
+    - if: always() && steps.run.outputs.word != ''
+      env: {TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", USER: "${{ vars.CICD_BOT_USER }}", SHA: "${{ steps.run.outputs.sha }}"}
+      run: |
+        set -eu
+        name=$(jq -r .stack stack.json); auth="AUTHORIZATION: basic $(printf '%s:%s' "$USER" "$TOKEN" | base64 -w0)"
+        st=$(mktemp -d); git -c http.extraHeader="$auth" clone -q --depth 5 '${{ github.server_url }}/${{ env.STATE_REPO }}.git' "$st"
+        cd "$st"; git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
+        for attempt in 1 2 3 4 5; do
+          git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
+          d="stacks/$CLUSTER/$name"; mkdir -p "$d/runs"
+          jq --arg sha "$SHA" --arg url '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_number }}' \
+            '. + {commit: $sha, runUrl: $url}' "$GITHUB_WORKSPACE/stack.json" > "$d/runs/${{ github.run_number }}.json"
+          cp "$d/runs/${{ github.run_number }}.json" "$d/latest.json"
+          ls -1t "$d/runs" | tail -n +21 | sed "s#^#$d/runs/#" | xargs -r rm -f     # the last 20 runs
+          git add stacks
+          git commit -q -m "stack $name: $(jq -r .word "$d/latest.json") at ${SHA:0:7}" -m '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_number }}'
+          git -c http.extraHeader="$auth" push -q origin HEAD:master && break
+          [ "$attempt" = 5 ] && exit 1; sleep $((attempt * 3))
+        done
+    - if: always()
+      uses: actions/upload-artifact@v3
+      with: {name: stack, path: stack.json}
+    - if: steps.run.outputs.rc != '0'
+      run: exit 1
 
   # self-service, for whoever the dashboard says asked (it checked their write on the app repo)
   manage:

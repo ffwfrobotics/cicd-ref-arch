@@ -1,0 +1,14 @@
+# The example stack (docs/stacks.md, examples/stack-ref): cicd-ref-arch's platform layer as a cluster.
+# A push to ffwf-iac/stack-ref runs the pipeline's stack job: a nested cluster in a free stack slot,
+# bootstrapped at that commit, checked (Flux Ready, the stack's smoke check inside it), stood down.
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata: {name: stack-ref}
+spec:
+  kind: Stack
+  mode: direct
+  tenant: ffwf
+  repo: ffwf-iac/stack-ref
+  path: .
+  clusters: [c-local]
+  enrolled: '2026-11-22'
