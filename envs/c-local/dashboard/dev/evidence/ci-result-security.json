@@ -6,7 +6,7 @@
   "workflow": "pipeline",
   "job": "security",
   "status": "pass",
-  "started_at": "2026-11-22T01:40:01Z",
+  "started_at": "2026-11-22T01:40:22Z",
   "duration_s": null,
   "summary": {
     "total": 16,
@@ -23,8 +23,8 @@
       "suppressed": 8,
       "below-threshold": 8
     },
-    "image": "localhost:5000/dashboard@sha256:949ea03861a3c45c8e40c4221096cec078ac1445cdbff1b2b21c0c2ac93a2242"
+    "image": "localhost:5000/dashboard@sha256:577cb6aef8689619c1ed430bee07105291019f41923bd6bf7aee5532548c11f3"
   },
   "external": [],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1017"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1016"
 }
