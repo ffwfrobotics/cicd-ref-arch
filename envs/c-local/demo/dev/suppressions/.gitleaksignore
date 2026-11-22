@@ -2,4 +2,4 @@
 # Reviewed with every promotion to prod (cicd-ref-arch docs/security.md).
 
 # example payload copied from the upstream webhook docs; the signing secret is a placeholder
-tests/fixtures/webhook-example.json:generic-api-key:4
+src/tests/fixtures/webhook-example.json:generic-api-key:4

@@ -13,4 +13,4 @@ resources:
 images:
 - name: app-image
   newName: localhost:5000/demo
-  digest: sha256:1d5de1ee2ec1998ee0dd9bce9ab3a4d3e34c9e5cf563ff37142cdee7afdfa310
+  digest: sha256:2410c183a9c2b581516026af88e8c73afa156d060590da72768237f859b5685a
