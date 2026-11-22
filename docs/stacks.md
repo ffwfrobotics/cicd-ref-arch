@@ -57,6 +57,20 @@ The image is `images/stack-node` (k0s, pinned by digest; `build.sh` builds it). 
 
 The namespace is `pod-security.kubernetes.io/enforce: privileged`. Only the platform's stack workflow creates these namespaces, and its runner pod has a ServiceAccount allowed to do so in `stack-*` namespaces only. App pipelines never get one.
 
+### `vcluster`: a virtual control plane in the slot
+
+A vcluster (0.38.0, pinned as `platform/stacks/providers/vcluster-0.38.0.yaml` with its config as a plain file) runs its control plane as ordinary, **unprivileged** pods in the slot. Its workloads are synced onto the host's nodes. Capabilities: `api` only. A stack's checks that need `nodes`, `cni` or `csi` are recorded as **not exercised** there. The same stack-ref commit passes on `k0s-pod` and on `vcluster`. It is the cheap, unprivileged provider, and also the test that the contract fits more than one shape.
+
+### Capacity: slots and the queue
+
+A slot is busy while it holds a `k0s-pod` node or a vcluster. A run takes the first free slot, and **waits** for one (up to `--slot-wait`, 30 minutes) when all are busy, so concurrent stack runs queue instead of failing. A stack kept up as a target (below) holds its slot until it is taken down.
+
+## Targets
+
+An environment can run on another cluster: `cicd.yaml` `environments.<env>.cluster: <target>`. A promotion then renders into `envs/<target>/` with that target's own `clusters/<target>/cicd-cluster.yaml`. The image is copied by digest only when the target's registry differs. `clusters/<target>/target.yaml` says what the target is: `managedBy` (a stack, or external), provider, slot, isolation, capabilities, registry.
+
+A stack can serve as a target: `tools/stack.py lifecycle --serve-target <name> --keep` leaves it up, and its Flux also follows `envs/<name>/` of the platform repo. A slot's registry mirrors (`stack-slots.yaml`) make `localhost:5000/...` in the nested cluster this cluster's registry, so a digest built here runs there unchanged. `c-nested` is such a target: stack-ref kept in `stack-slot-2`.
+
 ### `k0s-docker`: a cluster as a container on a host
 
 The provider for real targets on a machine with docker: `infra/k0s-local/create.sh` (c-local was built this way). It needs a runner on that host with the docker socket. That runner is privileged on the host, registered on the platform repo only, and not part of the base setup: adding one is an admin decision.
