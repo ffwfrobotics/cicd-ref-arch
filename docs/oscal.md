@@ -15,7 +15,7 @@ Plans: akb #451 and #455. OSCAL 1.2.3, the version of NIST's 800-53 Rev 5.2.0 co
 | The app as its owner describes it (profile, impact, release rule, promotion requirement) | compliance repo: `apps/<app>/app.yaml` |
 | IT Security's findings | compliance repo: `ledger/<app>.yaml` |
 | Announced vulnerabilities | compliance repo: `advisories/<id>.yaml` |
-| One commit's evidence and assessment | state repo: `envs/<cluster>/<app>/<env>/evidence/` |
+| One commit's evidence and assessment | state repo: `envs/<cluster>/<app>/<env>/evidence/`; with an evidence repo configured, the files are a release there and `evidence/evidence.json` names it (docs/evidence.md) |
 
 The compliance repo is named in `clusters/<cluster>/cicd-cluster.yaml` (`compliance:`). Without it, builds still run, without IT Security's findings or an assessment.
 

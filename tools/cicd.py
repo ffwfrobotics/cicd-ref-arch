@@ -36,6 +36,8 @@ from pathlib import Path
 
 import yaml
 
+import evidence  # noqa: E402  (tools/: scans as releases on the evidence repo)
+
 API = "cicd.ffwf.net/v1alpha1"
 RESERVED_ENVS = {"dev", "prod"}
 LABEL_MAX = 63
@@ -243,10 +245,11 @@ EVIDENCE = ("security.json", "sbom.cdx.json", "ci-result-test.json", "ci-result-
             "assessment-results.json", "assessment-summary.json", "ssp.json")
 
 
-def keep_security(out: Path, security_dir: Path | None, app_dir: Path | None):
+def keep_security(out: Path, security_dir: Path | None, app_dir: Path | None, everything: bool = False):
     """Next to an environment: the build's security summary and source findings (small; the image
     is re-scanned at promotion), and copies of the app's suppression records, so a promotion
-    pull request shows exactly which suppressions it carries to prod."""
+    pull request shows exactly which suppressions it carries to prod. `everything`: all of the
+    build's scan output goes into evidence/, for tools/evidence.py to move to a release."""
     if security_dir is not None:
         rec = security_dir / "security.json"
         if rec.exists():
@@ -257,7 +260,8 @@ def keep_security(out: Path, security_dir: Path | None, app_dir: Path | None):
         src = security_dir / "findings-source.json"
         if src.exists():
             shutil.copy(src, out / "findings-source.json")
-        for name in EVIDENCE:   # unaltered records: what the self-assessment and releases point at
+        names = sorted(p.name for p in security_dir.iterdir() if p.is_file()) if everything else EVIDENCE
+        for name in names:   # unaltered records: what the self-assessment and releases point at
             if (security_dir / name).exists():
                 (out / "evidence").mkdir(parents=True, exist_ok=True)
                 shutil.copy(security_dir / name, out / "evidence" / name)
@@ -315,12 +319,16 @@ def render_env(root: Path, app: dict, cl: dict, env: str, branch: str | None, im
         write(out / "edge" / "kustomization.yaml", dump_yaml({
             "apiVersion": "kustomize.config.k8s.io/v1beta1", "kind": "Kustomization",
             "resources": ["routes.yaml"]}))
-    keep_security(out, security_dir, app_dir)
+    ev_pol = evidence.active(root, cluster, name) if security_dir is not None else None
+    keep_security(out, security_dir, app_dir, everything=ev_pol is not None)
     write(out / "cicd-env.yaml", dump_yaml({
         "apiVersion": API, "kind": "Environment",
         "app": name, "env": env, "dir": env_dir, "namespace": ns, "branch": branch,
         "hosts": hosts, "image": image, **meta,
     }))
+    if ev_pol and (out / "evidence").is_dir():
+        evidence.publish(out / "evidence", cluster, name, env_dir, ev_pol, evidence.Forge(),
+                         {"image": image, "commit": meta.get("commit"), "run": meta.get("runUrl")})
     return out
 
 
@@ -618,6 +626,9 @@ def reassess(root: Path, args) -> list[str]:
         if args.app not in ("all", app) or args.env not in ("all", env_name):
             continue
         ev = env_dir / "evidence"
+        ev_pol = evidence.active(root, args.cluster, app)
+        if ev_pol and evidence.read_manifest(ev):
+            evidence.fetch(ev, evidence.Forge())     # all of it: the new version is complete on its own
         if not (ev / "sbom.cdx.json").exists():
             print(f"{app}/{env_name}: no kept SBOM (built before evidence was kept): skipped")
             continue
@@ -652,6 +663,9 @@ def reassess(root: Path, args) -> list[str]:
         shutil.copy(env_dir / "app.yaml", ev / "app.yaml")
         summary = assess_into(root, app, kind, ev, meta.get("commit"), meta["image"], quiet=True)
         (ev / "app.yaml").unlink()
+        if ev_pol:
+            evidence.publish(ev, args.cluster, app, env_name, ev_pol, evidence.Forge(),
+                             {"image": meta["image"], "commit": meta.get("commit"), "reassessed": now_utc().isoformat()})
         g = rec["gate"]
         ext = rec.get("external") or []
         line = (f"{app}/{env_name}: gate {g['status']} ({g['blocking']} blocking)"
@@ -732,6 +746,12 @@ def apply_due(root: Path, args) -> tuple[int, int]:
         write(done / "promotion.yaml", dump_yaml(rec))
         (out_env / "evidence").mkdir(exist_ok=True)     # who authorized what runs in prod, next to its other evidence
         write(out_env / "evidence" / "approval.json", json.dumps({**approval, "promotion": promo["id"]}, indent=2) + "\n")
+        ev_pol = evidence.active(root, target, promo["app"])
+        if ev_pol:      # the scans go to a release; the applied promotion records the same version
+            evidence.publish(out_env / "evidence", target, promo["app"], promo["to"], ev_pol, evidence.Forge(),
+                             {"image": image, "commit": promo.get("commit"), "promotion": promo["id"]})
+            shutil.rmtree(done / "evidence", ignore_errors=True)
+            shutil.copytree(out_env / "evidence", done / "evidence")
         print(f"{promo['id']}: applied ({why}; {sec_why})")
         applied += 1
     for c in {args.cluster} | targets_touched:

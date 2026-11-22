@@ -49,7 +49,7 @@ runs:
       run_url="$server/${{ github.repository }}/actions/runs/${{ github.run_number }}"
       for attempt in 1 2 3 4 5; do
         git -c http.extraHeader="$auth" fetch -q origin master && git reset -q --hard origin/master
-        envdir=$(python3 "$cicd/tools/cicd.py" render "$app_cfg" --env '${{ inputs.env }}' \
+        envdir=$(FORGEJO_TOKEN="$TOKEN" FORGEJO_SERVER="$server" python3 "$cicd/tools/cicd.py" render "$app_cfg" --env '${{ inputs.env }}' \
           --branch '${{ inputs.branch }}' --cluster '${{ inputs.cluster }}' --image '${{ inputs.image }}' \
           --manifests .manifests.yaml --commit "$commit" --repo "$src" --run-url "$run_url" --security-dir "$sec" \
           --sources "$SOURCES" "${prodm[@]}" | tail -1)
