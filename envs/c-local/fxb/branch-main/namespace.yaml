@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fxb-main
+  labels:
+    cicd.ffwf.net/app: fxb
+    cicd.ffwf.net/env: branch-main
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
