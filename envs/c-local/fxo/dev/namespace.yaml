@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: fxo-dev
-  labels:
-    cicd.ffwf.net/app: fxo
-    cicd.ffwf.net/env: dev
-    pod-security.kubernetes.io/enforce: restricted
-    pod-security.kubernetes.io/warn: restricted
