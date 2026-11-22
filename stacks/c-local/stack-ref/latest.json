@@ -1,6 +1,6 @@
 {
   "stack": "stack-ref",
-  "run": "1048",
+  "run": "1046",
   "provider": "k0s-pod@1",
   "isolation": "none",
   "capabilities": [
@@ -8,9 +8,108 @@
     "cni",
     "nodes"
   ],
-  "steps": {},
-  "error": "no free stack slot: all are in use",
-  "word": "error",
-  "commit": "880f9076209f410e482f4a6d0d22283ba5e51e51",
-  "runUrl": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1048"
+  "steps": {
+    "up": {
+      "result": "ok",
+      "seconds": 182,
+      "api": "https://api.stack-slot-1.svc.cluster.local:6443",
+      "nodes": 1,
+      "ready": 1,
+      "version": "v1.37.2+k0s"
+    },
+    "bootstrap": {
+      "result": "ok",
+      "repo": "ffwf-iac/stack-ref",
+      "commit": "5c216c1ba456ee49c67728ac68ec2dd4d687a8a5",
+      "path": "cluster/providers/k0s-pod",
+      "sources": [
+        {
+          "name": "platform",
+          "path": "platform",
+          "repo": "ffwf/cicd-ref-arch",
+          "commit": "c005c58c445c4bc60e4dfaee66f707b3cc3e9439"
+        }
+      ],
+      "deploy_keys": [
+        "ffwf-iac/stack-ref"
+      ],
+      "seconds": 88
+    },
+    "check": {
+      "result": "ready",
+      "seconds": 159,
+      "kustomizations": [
+        {
+          "name": "cicd-sources",
+          "ready": true,
+          "reason": "ReconciliationSucceeded",
+          "message": "Applied revision: sha1:c005c58c445c4bc60e4dfaee66f707b3cc3e9439"
+        },
+        {
+          "name": "gateway-api",
+          "ready": true,
+          "reason": "ReconciliationSucceeded",
+          "message": "Applied revision: v1.6.3@sha1:c0836133e24073fcdcdbb1713aba3cc73a89d0b5"
+        },
+        {
+          "name": "keda",
+          "ready": true,
+          "reason": "ReconciliationSucceeded",
+          "message": "Applied revision: sha1:c005c58c445c4bc60e4dfaee66f707b3cc3e9439"
+        },
+        {
+          "name": "keda-http",
+          "ready": true,
+          "reason": "ReconciliationSucceeded",
+          "message": "Applied revision: sha1:c005c58c445c4bc60e4dfaee66f707b3cc3e9439"
+        },
+        {
+          "name": "stack",
+          "ready": true,
+          "reason": "ReconciliationSucceeded",
+          "message": "Applied revision: sha1:5c216c1ba456ee49c67728ac68ec2dd4d687a8a5"
+        },
+        {
+          "name": "traefik",
+          "ready": true,
+          "reason": "ReconciliationSucceeded",
+          "message": "Applied revision: sha1:c005c58c445c4bc60e4dfaee66f707b3cc3e9439"
+        }
+      ],
+      "needs": [],
+      "exercised": [],
+      "not_exercised": []
+    },
+    "smoke": {
+      "result": "passed",
+      "seconds": 10,
+      "needs": [
+        "api"
+      ],
+      "exercised": [
+        "api"
+      ],
+      "log": "platform layer answers\n"
+    },
+    "down": {
+      "result": "ok",
+      "deploy_keys_removed": 1
+    }
+  },
+  "slot": {
+    "name": "stack-slot-1",
+    "pod_cidr": "10.250.0.0/16",
+    "svc_cidr": "10.251.0.0/16",
+    "api_port": 6443,
+    "dns_name": "api.stack-slot-1.svc.cluster.local",
+    "mirrors": [
+      [
+        "localhost:5000",
+        "http://172.17.0.6:5000"
+      ]
+    ]
+  },
+  "word": "ready",
+  "commit": "5c216c1ba456ee49c67728ac68ec2dd4d687a8a5",
+  "runUrl": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1046"
 }
