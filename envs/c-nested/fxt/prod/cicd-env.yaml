@@ -1,0 +1,19 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: fxt
+env: prod
+dir: prod
+namespace: fxt
+branch: null
+hosts:
+- fxt.c-nested.k.ffwf.net
+image: localhost:5000/fxt@sha256:d8d8ee42c9ecf2a7d448080ac290920eeda9dbcfe96d4deba5087a32fdf383fe
+commit: a9452ef5dca711c72e16b986079c19f08da69a98
+promotion: fxt-prod-20261122T020539Z
+approval: 'PR #14 merged by ffwfbot: no second person (requested by cicd-e2e)'
+separated: false
+security: 'applied with security gate fail (180 blocking: config/CKV_K8S_8, config/CKV_K8S_11,
+  config/CKV_K8S_40, config/CKV_K8S_22, vuln/CVE-2026-111497); self-assessment 30/40
+  satisfied'
+builtOn: c-local
+renderedAt: '2026-11-22T02:08:44Z'

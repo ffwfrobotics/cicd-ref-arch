@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: fxt
+labels:
+- pairs:
+    cicd.ffwf.net/app: fxt
+    cicd.ffwf.net/env: prod
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/fxt
+  digest: sha256:d8d8ee42c9ecf2a7d448080ac290920eeda9dbcfe96d4deba5087a32fdf383fe

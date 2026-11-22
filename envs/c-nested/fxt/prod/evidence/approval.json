@@ -1,0 +1,10 @@
+{
+  "requestedBy": "cicd-e2e",
+  "pr": 14,
+  "author": "ffwfbot",
+  "approvedBy": [],
+  "mergedBy": "ffwfbot",
+  "separated": false,
+  "summary": "PR #14 merged by ffwfbot: no second person (requested by cicd-e2e)",
+  "promotion": "fxt-prod-20261122T020539Z"
+}
