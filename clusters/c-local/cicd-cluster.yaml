@@ -13,6 +13,8 @@ keda:
 buildkit: tcp://buildkitd.buildkit.svc.cluster.local:1234
 # The owner's compliance repo: OSCAL content, IT Security's findings (ledger), advisories, releases
 compliance: {repo: ffwf/cicd-compliance, branch: main}
+# Scans kept as releases on CI/CD's evidence repo, not files here (docs/evidence.md); keep: versions per environment
+evidence: {repo: ffwf/cicd-compliance, keep: 1}
 # Endpoint checks (an IT Security finding like "missing HSTS") connect here, with the app's host
 # name as SNI and Host header: the gateway, as any LAN client reaches it.
 probe: {via: "traefik.gateway-system.svc.cluster.local:443"}

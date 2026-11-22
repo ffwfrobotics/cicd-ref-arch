@@ -1,0 +1,33 @@
+{
+ "schema": "evidence/v1",
+ "repo": null,
+ "tag": null,
+ "created": "2026-11-22T17:25:20Z",
+ "kept": "in this repo's history at 54c1482be8e5",
+ "files": {
+  "assessment-results.json": {
+   "sha256": "e0d10c8e4263b98f872ddd0a4f14eee12a4cfa0c8c3ec41e252c143160207bf2",
+   "bytes": 49249
+  },
+  "ci-result-security.json": {
+   "sha256": "898eb660110088a41e3943c40e8c64d3d4144cdf3a782b010af5ead27c664210",
+   "bytes": 1304
+  },
+  "ci-result-test.json": {
+   "sha256": "1b4b8a95b195d66cf761219b1e6d84adfc5afaaacc92bf45adda3f832b93006e",
+   "bytes": 960
+  },
+  "sbom.cdx.json": {
+   "sha256": "2d3e5972e0dffd85d230c892136b167c1fea9854bb26937a544c9c782da03153",
+   "bytes": 639261
+  },
+  "security.json": {
+   "sha256": "f1953d85270cd6b4e276b35135cce819d330a980796f994e11cfb3f19714459b",
+   "bytes": 12291
+  },
+  "ssp.json": {
+   "sha256": "37e169925d5782cc856664e67c29ab9493e57927af39279797dac2c37fd71914",
+   "bytes": 10153
+  }
+ }
+}
