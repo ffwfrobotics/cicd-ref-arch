@@ -1,12 +1,12 @@
 {
   "schema": "ci-result/v1",
   "repo": "ffwf/cicd-ref-arch",
-  "sha": "7a98ae008e8e599b17f3a65f0a3ef61571e85981",
+  "sha": "9138cc3af8fad4d829c622f9627892192c6b945a",
   "ref": "refs/heads/master",
   "workflow": "hello",
   "job": "security",
   "status": "warn",
-  "started_at": "2026-11-22T01:58:47Z",
+  "started_at": "2026-11-22T02:19:55Z",
   "duration_s": null,
   "summary": {
     "total": 244,
@@ -20,7 +20,7 @@
       "file": "Dockerfile:4",
       "severity": "high",
       "category": "config",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/278557a4ffe2b010/hostexecutor/examples/hello/Dockerfile.FROM)"
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/481287b2a54562d9/hostexecutor/examples/hello/Dockerfile.FROM)"
     },
     {
       "test": "vuln/CVE-2026-85091",
@@ -40,8 +40,8 @@
       "no-fix-available": 80,
       "below-threshold": 156
     },
-    "image": "localhost:5000/hello@sha256:8f71f051bf6ad3dc7a2719ae015fe932f2dff83ae3b455bdaeb62234f6f49cc6"
+    "image": "localhost:5000/hello@sha256:ce6405c6a2e5c6e8a8561dc8650d2feb6f7d0dc5e215bbd3b3144990b7b002df"
   },
   "external": [],
-  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1028"
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1049"
 }
