@@ -397,17 +397,17 @@ def v6_monorepo_config_repo():
     check("48Mi" in str(app_yaml), "the rendered environment has the new request")
 
 
-def overlay_files(marker, prod_patch):
+def overlay_files(marker, prod_patch, app="fxo"):
     """fx-overlays: a direct app whose deploy-prod/ asks for more memory than dev."""
     import fixtures
-    files = fixtures.iac_files("fxo", fixtures.source_dir(fixtures.fill(fixtures.SVC_A, marker)), ".")
+    files = fixtures.iac_files(app, fixtures.source_dir(fixtures.fill(fixtures.SVC_A, marker)), ".")
     files.update(fixtures.fill(fixtures.SVC_A, marker))
     cfg = yaml.safe_load(files["cicd.yaml"])
     cfg["spec"]["overlays"] = {"allow": ["resources"]}
     files["cicd.yaml"] = yaml.safe_dump(cfg, sort_keys=False)
     files["deploy-prod/kustomization.yaml"] = yaml.safe_dump({
         "apiVersion": "kustomize.config.k8s.io/v1beta1", "kind": "Kustomization", "resources": ["../deploy"],
-        "patches": [{"target": {"kind": "Deployment", "name": "fxo"}, "patch": prod_patch}]})
+        "patches": [{"target": {"kind": "Deployment", "name": app}, "patch": prod_patch}]})
     return files
 
 
@@ -505,6 +505,54 @@ def vp_prebuilt():
         iac_head(iac)), timeout=900, every=20)
     meta, rt = deployed(app, "dev", h2["sha"], iac)
     check(meta["image"].endswith("@" + d2) and rt == "success", "dev runs the new digest")
+
+
+def nested(slot, *args, check=True):
+    """kubectl in a nested cluster, through its node (the stack runner's credentials: exec in the slot)."""
+    env = dict(os.environ, KUBECONFIG=os.environ.get("STACK_KUBECONFIG", ""))
+    r = subprocess.run(["kubectl", "-n", slot, "exec", "node", "--", *args], capture_output=True, text=True, env=env)
+    if check and r.returncode != 0:
+        raise Fail(f"nested {' '.join(args[:4])}: {r.stderr.strip()[-200:]}")
+    return r.stdout
+
+
+@scenario
+def v8_target():
+    """fx-target (direct): dev on c-local; prod on the target c-nested (a kept stack in stack-slot-2), served there."""
+    import fixtures
+    app, repo, target, slot = "fxt", fixtures.ensure_repo("fx-target"), "c-nested", "stack-slot-2"
+    nested(slot, "true")
+    check(True, f"the target {target}'s node is up in {slot}")
+    unenroll(app)
+    files = overlay_files("t1", "- op: replace\n  path: /spec/template/spec/containers/0/resources/requests/memory\n  value: 48Mi\n", app=app)
+    cfg = yaml.safe_load(files["cicd.yaml"])
+    cfg["spec"]["environments"]["prod"]["cluster"] = target
+    files["cicd.yaml"] = yaml.safe_dump(cfg, sort_keys=False)
+    enroll_record(app, {"repo": repo, "clusters": [CLUSTER, target]})
+    fixtures.hook(repo)
+    s1 = fixtures.write_tree(repo, files, "fixture: target", reset=True)
+    dispatch(app=app, branch="main", sha=s1, action="deploy", actor="cicd-e2e")
+    meta, rt = deployed(app, "dev", s1, repo)
+    check(rt == "success", "dev runs on c-local")
+    dispatch(app=app, branch="main", sha=s1, action="request-promotion", actor="cicd-e2e")
+    pr = wait("the promotion PR", lambda: next((p for p in api("GET", f"/repos/{STATE}/pulls?state=open&limit=20")[1] or []
+                                               if p["head"]["ref"].startswith(f"promote/{app}-prod-")), None), timeout=600)
+    code, _ = api("POST", f"/repos/{STATE}/pulls/{pr['number']}/merge", {"Do": "merge", "MergeTitleField": pr["title"]})
+    check(code in (200, 204), f"merged promotion PR #{pr['number']}")
+    path = f"envs/{target}/{app}/prod/cicd-env.yaml"
+    meta = wait(f"{path}", lambda: (lambda c: yaml.safe_load(c) if isinstance(c, str) else None)(
+        api("GET", f"/repos/{STATE}/raw/{path}")[1]), timeout=900, every=20)
+    check(meta.get("commit") == s1 and meta.get("builtOn") == CLUSTER, f"prod is rendered for {target}, built on {CLUSTER}")
+    check("@sha256:" in meta["image"] and meta["image"].startswith("localhost:5000/"), "the same digest, pulled through the slot's mirror")
+    wait(f"{app} to be Available on {target}", lambda: "True" in nested(slot, "k0s", "kubectl", "-n", app, "get", "deploy", app, "-o",
+         "jsonpath={.status.conditions[?(@.type=='Available')].status}", check=False) or
+         nested(slot, "k0s", "kubectl", "-n", app, "get", "httpscaledobject", "-o", "name", check=False).strip(), timeout=900, every=20)
+    ip = nested(slot, "k0s", "kubectl", "-n", "keda", "get", "svc", "keda-add-ons-http-interceptor-proxy", "-o", "jsonpath={.spec.clusterIP}")
+    host = meta["hosts"][0]
+    body = wait(f"{host} through {target}'s interceptor", lambda: (lambda o: o if "t1" in o else None)(
+        nested(slot, "wget", "-q", "-T", "30", "-O-", "--header", f"Host: {host}", f"http://{ip}:8080/", check=False)), timeout=600, every=15)
+    check("t1" in body, f"{app} answers on {target} (woken from zero by its interceptor)")
+    unenroll(app)
 
 
 def raw_state(path):
