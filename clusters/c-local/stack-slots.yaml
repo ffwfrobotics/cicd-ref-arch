@@ -9,3 +9,6 @@ slots:
 # the digests built here run there unchanged, and nothing is copied.
 registryMirrors:
 - {host: "localhost:5000", endpoint: "http://172.17.0.6:5000"}
+# The forge's SSH host key (public), for the deploy keys stack clusters read private repos with. Kept here so
+# CI runners, which can't reach the forge's SSH port, never scan it. Refresh with: ssh-keyscan -p 42222 forge.goblincorps.com
+forgeKnownHosts: "[forge.goblincorps.com]:42222 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC0tRM8ZcaNrhR4FYi7cMdwQhqHOd4JQRRwgyRISoxOS12vY+2Ani3kS/AXeTPBJL/g4LxqXhd2eF9j6180/499Mun4zRNLlB/439eqsyMypZ3ElpOy0Y9h4RG1mv1APUfWjwzdqdVfLedd6lJpz2P6l1qtd8xq/20csYnYMQsESZKTdVgELLnXrvKpZiI5wUWD8i0XwVv5ozwLv6vDqIpPdgnESkasct9Jtbj+H1pfJdJ+YgcEhWC5kzBNdnsHmAK8vX9/tqWHnFXWsc1em3jDNgNqllHyWzkjq/IKWsXybDQkYOlT0GUeTBZVqodBlaTkBFI9wSYivdV1gzOGroybW35VXiHnfBj5WbHAa7UpeM6u1sEo/VYVJ6abiyP25v6BHiiN3POShn65e8Ry5XEJX8fzIHIRI/gf4YsxQcdt9Cs9wgj9p8K7sxS3J6hi1SppdGkyq4sNH9hyhm2ceh7xv3Y/JDQVIraB+lcZo0FWEfR1ChzN1QJzR1wzGtVQJSMvS4PTn5UGHDAuCByxNhc6qD4L21UeNTObDXObiD70nP9jJwWn+IX+/3sviHSAmrG/6PL6vKmCjxGHvtXQGPdm0w8+FtEcPtrdEJ6wPgSBv22CXvHT/QWmhMxuzNbAE4cLaDm+vQCrBw8f61pNHqH3YXa3FVq5FcENVzyNCfXNpw=="

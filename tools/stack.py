@@ -279,13 +279,20 @@ FORGE_SSH = os.environ.get("FORGE_SSH", "ssh://git@forge.goblincorps.com:42222")
 
 
 def deploy_key(a, secret_name: str, repo: str, token: str) -> tuple[dict, dict]:
-    """A read-only deploy key for one repo and one run: (the Secret for Flux, {repo, id} to delete at down)."""
-    out = subprocess.run(["flux", "create", "secret", "git", secret_name, "--namespace", "flux-system", "--export",
-                          "--url", f"{FORGE_SSH}/{repo}.git", "--ssh-key-algorithm", "ed25519"],
-                         capture_output=True, text=True, check=True).stdout
-    sec = yaml.safe_load(out)
-    data = sec.get("stringData") or {k: __import__("base64").b64decode(v).decode() for k, v in (sec.get("data") or {}).items()}
-    body = json.dumps({"title": f"stack {a.name} run {a.run}", "key": data["identity.pub"].strip(), "read_only": True}).encode()
+    """A read-only deploy key for one repo and one run: (the Secret for Flux, {repo, id} to delete at down).
+    The key is made with openssl (an ed25519 PKCS#8 key, which Flux's SSH library reads); the forge's host key
+    comes from the platform's config: CI runners can't reach the forge's SSH port to scan it."""
+    import base64
+    import struct
+    pem = subprocess.run(["openssl", "genpkey", "-algorithm", "ed25519"], capture_output=True, text=True, check=True).stdout
+    der = subprocess.run(["openssl", "pkey", "-pubout", "-outform", "DER"], input=pem.encode(), capture_output=True, check=True).stdout
+    wire = lambda b: struct.pack(">I", len(b)) + b                                  # noqa: E731
+    pub = "ssh-ed25519 " + base64.b64encode(wire(b"ssh-ed25519") + wire(der[-32:])).decode()
+    if not a.known_hosts:
+        raise RuntimeError("no forgeKnownHosts in the slots config: a deploy key can't be used without the forge's host key")
+    sec = {"apiVersion": "v1", "kind": "Secret", "metadata": {"name": secret_name, "namespace": "flux-system"},
+           "stringData": {"identity": pem, "identity.pub": pub, "known_hosts": a.known_hosts}}
+    body = json.dumps({"title": f"stack {a.name} run {a.run}", "key": pub, "read_only": True}).encode()
     req = urllib.request.Request(f"{a.server.rstrip('/')}/api/v1/repos/{repo}/keys", data=body, method="POST",
                                  headers={"Authorization": f"token {token}", "Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=30) as r:
@@ -468,6 +475,7 @@ def main():
     a = ap.parse_args()
     a.deploy_keys = []
     slots = {s.name: s for s in load_slots(Path(a.root), a.cluster)}
+    a.known_hosts = (yaml.safe_load((Path(a.root) / "clusters" / a.cluster / "stack-slots.yaml").read_text()) or {}).get("forgeKnownHosts", "")
     prov = PROVIDERS[a.provider](port_forward=a.port_forward)
     rec = {"stack": a.name, "run": a.run, "provider": f"{prov.name}@{prov.version}", "isolation": prov.isolation,
            "capabilities": sorted(prov.capabilities), "steps": {}}
