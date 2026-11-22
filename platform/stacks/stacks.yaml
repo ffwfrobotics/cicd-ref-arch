@@ -2,8 +2,8 @@
 # a free slot, checks it and stands it down. There are two slots: that is the capacity budget, and the
 # only namespaces where privileged pods may run for CI.
 #
-# The ServiceAccount cicd-stack/runner can manage pods (exec, port-forward), Services and ConfigMaps in
-# the slots, and nothing else: it can't create namespaces, read Secrets elsewhere, or touch app
+# The ServiceAccount cicd-stack/runner controls the slots (pods with exec and port-forward, Services,
+# ConfigMaps, and what the vcluster provider needs: workloads, Secrets, Roles), and nothing else: it can't create namespaces, read Secrets elsewhere, or touch app
 # environments. The pipeline gets its token as the Actions secret CICD_STACK_KUBECONFIG of the
 # platform repo, never on the runner pods. Rotate: delete the Secret runner-token (Flux recreates it),
 # then update the Actions secret.
@@ -39,6 +39,18 @@ rules:
 - apiGroups: [""]
   resources: [pods/log, events]
   verbs: [get, list, watch]
+# the vcluster provider (platform/stacks/providers): its control plane is a Deployment with its own
+# ServiceAccount, Secret and Role in the slot. The slots are throwaway sandboxes, so the runner may
+# control them fully, Roles included (bind, escalate): nothing outside the slots.
+- apiGroups: [""]
+  resources: [serviceaccounts, secrets, endpoints, persistentvolumeclaims]
+  verbs: [get, list, watch, create, update, patch, delete]
+- apiGroups: [apps]
+  resources: [deployments, statefulsets, replicasets]
+  verbs: [get, list, watch, create, update, patch, delete]
+- apiGroups: [rbac.authorization.k8s.io]
+  resources: [roles, rolebindings]
+  verbs: [get, list, watch, create, update, patch, delete, bind, escalate]
 ---
 apiVersion: v1
 kind: Namespace

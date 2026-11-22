@@ -70,3 +70,21 @@ class Config(unittest.TestCase):
     def test_smoke_not_exercised_without_the_capability(self):
         h = stack.ClusterHandle("x", "https://a", "", frozenset({"api"}), "none", "t@1")
         self.assertEqual(stack.smoke(h, "true", ["api", "nodes"])["result"], "not-exercised")
+
+
+class VClusterProvider(unittest.TestCase):
+    def test_template_is_namespaced_and_unprivileged(self):
+        s = stack.load_slots(REPO, "c-local")[0]
+        req = stack.ClusterRequest(slot=s, name="x", run="1", fleet_ref="o/r@x:cluster")
+        docs = json.loads(stack.VCluster().manifests(req))["items"]
+        self.assertTrue(docs)
+        self.assertFalse([d["kind"] for d in docs if d["kind"].startswith("Cluster")])
+        self.assertFalse([d for d in docs if d["kind"] == "PersistentVolumeClaim"])
+        for d in docs:
+            self.assertEqual(d["metadata"].get("namespace", s.name), s.name)
+        text = json.dumps(docs)
+        self.assertNotIn('"privileged": true', text)
+        cfg = next(d for d in docs if d["kind"] == "Secret" and d["metadata"]["name"] == "vc-config-vc")
+        self.assertIn(f"vc.{s.name}.svc.cluster.local", cfg["stringData"]["config.yaml"])
+        self.assertNotIn("kind: Secret", (REPO / "platform/stacks/providers/vcluster-0.38.0.yaml").read_text())
+        self.assertEqual(stack.VCluster.capabilities, frozenset({"api"}))

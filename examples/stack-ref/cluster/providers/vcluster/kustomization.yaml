@@ -1,0 +1,4 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# what vcluster runs: the base, unchanged (its checks needing nodes, cni or csi are not exercised there)
+resources: [../../base]

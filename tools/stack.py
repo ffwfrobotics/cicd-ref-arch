@@ -12,6 +12,8 @@ bootstrap, checks, evidence) uses only the handle's kubeconfig. Providers:
             capabilities api, nodes, cni. Threat model: the node is privileged in the host cluster;
             its private cgroup namespace keeps the nested kubelet away from the host's pods (it
             once tried to "clean up" c-local's kubepods without it).
+  vcluster  a virtual control plane as unprivileged pods in the slot (platform/stacks/providers,
+            pinned); its workloads run on the host's nodes. Capabilities: api only.
 
 lifecycle = up, bootstrap, check, down (down always, unless --keep). Evidence goes to --out (JSON).
 From a workstation, --port-forward reaches the nested API through kubectl port-forward.
@@ -233,7 +235,71 @@ class K0sPod:
             kubectl("-n", slot.name, "delete", kind, "--ignore-not-found", "--grace-period=5", "--wait=true", timeout=180, check=False)
 
 
-PROVIDERS = {"k0s-pod": K0sPod}
+# ---------------------------------------------------------------- provider vcluster
+
+
+class VCluster:
+    """A virtual control plane (vcluster) as ordinary pods in the slot; its workloads are synced onto the host's
+    nodes. Not privileged. Capabilities: api only (no nodes, CNI or CSI of its own), so checks that need them are
+    recorded as not exercised here. The manifests are pinned in platform/stacks/providers."""
+    name = "vcluster"
+    version = "0.38.0"
+    capabilities = frozenset({"api"})
+    isolation: Isolation = "none"
+    needs_host = False
+
+    def __init__(self, port_forward: bool = False):
+        self.port_forward = port_forward
+        self._pf = None
+        self.template = ROOT / "platform" / "stacks" / "providers" / f"vcluster-{self.version}.yaml"
+
+    def manifests(self, req: ClusterRequest) -> str:
+        """The pinned template for this slot (SLOTNS replaced), with the config Secret made from its plain file: no
+        Secret manifest is kept in git."""
+        docs = [d for d in yaml.safe_load_all(self.template.read_text().replace("SLOTNS", req.slot.name)) if d]
+        cfg = self.template.with_name(f"vcluster-{self.version}-config.yaml").read_text().replace("SLOTNS", req.slot.name)
+        docs.append({"apiVersion": "v1", "kind": "Secret", "type": "Opaque",
+                     "metadata": {"name": "vc-config-vc", "namespace": req.slot.name, "labels": {"app": "vcluster", "release": "vc"}},
+                     "stringData": {"config.yaml": cfg}})
+        return json.dumps({"apiVersion": "v1", "kind": "List", "items": docs})
+
+    def up(self, req: ClusterRequest) -> ClusterHandle:
+        s = req.slot
+        kubectl("-n", s.name, "apply", "-f", "-", input=self.manifests(req))
+        wait("the vcluster control plane", lambda: kubectl("-n", s.name, "get", "deploy", "vc", "-o",
+                                                           "jsonpath={.status.readyReplicas}").strip() == "1", 600)
+        raw = wait("its kubeconfig", lambda: kubectl("-n", s.name, "get", "secret", "vc-vc", "-o", "jsonpath={.data.config}").strip(), 300)[0]
+        kc = yaml.safe_load(__import__("base64").b64decode(raw))
+        endpoint = f"https://vc.{s.name}.svc.cluster.local:443"
+        if self.port_forward:
+            with socket.socket() as so:
+                so.bind(("127.0.0.1", 0))
+                port = so.getsockname()[1]
+            self._pf = subprocess.Popen(["kubectl", "-n", s.name, "port-forward", "svc/vc", f"{port}:443"],
+                                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            time.sleep(2)
+            endpoint = f"https://127.0.0.1:{port}"
+        for c in kc["clusters"]:
+            c["cluster"]["server"] = endpoint
+        return ClusterHandle(kubeconfig=yaml.safe_dump(kc), api_endpoint=endpoint, registry=req.registry,
+                             capabilities=self.capabilities, isolation=self.isolation, provider=f"{self.name}@{self.version}")
+
+    def ready(self, h: ClusterHandle) -> dict:
+        k = HandleFile(h)
+        v = json.loads(k("version", "-o", "json", timeout=30)).get("serverVersion") or {}
+        return {"version": v.get("gitVersion")}
+
+    def down(self, slot: Slot) -> None:
+        if self._pf:
+            self._pf.terminate()
+        kubectl("-n", slot.name, "delete", "-f", "-", "--ignore-not-found", "--wait=true", timeout=300, check=False,
+                input=self.manifests(ClusterRequest(slot=slot, name="", run="", fleet_ref="")))
+        # what it synced onto the host
+        kubectl("-n", slot.name, "delete", "pods,services,configmaps,secrets,endpoints,serviceaccounts", "-l",
+                "vcluster.loft.sh/managed-by=vc", "--ignore-not-found", "--wait=true", timeout=300, check=False)
+
+
+PROVIDERS = {"k0s-pod": K0sPod, "vcluster": VCluster}
 
 
 # ---------------------------------------------------------------- after up: only the handle

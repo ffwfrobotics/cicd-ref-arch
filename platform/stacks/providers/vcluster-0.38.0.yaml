@@ -1,0 +1,347 @@
+# vcluster 0.38.0 for the stack provider vcluster (tools/stack.py), rendered by
+#   helm template vc loft/vcluster --version 0.38.0 --namespace SLOTNS -f platform/stacks/providers/vcluster-values.yaml
+# SLOTNS is replaced with the slot's namespace when it is applied. Namespaced objects only (no ClusterRole, no PVC).
+# Source: vcluster/templates/serviceaccount.yaml
+# Source: vcluster/templates/workload-serviceaccount.yaml
+# Source: vcluster/templates/config-secret.yaml
+# Source: vcluster/templates/role.yaml
+# Source: vcluster/templates/rolebinding.yaml
+# Source: vcluster/templates/service.yaml
+# Source: vcluster/templates/statefulset.yaml
+# The chart's Secret vc-config-vc is made at apply time from vcluster-0.38.0-config.yaml.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vc-vc
+  namespace: SLOTNS
+  labels:
+    app: vcluster
+    chart: vcluster-0.38.0
+    release: vc
+    heritage: Helm
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vc-workload-vc
+  namespace: SLOTNS
+  labels:
+    app: vcluster
+    chart: vcluster-0.38.0
+    release: vc
+    heritage: Helm
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: vc-vc
+  namespace: SLOTNS
+  labels:
+    app: vcluster
+    chart: vcluster-0.38.0
+    release: vc
+    heritage: Helm
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - configmaps
+  - secrets
+  - services
+  - pods
+  - pods/attach
+  - pods/portforward
+  - pods/exec
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - delete
+  - patch
+  - update
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ''
+  resources:
+  - pods/status
+  - pods/ephemeralcontainers
+  verbs:
+  - patch
+  - update
+- apiGroups:
+  - ''
+  resources:
+  - pods/resize
+  verbs:
+  - patch
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  - replicasets
+  - deployments
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+  - update
+- apiGroups:
+  - ''
+  resources:
+  - endpoints
+  - pods/log
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ''
+  resources:
+  - events
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - events.k8s.io
+  resources:
+  - events
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ''
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - delete
+  - patch
+  - update
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - create
+  - list
+  - get
+  - delete
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - patch
+  - update
+  - get
+  - list
+  - watch
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshots
+  verbs:
+  - create
+  - delete
+  - patch
+  - update
+  - get
+  - list
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: vc-vc
+  namespace: SLOTNS
+  labels:
+    app: vcluster
+    chart: vcluster-0.38.0
+    release: vc
+    heritage: Helm
+subjects:
+- kind: ServiceAccount
+  name: vc-vc
+  namespace: SLOTNS
+roleRef:
+  kind: Role
+  name: vc-vc
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vc
+  namespace: SLOTNS
+  labels:
+    app: vcluster
+    chart: vcluster-0.38.0
+    release: vc
+    heritage: Helm
+    vcluster.loft.sh/service: 'true'
+spec:
+  type: ClusterIP
+  ports:
+  - name: https
+    port: 443
+    targetPort: 8443
+    nodePort: 0
+    protocol: TCP
+  - name: kubelet
+    port: 10250
+    targetPort: 8443
+    nodePort: 0
+    protocol: TCP
+  selector:
+    app: vcluster
+    release: vc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vc
+  namespace: SLOTNS
+  labels:
+    app: vcluster
+    chart: vcluster-0.38.0
+    release: vc
+    heritage: Helm
+spec:
+  selector:
+    matchLabels:
+      app: vcluster
+      release: vc
+  strategy:
+    type: Recreate
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        vClusterConfigHash: 7f78c23f4da571604987f78dfc8b29eefccd74268f878d222c9423966ce32714
+      labels:
+        app: vcluster
+        release: vc
+    spec:
+      terminationGracePeriodSeconds: 15
+      serviceAccountName: vc-vc
+      volumes:
+      - name: helm-cache
+        emptyDir: {}
+      - emptyDir: {}
+        name: binaries
+      - name: tmp
+        emptyDir: {}
+      - name: certs
+        emptyDir: {}
+      - name: vcluster-config
+        secret:
+          secretName: vc-config-vc
+      - name: data
+        emptyDir: {}
+      initContainers:
+      - name: kubernetes
+        image: ghcr.io/loft-sh/kubernetes:v1.36.6
+        volumeMounts:
+        - mountPath: /binaries
+          name: binaries
+        command:
+        - cp
+        args:
+        - -r
+        - /kubernetes/.
+        - /binaries/
+        securityContext: {}
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+          requests:
+            cpu: 40m
+            memory: 64Mi
+      enableServiceLinks: true
+      containers:
+      - name: syncer
+        image: ghcr.io/loft-sh/vcluster-pro:0.38.0
+        imagePullPolicy: null
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 60
+          periodSeconds: 2
+          timeoutSeconds: 3
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8443
+            scheme: HTTPS
+          periodSeconds: 2
+          timeoutSeconds: 3
+          failureThreshold: 60
+        startupProbe:
+          httpGet:
+            path: /readyz
+            port: 8443
+            scheme: HTTPS
+          periodSeconds: 6
+          timeoutSeconds: 3
+          failureThreshold: 300
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsGroup: 0
+          runAsUser: 0
+        resources:
+          limits:
+            ephemeral-storage: 10Gi
+            memory: 4Gi
+          requests:
+            cpu: 200m
+            ephemeral-storage: 1Gi
+            memory: 256Mi
+        env:
+        - name: VCLUSTER_NAME
+          value: vc
+        - name: LOFT_LOG_ENCODING
+          value: console
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: binaries
+          mountPath: /binaries
+        - name: certs
+          mountPath: /pki
+        - name: helm-cache
+          mountPath: /.cache/helm
+        - name: vcluster-config
+          mountPath: /var/lib/vcluster
+        - name: tmp
+          mountPath: /tmp

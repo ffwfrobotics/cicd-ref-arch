@@ -1,0 +1,20 @@
+controlPlane:
+  proxy:
+    extraSANs:
+    - vc.SLOTNS.svc.cluster.local
+    - vc.SLOTNS.svc
+    - localhost
+    - 127.0.0.1
+  statefulSet:
+    persistence:
+      volumeClaim:
+        enabled: false
+rbac:
+  clusterRole:
+    enabled: false
+sync:
+  fromHost:
+    nodes:
+      enabled: false
+telemetry:
+  enabled: false
