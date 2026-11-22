@@ -1,4 +1,4 @@
-"""Fixture repos in the org ffwf-fixtures, made (and reset) from what is written here."""
+"""Fixture repos: developers' repos in ffwf-fixtures, IaC roots in ffwf-iac, made (and reset) from what is written here."""
 from __future__ import annotations
 
 import os
@@ -9,7 +9,8 @@ from pathlib import Path
 
 import run as e2e
 
-ORG = "ffwf-fixtures"
+ORG = "ffwf-fixtures"   # developers' repos: CI/CD only reads them
+IAC = "ffwf-iac"        # IaC roots (monorepos that hold them, direct apps, stacks): CI/CD's own (tenants/_writable.yaml)
 
 # fx-vibe: what a vibe-coded repo looks like from here. A static site with no Dockerfile, no tests,
 # and a deploy/ that would never work (wrong image, no probes, a namespace): wrapping must ignore it.
@@ -24,11 +25,11 @@ VIBE = {
 }
 
 
-def ensure_repo(name: str, private: bool = False) -> str:
-    repo = f"{ORG}/{name}"
+def ensure_repo(name: str, private: bool = False, org: str = ORG) -> str:
+    repo = f"{org}/{name}"
     code, _ = e2e.api("GET", f"/repos/{repo}")
     if code == 404:
-        code, out = e2e.api("POST", f"/orgs/{ORG}/repos", {"name": name, "private": private, "auto_init": False,
+        code, out = e2e.api("POST", f"/orgs/{org}/repos", {"name": name, "private": private, "auto_init": False,
                                                             "default_branch": "main"})
         if code not in (200, 201):
             raise e2e.Fail(f"could not create {repo}: {code} {out}")

@@ -897,6 +897,14 @@ def load_tenants(root: Path) -> dict[str, dict]:
     return out
 
 
+def writable(root: Path, repo: str) -> bool:
+    """May CI/CD write to this repo (tenants/_writable.yaml)? Only its own repos and the IaC repos that
+    wrap apps; a developer's repo is read only, whatever the bot's access to it."""
+    p = root / "tenants" / "_writable.yaml"
+    w = load_yaml(p) if p.exists() else {}
+    return repo.split("/")[0] in (w.get("owners") or []) or repo in (w.get("repos") or [])
+
+
 MODES = ("direct", "wrapped", "monorepo", "prebuilt")
 KINDS = ("App", "Stack")
 UPDATES = ("follow", "pin")
@@ -976,6 +984,8 @@ def bump(root: Path, args) -> str:
     if args.app not in tenants:
         sys.exit(f"{args.app} is not enrolled")
     spec = tenant_spec(tenants[args.app])
+    if not writable(root, spec["repo"]):
+        return f"not bumped: {spec['repo']} is a developer's repo, and CI/CD writes only to its own (tenants/_writable.yaml)"
     src = next((x for x in spec["sources"] if x["repo"] == args.source), None)
     if src is None:
         sys.exit(f"{args.source} is not a source of {args.app}")
@@ -1077,6 +1087,9 @@ def check_images(root: Path, args) -> list[str]:
         except ValueError:
             continue
         if spec["mode"] != "prebuilt" or not approved(t):
+            continue
+        if not writable(root, spec["repo"]):
+            done.append(f"{name}: not updated: {spec['repo']} is a developer's repo (tenants/_writable.yaml)")
             continue
         code, repo = api("GET", args.server, f"/repos/{spec['repo']}", token)
         if code != 200:
@@ -1360,6 +1373,7 @@ def main():
             for k in ("repo", "path", "mode", "kind"):
                 print(f"{k}={spec[k]}")
             print(f"status={spec.get('status', 'approved')}")
+            print(f"writable={'true' if writable(root, spec['repo']) else 'false'}")
             print(f"sources={json.dumps(spec['sources'], separators=(',', ':'))}")
         else:
             print(json.dumps(spec, indent=2))

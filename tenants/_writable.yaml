@@ -1,0 +1,10 @@
+# The repos CI/CD may write to (docs/enrollment.md, "Who writes where"): its own repos and the IaC repos
+# that wrap apps. Every other repo is a developer's: CI/CD reads it and never pushes, comments, posts a
+# status or adds a key there, even when the bot happens to have write on it (a user's grant to the
+# software factory, which shares the bot account, is not a grant to CI/CD).
+owners: [ffwf-iac, ffwfbot]
+repos:
+- ffwf/cicd-ref-arch
+- ffwf/cicd-dashboard
+- ffwf/cicd-compliance
+- ffwf/cicd-factory

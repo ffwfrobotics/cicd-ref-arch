@@ -1,14 +1,21 @@
-# Enrolled by an admin with tools/enroll.py (docs/enroll.md).
+# Wrapped 2026-11-22: built and deployed from ffwf-iac/demo, code from ffwf/cicd-demo-app, which CI/CD only reads (docs/enrollment.md)
 apiVersion: cicd.ffwf.net/v1alpha1
 kind: Tenant
 metadata:
   name: demo
 spec:
+  kind: App
   tenant: ffwf
-  repo: ffwf/cicd-demo-app
+  mode: wrapped
+  repo: ffwf-iac/demo
   path: .
+  sources:
+  - path: src
+    repo: ffwf/cicd-demo-app
+    branch: main
+    update: follow
   clusters:
   - c-local
+  enrolled: '2026-11-19'
   owners:
   - john
-  enrolled: '2026-11-19'

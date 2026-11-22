@@ -39,6 +39,7 @@ jobs:
       path: ${{ steps.app.outputs.path }}
       sha: ${{ steps.route.outputs.sha }}
       sources: ${{ steps.app.outputs.sources }}
+      writable: ${{ steps.app.outputs.writable }}
       dev_branch: ${{ steps.intake.outputs.dev_branch }}
     steps:
     - uses: actions/checkout@v4
@@ -72,16 +73,18 @@ jobs:
       with: {repository: "${{ steps.app.outputs.repo }}", ref: "${{ inputs.sha || inputs.branch }}", path: app, submodules: recursive,
              token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
     # the contract (contract.yaml): fills in cicd.yaml and deploy/ when they're missing, and says
-    # what to fix as commit statuses on the app repo. Never fails; nothing to run stops the run here.
+    # what to fix as commit statuses on the IaC root, when it's CI/CD's own (tenants/_writable.yaml; never
+    # on a developer's repo). Never fails; nothing to run stops the run here.
     - id: intake
       if: inputs.action != 'bump' && steps.app.outputs.env != 'stack'
       env: {APP_NAME: "${{ inputs.app }}", REPO: "${{ steps.app.outputs.repo }}", APP: "app/${{ steps.app.outputs.path }}",
-            ACTION: "${{ inputs.action }}", TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", SERVER: "${{ github.server_url }}"}
+            ACTION: "${{ inputs.action }}", TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", SERVER: "${{ github.server_url }}",
+            WRITABLE: "${{ steps.app.outputs.writable }}"}
       run: |
         dev=$(curl -fsS -H "Authorization: token $TOKEN" "$SERVER/api/v1/repos/$REPO" | jq -r '.default_branch // "main"')
         echo "dev_branch=$dev" >> "$GITHUB_OUTPUT"
         python3 .cicd/tools/intake.py check "$APP" --app "$APP_NAME" --dev-branch "$dev" --fill --out intake.json --github-output
-        if [ "$ACTION" = deploy ]; then
+        if [ "$ACTION" = deploy ] && [ "$WRITABLE" = true ]; then
           FORGEJO_TOKEN="$TOKEN" python3 .cicd/tools/intake.py statuses intake.json --repo "$REPO" --sha "$(git -C app rev-parse HEAD)" \
             --server "$SERVER" --target-url "$SERVER/${{ github.repository }}/actions/runs/${{ github.run_number }}"
         fi
@@ -221,7 +224,7 @@ jobs:
       run: |
         python3 .cicd/tools/runtime.py watch --root .cicd --cluster "$CLUSTER" --app "${{ inputs.app }}" --env-dir "$ENV_DIR" \
           --sha "${{ needs.route.outputs.sha }}" --out runtime.json --github-output
-    - if: always() && steps.watch.outputs.state != ''
+    - if: always() && steps.watch.outputs.state != '' && needs.route.outputs.writable == 'true'
       env: {FORGEJO_TOKEN: "${{ secrets.CICD_BOT_TOKEN }}"}
       run: |
         python3 .cicd/tools/runtime.py statuses runtime.json --repo "${{ needs.route.outputs.repo }}" --sha "${{ needs.route.outputs.sha }}" \
@@ -291,7 +294,7 @@ jobs:
         rm -f "$RUNNER_TEMP/stack.kubeconfig"
         echo "word=$(jq -r .word stack.json)" >> "$GITHUB_OUTPUT"
         echo "rc=$rc" >> "$GITHUB_OUTPUT"
-    - if: always() && steps.run.outputs.word != ''
+    - if: always() && steps.run.outputs.word != '' && needs.route.outputs.writable == 'true'
       env: {TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", REPO: "${{ needs.route.outputs.repo }}", SHA: "${{ steps.run.outputs.sha }}",
             WORD: "${{ steps.run.outputs.word }}"}
       run: |
@@ -299,7 +302,7 @@ jobs:
         jq -n --arg s "$st" --arg d "$WORD" --arg u '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_number }}' \
           '{state: $s, context: "cicd/stack", description: $d, target_url: $u}' \
           | curl -fsS -o /dev/null -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' -d @- \
-            '${{ github.server_url }}'"/api/v1/repos/$REPO/statuses/$SHA"
+            '${{ github.server_url }}'"/api/v1/repos/$REPO/statuses/$SHA" || echo "::warning::could not set the cicd/stack status"
     - if: always() && steps.run.outputs.word != ''
       env: {TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", USER: "${{ vars.CICD_BOT_USER }}", SHA: "${{ steps.run.outputs.sha }}"}
       run: |

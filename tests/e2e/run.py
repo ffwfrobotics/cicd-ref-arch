@@ -5,7 +5,7 @@
 
 Each scenario acts as the bot (pushes, dispatches), waits for what the platform records (pipeline
 runs, envs/<cluster>/<app>/... in the state repo, commit statuses) and asserts states and fields,
-never wording. Exit 0 when every scenario passed. Fixtures live in the org ffwf-fixtures and are
+never wording. Exit 0 when every scenario passed. Developers' repos live in the org ffwf-fixtures, IaC roots in ffwf-iac; both are
 made (and reset) by tests/e2e/fixtures.py.
 """
 from __future__ import annotations
@@ -344,7 +344,7 @@ def v5_monorepo():
     """fx-mono: one repo, two projects (apps/a static, apps/b Python) built from submodules svc-a, svc-b."""
     import fixtures
     (a, sa), (b, sb) = mono_sources()
-    repo = fixtures.ensure_repo("fx-mono")
+    repo = fixtures.ensure_repo("fx-mono", org=fixtures.IAC)
     for app in ("fxm-a", "fxm-b"):
         unenroll(app)
     files = {f"apps/a/{k}": v for k, v in fixtures.iac_files("fxm-a", fixtures.source_dir(fixtures.fill(fixtures.SVC_A, "a1")), "../../svc-a").items()}
@@ -370,8 +370,8 @@ def v6_monorepo_config_repo():
     """fx-mono-cfg: the IaC roots live in a config repo that is itself a submodule; pushes to it bump it."""
     import fixtures
     (a, sa), (b, sb) = mono_sources()
-    cfg = fixtures.ensure_repo("fx-config")
-    repo = fixtures.ensure_repo("fx-mono-cfg")
+    cfg = fixtures.ensure_repo("fx-config", org=fixtures.IAC)
+    repo = fixtures.ensure_repo("fx-mono-cfg", org=fixtures.IAC)
     for app in ("fxc-a", "fxc-b"):
         unenroll(app)
     files = {f"apps/a/{k}": v for k, v in fixtures.iac_files("fxc-a", fixtures.source_dir(fixtures.fill(fixtures.SVC_A, "a1")), "../../../svc-a").items()}
@@ -419,7 +419,7 @@ BROKEN = "- op: replace\n  path: /spec/template/spec/nonsense/0/x\n  value: 1\n"
 def v2_overlays():
     """fx-overlays (direct): dev runs the base, prod the deploy-prod/ overlay; the PR shows it; a broken overlay fails the push."""
     import fixtures
-    app, repo = "fxo", fixtures.ensure_repo("fx-overlays")
+    app, repo = "fxo", fixtures.ensure_repo("fx-overlays", org=fixtures.IAC)
     unenroll(app)
     enroll_record(app, {"repo": repo})
     fixtures.hook(repo)
@@ -520,7 +520,7 @@ def nested(slot, *args, check=True):
 def v8_target():
     """fx-target (direct): dev on c-local; prod on the target c-nested (a kept stack in stack-slot-2), served there."""
     import fixtures
-    app, repo, target, slot = "fxt", fixtures.ensure_repo("fx-target"), "c-nested", "stack-slot-2"
+    app, repo, target, slot = "fxt", fixtures.ensure_repo("fx-target", org=fixtures.IAC), "c-nested", "stack-slot-2"
     nested(slot, "true")
     check(True, f"the target {target}'s node is up in {slot}")
     unenroll(app)

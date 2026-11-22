@@ -74,6 +74,7 @@ class Bump(unittest.TestCase):
         # the platform repo's tenant record
         self.root = self.tmp / "root"
         (self.root / "tenants").mkdir(parents=True)
+        (self.root / "tenants/_writable.yaml").write_text("owners: [ffwf-iac]\n")
         self.update = "follow"
         self.prs = []
         self.real_api = cicd.api
@@ -156,6 +157,15 @@ class Bump(unittest.TestCase):
         self.assertEqual(len(self.prs), 1)
         self.assertEqual(self.gitlink(self.prs[0]["head"]), c)
         self.assertIn(c[:7], self.prs[0]["title"])
+
+    def test_a_developers_iac_root_is_never_written(self):
+        (self.root / "tenants/x.yaml").write_text(yaml.safe_dump({"metadata": {"name": "x"}, "spec": {
+            "tenant": "t", "mode": "monorepo", "repo": "dev/mono", "path": "apps/x",
+            "sources": [{"path": "src", "repo": "o/src"}]}}))
+        calls = []
+        cicd.api = lambda *a, **k: calls.append(a) or (404, "unexpected")
+        self.assertIn("not bumped", self.run_bump("main", self.b))
+        self.assertEqual(calls, [])
 
     def test_unknown_commit_or_source_is_refused(self):
         self.record()

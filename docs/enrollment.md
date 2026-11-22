@@ -6,13 +6,21 @@ Where the IaC root sits is the only difference between the modes. The pipeline d
 
 | Mode | IaC root (`spec.repo`, `spec.path`) | Code | Who controls build, deploy and resources |
 |---|---|---|---|
-| **direct** | the app repo, `.` | the same repo | the app's developers |
+| **direct** | the app repo, `.`: only one of CI/CD's own repos (the platform's `hello`, `cicd-dashboard`, `ffwfbot/intake-sample`) | the same repo | its owners |
 | **wrapped** | `ffwf-iac/<app>`, `.`: a repo the platform bot creates and owns | submodule `src/` → the app repo (imported into this forge) | the platform's owners. Developers get read access, or PRs if allowed |
-| **monorepo** | the monorepo, `apps/<project>` | submodules of the monorepo, or code inline | the monorepo's owners |
-| **monorepo with a config repo** | the monorepo, `<config>/apps/<project>` | sibling submodules of the monorepo | the config repo's owners |
+| **monorepo** | the monorepo, `apps/<project>`: a CI/CD repo holding several apps' IaC roots | submodules of the monorepo | the monorepo's owners |
+| **monorepo with a config repo** | the monorepo, `<config>/apps/<project>`: both CI/CD repos | sibling submodules of the monorepo | the config repo's owners |
 | **prebuilt** | `ffwf-iac/<app>`, `.`: `cicd.yaml` names an existing image (`spec.image`: repository, tag, digest) and the deploy base | none: nothing is built | the platform's owners. The image comes from elsewhere |
 
 `cicd.yaml` says where the code is: `spec.build.context` is relative to the IaC root, for example `src` or `../../services/api`. A source's `path` in the tenant record is its submodule path in the IaC *repo*, so in a monorepo enrolled at `apps/api` the source `services/api` is built with context `../../services/api`. `spec.build.dockerfile` names the IaC root's Dockerfile. The test command runs in the IaC root, so it can test the code in `src/` with tests the owners wrote.
+
+## Who writes where
+
+CI/CD writes only to **its own repos**, listed in `tenants/_writable.yaml`: the IaC org (`ffwf-iac`), the bot's own repos, and the platform, compliance, dashboard and factory repos. That is where bumps, digest updates, commit statuses, webhooks and deploy keys go. A **developer's repo** is read only: CI/CD checks it out to build, test and scan it, and never pushes, comments, posts a status or adds a key there. The developer grants that read access and adds the webhook (the dashboard does both as them when they enroll).
+
+So an IaC root is always one of CI/CD's repos. A developer's repo is enrolled **wrapped**: its code becomes the source `src/` of `ffwf-iac/<app>`. Direct and monorepo enrollment of a developer's repo is refused, and `tools/wrap.py`, `tools/enroll.py` and the dashboard all check the list.
+
+The list is checked where the write happens, not only at enrollment. The bot account may have write on a developer's repo because the developer granted it to the software factory, which shares the account. That grant is not a grant to CI/CD. `tests/test_writes.py` lists every place the platform writes to the forge, and fails when one is added without saying where it writes.
 
 ## The tenant record
 

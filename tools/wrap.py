@@ -164,13 +164,18 @@ def wrap_prebuilt(a, root: Path, token: str, hook_secret: str):
     finally:
         shutil.rmtree(work, ignore_errors=True)
     if a.hook_url:
-        hooks(a.server, token, a.hook_url, hook_secret, [iac])
+        hooks(a.server, token, a.hook_url, hook_secret, [iac], Path(a.root))
     write_tenant(root, a, {"mode": "prebuilt", "repo": iac, "path": ".", "image": {"update": a.update}},
                  f"Prebuilt image {repository}:{tag}, deployed from {iac}")
 
 
-def hooks(server: str, token: str, hook_url: str, secret: str, repos: list[str]):
+def hooks(server: str, token: str, hook_url: str, secret: str, repos: list[str], root: Path = ROOT):
+    """Webhooks on CI/CD's own repos. A developer's repo gets its webhook from the developer (the dashboard
+    adds it as them when they enroll): the bot only reads it."""
     for repo in repos:
+        if not cicd.writable(root, repo):
+            print(f"webhook on {repo}: left to its owner (a developer's repo)")
+            continue
         cfg = {"url": hook_url, "content_type": "json", "secret": secret}
         code, have = cicd.api("GET", server, f"/repos/{repo}/hooks", token)
         same = [h for h in (have if code == 200 else []) if (h.get("config") or {}).get("url") == hook_url]
@@ -277,14 +282,18 @@ def wrap_new(a, root: Path, token: str, hook_secret: str):
     finally:
         shutil.rmtree(work, ignore_errors=True)
     if a.hook_url:
-        hooks(a.server, token, a.hook_url, hook_secret, [iac, a.source])
+        hooks(a.server, token, a.hook_url, hook_secret, [iac, a.source], Path(a.root))
     write_tenant(root, a, {"mode": "wrapped", "repo": iac, "path": ".",
                            "sources": [{"path": "src", "repo": a.source, "branch": branch, "update": a.update}]},
                  f"Wrapped by tools/wrap.py: built and deployed from {iac}, code from {a.source}")
 
 
 def enroll_monorepo(a, root: Path, token: str, hook_secret: str):
-    """A project of a monorepo: the IaC root is a.path in a.repo; its sources are the submodules it builds from."""
+    """A project of a monorepo: the IaC root is a.path in a.repo; its sources are the submodules it builds from.
+    The monorepo holds IaC roots, so it is one of CI/CD's repos (tenants/_writable.yaml); a developer's
+    monorepo is wrapped project by project instead."""
+    if not cicd.writable(root, a.repo):
+        sys.exit(f"{a.repo} is a developer's repo: CI/CD writes only to its own (tenants/_writable.yaml). Wrap it instead (--mode wrapped)")
     code, _ = cicd.api("GET", a.server, f"/repos/{a.repo}", token)
     if code != 200:
         sys.exit(f"cannot read {a.repo}: {code}")
@@ -305,7 +314,7 @@ def enroll_monorepo(a, root: Path, token: str, hook_secret: str):
     sources = monorepo_sources(a.repo, a.path, context, gm, a.update)
     print(f"{a.repo}:{a.path}, context {context}: sources {', '.join(x['path'] + ' ' + x['repo'] for x in sources) or 'none'}")
     if a.hook_url:
-        hooks(a.server, token, a.hook_url, hook_secret, [a.repo] + [x["repo"] for x in sources])
+        hooks(a.server, token, a.hook_url, hook_secret, [a.repo] + [x["repo"] for x in sources], Path(a.root))
     write_tenant(root, a, {"mode": "monorepo", "repo": a.repo, "path": a.path, "sources": sources},
                  f"A project of the monorepo {a.repo} at {a.path}")
 

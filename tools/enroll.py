@@ -9,9 +9,9 @@
 2. adds a push webhook to the app repo: the dashboard turns each push into a run of this repo's
    pipeline (.forgejo/workflows/pipeline.yaml). Without the webhook, the environments workflow
    still starts it within 5 minutes.
-3. removes what the app repo held under the old model, if anything: the workflow
-   .forgejo/workflows/cicd.yaml, the secret CICD_BOT_TOKEN, the variables CICD_BOT_USER and
-   CICD_CLUSTER. The app repo then holds no pipeline and no token.
+
+Direct mode is for CI/CD's own repos only (tenants/_writable.yaml): the IaC root is written to (bumps,
+statuses), and CI/CD never writes to a developer's repo. A developer's repo is wrapped: tools/wrap.py.
 
 Run it again to update the webhook. Developers of the app need write access to its code only.
 Needs Python 3.10+ and PyYAML.
@@ -30,7 +30,6 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-WORKFLOW = ".forgejo/workflows/cicd.yaml"
 
 
 def api(method: str, url: str, token: str, body=None):
@@ -70,6 +69,11 @@ def main():
         sys.exit(f"cannot read {a.repo}: {code} {repo}")
     if not repo.get("permissions", {}).get("admin"):
         sys.exit(f"the token is not an admin of {a.repo}: enrolling adds its webhook")
+    sys.path.insert(0, str(ROOT / "tools"))
+    import cicd
+    if not cicd.writable(ROOT, a.repo):
+        sys.exit(f"{a.repo} is a developer's repo: direct mode is for CI/CD's own repos (tenants/_writable.yaml). "
+                 f"Wrap it: tools/wrap.py --app {a.app} --source {a.repo}")
 
     # 1. the tenant record
     tenant = {"apiVersion": "cicd.ffwf.net/v1alpha1", "kind": "Tenant", "metadata": {"name": a.app},
@@ -99,24 +103,6 @@ def main():
             sys.exit(out)
     else:
         print("no --hook-url: pushes start the pipeline within 5 minutes (environments workflow)")
-
-    # 3. what the old model kept in the app repo
-    branch = a.branch or repo.get("default_branch") or "main"
-    code, cur = api("GET", f"{base}/contents/{WORKFLOW}?ref={branch}", token)
-    if code == 200:
-        code, out = api("DELETE", f"{base}/contents/{WORKFLOW}", token, {
-            "sha": cur["sha"], "branch": branch,
-            "message": f"cicd: the pipeline now runs in the platform ({a.server}/ffwf/cicd-ref-arch), not here",
-            "author": {"name": "cicd-bot", "email": "cicd-bot@noreply.invalid"},
-            "committer": {"name": "cicd-bot", "email": "cicd-bot@noreply.invalid"}})
-        print(f"removed {WORKFLOW} on {branch}: {code}")
-        if code not in (200, 204):
-            sys.exit(out)
-    code, _ = api("DELETE", f"{base}/actions/secrets/CICD_BOT_TOKEN", token)
-    print(f"secret CICD_BOT_TOKEN: {'removed' if code in (200, 204) else 'none'}")
-    for name in ("CICD_BOT_USER", "CICD_CLUSTER"):
-        code, _ = api("DELETE", f"{base}/actions/variables/{name}", token)
-        print(f"variable {name}: {'removed' if code in (200, 204) else 'none'}")
 
 
 if __name__ == "__main__":

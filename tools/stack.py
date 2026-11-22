@@ -347,7 +347,13 @@ FORGE_SSH = os.environ.get("FORGE_SSH", "ssh://git@forge.goblincorps.com:42222")
 def deploy_key(a, secret_name: str, repo: str, token: str) -> tuple[dict, dict]:
     """A read-only deploy key for one repo and one run: (the Secret for Flux, {repo, id} to delete at down).
     The key is made with openssl (an ed25519 PKCS#8 key, which Flux's SSH library reads); the forge's host key
-    comes from the platform's config: CI runners can't reach the forge's SSH port to scan it."""
+    comes from the platform's config: CI runners can't reach the forge's SSH port to scan it. Only on CI/CD's
+    own repos (tenants/_writable.yaml): adding a key needs admin, and a developer's repo is read only."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import cicd
+    if not cicd.writable(Path(getattr(a, "root", ROOT)), repo):
+        raise RuntimeError(f"{repo} is private and a developer's: CI/CD adds no deploy key there. Make it readable "
+                           "anonymously, or put it in a CI/CD repo (tenants/_writable.yaml)")
     import base64
     import struct
     pem = subprocess.run(["openssl", "genpkey", "-algorithm", "ed25519"], capture_output=True, text=True, check=True).stdout

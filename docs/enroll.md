@@ -35,7 +35,7 @@ Any signed-in user can add an app; an admin approves it. In cicd-dashboard, **Ad
 | Empty | A new empty repo: push to it. |
 
 The dashboard then, in this order (`cicd-dashboard/dashboard/enroll.py`):
-1. **as you:** imports or creates the repo, gives the platform bot write on it (to check it out and post commit statuses), and adds the push webhook;
+1. **as you:** imports or creates the repo, gives the platform bot **read** on it (to check it out; CI/CD never writes to it, docs/enrollment.md "Who writes where"), and adds the push webhook;
 2. **as the platform:** writes `tenants/<app>.yaml` with `status: pending` and `requestedBy: <you>`, and starts the first run.
 
 **Pending** apps get the whole pipeline (contract check, tests, build, scans, self-assessment), but deploy **only to branch environments**: the default branch too, at `<app>-<branch>.<cluster>.<zone>`. There is no dev host and no promotion, and they count toward the tenant's branch limit.
