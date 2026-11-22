@@ -1,0 +1,24 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: dashboard-prod-20261122T042817Z
+app: dashboard
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/dashboard@sha256:822897d03811b2d859f4ad08b959d51797627c5bb1c423c5b3eb80d24613fd75
+commit: d1df0f393c9334d03f94a61b43690c6bce7dbba6
+notBefore: '2026-11-22T04:28:17Z'
+requestedBy: john
+reason: ''
+appliedAt: '2026-11-22T04:31:59Z'
+approval: 'PR #15 merged by john: no second person (requested by john)'
+approvalRecord:
+  requestedBy: john
+  pr: 15
+  author: ffwfbot
+  approvedBy: []
+  mergedBy: john
+  separated: false
+  summary: 'PR #15 merged by john: no second person (requested by john)'
+security: security gate pass (below-threshold 8, suppressed 8); self-assessment 34/40
+  satisfied
