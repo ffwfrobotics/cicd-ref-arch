@@ -1,0 +1,14 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: fxt
+env: dev
+dir: dev
+namespace: fxt-dev
+branch: main
+hosts:
+- fxt-dev.c-local.k.ffwf.net
+image: localhost:5000/fxt@sha256:d8d8ee42c9ecf2a7d448080ac290920eeda9dbcfe96d4deba5087a32fdf383fe
+repo: ffwf-fixtures/fx-target
+commit: a9452ef5dca711c72e16b986079c19f08da69a98
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1033
+renderedAt: '2026-11-22T02:03:57Z'
