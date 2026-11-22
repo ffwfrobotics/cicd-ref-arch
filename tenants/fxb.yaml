@@ -1,4 +1,3 @@
-# Prebuilt image registry.buildkit.svc.cluster.local:5000/fx-prebuilt:stable, deployed from ffwf-iac/fxb (docs/enrollment.md)
 apiVersion: cicd.ffwf.net/v1alpha1
 kind: Tenant
 metadata:
@@ -14,5 +13,5 @@ spec:
   clusters:
   - c-local
   enrolled: '2026-11-22'
-  status: pending
+  status: approved
   requestedBy: cicd-e2e
