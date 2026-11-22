@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: fxo-dev
+labels:
+- pairs:
+    cicd.ffwf.net/app: fxo
+    cicd.ffwf.net/env: dev
+  includeSelectors: false
+resources:
+- namespace.yaml
+- app.yaml
+- platform.yaml
+images:
+- name: app-image
+  newName: localhost:5000/fxo
+  digest: sha256:a3cf9904944ae2a545eb5f6d421cd7352df82d168f1262f3dc03d75102ee6c07

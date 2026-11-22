@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fxo
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  selector:
+    app: fxo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fxo
+spec:
+  selector:
+    matchLabels:
+      app: fxo
+  template:
+    metadata:
+      labels:
+        app: fxo
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - image: app-image
+        name: fxo
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 1
+          tcpSocket:
+            port: http
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            cpu: 10m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      enableServiceLinks: false
+      securityContext:
+        runAsGroup: 101
+        runAsNonRoot: true
+        runAsUser: 101
+        seccompProfile:
+          type: RuntimeDefault
