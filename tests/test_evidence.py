@@ -199,6 +199,43 @@ class Render(unittest.TestCase):
         self.assertEqual(evidence.referenced(self.root), {m["tag"]})
 
 
+    def test_promotion_carries_dev_evidence_and_adds_its_rescan(self):
+        import subprocess
+        app = cicd.load_app(str(REPO / "examples/hello/cicd.yaml"))
+        cl = cicd.load_cluster(self.root, "c-local")
+        dev = cicd.render_env(self.root, app, cl, "dev", None, "localhost:5000/hello@" + DIGEST, "", {"commit": "abc"},
+                              app_config_text=(REPO / "examples/hello/cicd.yaml").read_text(), security_dir=self.sec)
+        dev_tag = json.loads((dev / "evidence/evidence.json").read_text())["tag"]
+        subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        git = ["git", "-C", str(self.root), "-c", "user.name=t", "-c", "user.email=t@t"]
+
+        class A:
+            app, cluster, source, to, requested_by, reason, not_before = "hello", "c-local", "dev", "prod", "a", "", None
+        cicd.request_promotion(self.root, A)
+        self.assertEqual(evidence.referenced(self.root), {dev_tag})      # the pending promotion names dev's version
+        subprocess.run(git + ["add", "-A"], check=True)
+        subprocess.run(git + ["commit", "-qm", "promote"], check=True)
+
+        def rescan(root, d, promo, cl):     # what security_of leaves: a fresh image scan in the promotion's evidence/
+            (d / "evidence" / "security.json").write_text('{"gate": {"status": "pass"}, "prod": true}')
+            return True, "security gate pass"
+
+        class B:
+            cluster = "c-local"
+        with mock.patch.object(cicd, "security_of", rescan), \
+                mock.patch.dict(os.environ, {"FORGEJO_API": "http://127.0.0.1:9/api/v1/repos/x/y"}):
+            self.assertEqual(cicd.apply_due(self.root, B), (1, 0))
+        prod = self.root / "envs/c-local/hello/prod/evidence"
+        m = json.loads((prod / "evidence.json").read_text())
+        self.assertTrue(m["tag"].startswith("c-local/hello/prod/"))
+        self.assertEqual(sorted(p.name for p in prod.iterdir()), ["approval.json", "evidence.json"])
+        self.assertIn("grype.json", m["files"])                                    # carried from dev
+        self.assertEqual(self.forge.download(m["files"]["security.json"]["url"]),
+                         b'{"gate": {"status": "pass"}, "prod": true}')            # the promotion's own re-scan
+        done = next((self.root / "promotions/done").glob("*/evidence"))
+        self.assertEqual(json.loads((done / "evidence.json").read_text())["tag"], m["tag"])
+        self.assertFalse((done / "security.json").exists())
+
 class Backfill(unittest.TestCase):
     def test_applied_promotions_keep_checksums_only(self):
         root = Path(tempfile.mkdtemp())
