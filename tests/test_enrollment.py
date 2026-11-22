@@ -92,8 +92,13 @@ class Bump(unittest.TestCase):
             sha = path.rsplit("/", 1)[1]
             return (200, {}) if sha in (self.a, self.b) else (404, "no")
         if method == "POST" and path == "/repos/ffwf-iac/x/pulls":
-            self.prs.append(body)
+            self.prs.append(dict(body))
             return 201, {"number": len(self.prs)}
+        if method == "GET" and path.startswith("/repos/ffwf-iac/x/pulls?"):
+            return 200, [{"number": i + 1, "head": {"ref": p["head"]}, "base": {"ref": p["base"]}} for i, p in enumerate(self.prs)]
+        if method == "PATCH" and path.startswith("/repos/ffwf-iac/x/pulls/"):
+            self.prs[int(path.rsplit("/", 1)[1]) - 1].update(body)
+            return 200, {}
         return 404, "unexpected"
 
     def record(self):
@@ -135,6 +140,22 @@ class Bump(unittest.TestCase):
         self.assertEqual(self.gitlink("main"), self.a)
         self.assertEqual(self.prs[0]["base"], "main")
         self.assertEqual(self.gitlink(self.prs[0]["head"]), self.b)
+
+    def test_pin_coalesces_into_one_pr(self):
+        self.update = "pin"
+        self.record()
+        (self.src / "c").write_text("c")
+        git(self.src, "add", "c")
+        git(self.src, "commit", "-qm", "C")
+        c = git(self.src, "rev-parse", "HEAD")
+        real = self.api
+        self.api = lambda m, srv, path, tok, body=None: (200, {}) if path == f"/repos/o/src/git/commits/{c}" else real(m, srv, path, tok, body)
+        cicd.api = self.api
+        self.run_bump("main", self.b)
+        self.run_bump("main", c)
+        self.assertEqual(len(self.prs), 1)
+        self.assertEqual(self.gitlink(self.prs[0]["head"]), c)
+        self.assertIn(c[:7], self.prs[0]["title"])
 
     def test_unknown_commit_or_source_is_refused(self):
         self.record()
@@ -210,3 +231,53 @@ class Monorepo(unittest.TestCase):
         self.assertEqual([x["path"] for x in inline], ["svc-a"])
         cfg = wrap.monorepo_sources("ffwf-fixtures/fx-mono", "config/apps/a", "../../../svc-a", gm, "pin")
         self.assertEqual([(x["path"], x["update"]) for x in cfg], [("config", "pin"), ("svc-a", "pin")])
+
+
+class Drift(unittest.TestCase):
+    def test_source_deploy_changes_warn(self):
+        import intake  # noqa: PLC0415
+        import wrap    # noqa: PLC0415
+        work = Path(tempfile.mkdtemp())
+        (work / "src/deploy").mkdir(parents=True)
+        (work / "src/index.html").write_text("x")
+        (work / "src/deploy/deployment.yaml").write_text("replicas: 5\n")
+        wrap.generate(work, "w", "o/w", wrap.detect(work / "src"), "follow")
+        got = []
+        put = lambda cid, state, detail="", file=None, line=None: got.append((cid, state, detail))
+        intake.drift_check(work, put)
+        self.assertEqual(got[-1][:2], ("source-drift", "ok"))
+        (work / "src/deploy/deployment.yaml").write_text("replicas: 9\n")
+        (work / "src/cicd.yaml").write_text("kind: App\n")
+        intake.drift_check(work, put)
+        self.assertEqual(got[-1][1], "warn")
+        self.assertIn("src/deploy/deployment.yaml", got[-1][2])
+        self.assertIn("src/cicd.yaml", got[-1][2])
+
+
+class Prebuilt(unittest.TestCase):
+    def test_spec(self):
+        s = cicd.tenant_spec(tenant(mode="prebuilt"))
+        self.assertEqual(s["image"], {"update": "follow"})
+        with self.assertRaises(ValueError):
+            cicd.tenant_spec(tenant(mode="prebuilt", sources=[{"path": "src", "repo": "o/s"}]))
+
+    def test_set_digest_keeps_the_rest(self):
+        block = "# keep me\nspec:\n  image:\n    repository: r/x\n    tag: '1'\n    digest: sha256:aaa\n  service: {port: 80}\n"
+        out = cicd.set_image_digest(block, "sha256:bbb")
+        self.assertIn("# keep me", out)
+        self.assertEqual(yaml.safe_load(out)["spec"]["image"]["digest"], "sha256:bbb")
+        flow = "spec:\n  image: {repository: r/x, tag: '1', digest: sha256:aaa}\n"
+        self.assertEqual(yaml.safe_load(cicd.set_image_digest(flow, "sha256:ccc"))["spec"]["image"]["digest"], "sha256:ccc")
+
+    def test_generated_and_intake(self):
+        import intake  # noqa: PLC0415
+        import wrap    # noqa: PLC0415
+        work = Path(tempfile.mkdtemp())
+        wrap.generate_prebuilt(work, "pb", "reg/pb", "1.0", {"digest": "sha256:" + "d" * 64, "port": 8080, "run_as": 101}, "pin")
+        cfg = yaml.safe_load((work / "cicd.yaml").read_text())
+        self.assertNotIn("build", cfg["spec"])
+        self.assertEqual(cfg["spec"]["image"]["tag"], "1.0")
+        results, _ = intake.check(work, "pb", "main", False)
+        by = {r["check"]: r["state"] for r in results} if results and "check" in results[0] else {r["id"]: r["state"] for r in results}
+        self.assertEqual((by["dockerfile"], by["base-pinned"]), ("ok", "ok"))
+        self.assertTrue(intake.runnable(results))

@@ -32,6 +32,7 @@ The `intake` step (`tools/intake.py`) checks each pushed commit before anything 
 | `tests` | 1 | spec.test.run is set | warn. No test command: set spec.test.run in cicd.yaml |
 | `deploy-base` | 2 | the deploy path holds a kustomization.yaml | assumed: default used. No deploy base: one Deployment and Service generated. Commit them (in the run log) to change them |
 | `no-namespace` | 2 | no metadata.namespace in the base | warn. Remove metadata.namespace: each environment sets its own |
+| `source-drift` | 2 | wrapped: the source's own deploy/, cicd.yaml and Dockerfile are as they were when it was wrapped | warn. The source changed files the IaC root owns (they are ignored): check whether the IaC root needs the change, then refresh .wrap/source-files.json |
 | `overlays` | 2 | each deploy-<env>/ overlay builds, passes the same checks as the base, and changes only what spec.overlays.allow lists | warn. Fix the overlay named: it is what that environment would run (an overlay that doesn't build stops the run) |
 | `app-image` | 3 | a container's image is `app-image` | warn. Set the app container's image to app-image: the pipeline swaps in what it built |
 | `no-replicas` | 4 | the workload sets no spec.replicas | warn. Remove spec.replicas: KEDA sets the count |

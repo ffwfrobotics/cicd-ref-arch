@@ -10,6 +10,7 @@ Where the IaC root sits is the only difference between the modes. The pipeline d
 | **wrapped** | `ffwf-iac/<app>`, `.`: a repo the platform bot creates and owns | submodule `src/` → the app repo (imported into this forge) | the platform's owners. Developers get read access, or PRs if allowed |
 | **monorepo** | the monorepo, `apps/<project>` | submodules of the monorepo, or code inline | the monorepo's owners |
 | **monorepo with a config repo** | the monorepo, `<config>/apps/<project>` | sibling submodules of the monorepo | the config repo's owners |
+| **prebuilt** | `ffwf-iac/<app>`, `.`: `cicd.yaml` names an existing image (`spec.image`: repository, tag, digest) and the deploy base | none: nothing is built | the platform's owners. The image comes from elsewhere |
 
 `cicd.yaml` says where the code is: `spec.build.context` is relative to the IaC root, for example `src` or `../../services/api`. A source's `path` in the tenant record is its submodule path in the IaC *repo*, so in a monorepo enrolled at `apps/api` the source `services/api` is built with context `../../services/api`. `spec.build.dockerfile` names the IaC root's Dockerfile. The test command runs in the IaC root, so it can test the code in `src/` with tests the owners wrote.
 
@@ -47,6 +48,18 @@ A push to a source repo reaches the dashboard by its webhook. The dashboard disp
 Each bump commit carries trailers: `Source-Repo:`, `Source-Commit:` and `Requested-by:` (the pusher). That commit is an ordinary push to the IaC root, so it builds, deploys and is checked like any other. The environment records which source commit it runs (`cicd-env.yaml`, `sources:`). A deleted source branch removes its `src/<slug>` IaC branch, which removes the branch environment.
 
 The IaC root's own branches build as usual. A change to `deploy/` alone is a deploy of the same source commit with new settings.
+
+## Prebuilt images
+
+A **prebuilt** app has no code to build: its IaC root's `cicd.yaml` names an image by `spec.image.repository`, `tag` and `digest`. The pipeline copies that digest into the cluster's registry, unchanged, so the digest in the evidence is the one that runs. It pulls the image as an OCI archive, then makes the SBOM and runs the scans exactly as for a build. An image built elsewhere gets the same evidence as one built here.
+
+The tenant record says `mode: prebuilt` and `image: {update: follow | pin}`. Every 5 minutes the environments workflow resolves each prebuilt app's tag (`cicd.py check-images`). When the tag points at a new digest, the digest in `cicd.yaml` is updated:
+- **follow:** a commit on the IaC root's dev branch;
+- **pin:** a PR from `bump/image`, one per app, updated while it is open.
+
+The commit carries `Image-Repo`, `Image-Tag`, `Image-Digest` and `Previous-Digest` trailers. That push then deploys like any other.
+
+`tools/wrap.py --mode prebuilt --image <repository>:<tag>` creates the IaC repo. The digest, port and user are read from the image's config (`crane`).
 
 ## What intake does with the source's own files
 

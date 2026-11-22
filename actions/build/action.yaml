@@ -26,7 +26,9 @@ runs:
       b = app["spec"].get("build", {})
       for k, v in {"NAME": app["metadata"]["name"], "PUSH": cl["registry"]["push"], "PULL": cl["registry"]["pull"],
                    "BUILDKIT": cl["buildkit"], "CONTEXT": b.get("context", "."), "DOCKERFILE": b.get("dockerfile", "Dockerfile"),
-                   "DEPLOY": app["spec"].get("deploy", {}).get("path", "deploy")}.items():
+                   "DEPLOY": app["spec"].get("deploy", {}).get("path", "deploy"),
+                   "PREBUILT": (lambda i: f"{i['repository']}@{i['digest']}" if i.get("repository") and i.get("digest") else "")(
+                       app["spec"].get("image") or {})}.items():
           print(f"{k}={shlex.quote(str(v))}")
       PY
       )"
@@ -40,12 +42,21 @@ runs:
         kubeconform -strict -summary -ignore-missing-schemas "$out/app-$e.yaml"
       done
       # one build, two outputs: pushed to the cluster registry, and an OCI tarball for sbom/scan
-      buildctl --addr "$BUILDKIT" build --frontend dockerfile.v0 \
-        --local context="$app/$CONTEXT" --local dockerfile="$app/$(dirname "$DOCKERFILE")" \
-        --opt filename="$(basename "$DOCKERFILE")" --opt build-arg:APP_COMMIT="$sha7" \
-        --output "type=image,name=$PUSH/$NAME:$sha7,push=true,registry.insecure=true" \
-        --output "type=oci,dest=$out/image.oci.tar" \
-        --metadata-file "$out/build-metadata.json"
+      if [ -n "$PREBUILT" ]; then
+        # prebuilt (docs/enrollment.md): the image exists; copy it here by digest (unchanged), and pull it
+        # as an OCI archive so the SBOM and the scans see exactly what runs
+        crane copy --insecure "$PREBUILT" "$PUSH/$NAME:$sha7"
+        rm -rf "$out/oci"; crane pull --insecure --format=oci --platform linux/amd64 "$PREBUILT" "$out/oci"
+        tar -C "$out/oci" -cf "$out/image.oci.tar" .
+        jq -n --arg d "${PREBUILT##*@}" --arg src "$PREBUILT" '{"containerimage.digest": $d, prebuilt: $src}' > "$out/build-metadata.json"
+      else
+        buildctl --addr "$BUILDKIT" build --frontend dockerfile.v0 \
+          --local context="$app/$CONTEXT" --local dockerfile="$app/$(dirname "$DOCKERFILE")" \
+          --opt filename="$(basename "$DOCKERFILE")" --opt build-arg:APP_COMMIT="$sha7" \
+          --output "type=image,name=$PUSH/$NAME:$sha7,push=true,registry.insecure=true" \
+          --output "type=oci,dest=$out/image.oci.tar" \
+          --metadata-file "$out/build-metadata.json"
+      fi
       digest=$(jq -r '."containerimage.digest"' "$out/build-metadata.json")
       case "$digest" in sha256:*) ;; *) echo "no digest in build metadata" >&2; exit 1 ;; esac
       echo "digest=$digest" >> "$GITHUB_OUTPUT"

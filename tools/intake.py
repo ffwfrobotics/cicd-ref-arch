@@ -185,9 +185,19 @@ def check(app_dir: Path, app: str, dev_branch: str, fill: bool) -> tuple[list[di
     b = spec.get("build") or {}
     # the Dockerfile is named from the IaC root, like the build does (actions/build); the context may be elsewhere
     dockerfile = app_dir / (b.get("dockerfile") or "Dockerfile")
-    if b.get("dockerfile") and "/" in b["dockerfile"]:
+    img = spec.get("image") or {}
+    if img:     # prebuilt (docs/enrollment.md): an existing image, pinned by digest, instead of a build
+        if img.get("repository") and str(img.get("digest", "")).startswith("sha256:"):
+            put("dockerfile", "ok", f"prebuilt {img['repository']}@{img['digest'][:19]}", cfg_path)
+            put("base-pinned", "ok", file=cfg_path)
+        else:
+            put("dockerfile", "missing", "spec.image needs repository and digest (sha256:...)", cfg_path)
+        dockerfile = Path("/nonexistent")
+    if b.get("dockerfile") and "/" in b["dockerfile"] and not img:
         dockerfile = app_dir / b["dockerfile"]
-    if dockerfile.is_file():
+    if img:
+        pass
+    elif dockerfile.is_file():
         put("dockerfile", "ok", file=dockerfile)
         lines = dockerfile.read_text(errors="replace").splitlines()
         args = dict(m.groups() for l in lines if (m := re.match(r"\s*ARG\s+(\w+)=(\S+)", l, re.I)))
@@ -259,6 +269,7 @@ def check(app_dir: Path, app: str, dev_branch: str, fill: bool) -> tuple[list[di
     put("requests", "warn" if no_req else "ok", ", ".join(map(str, no_req)), containers[0][0] if no_req else None)
 
     overlay_check(app_dir, deploy, spec, put)
+    drift_check(app_dir, put)
 
     want = spec.get("service") or {}
     svcs = {(d.get("metadata") or {}).get("name"): (p, d) for p, d in docs if d.get("kind") == "Service"}
@@ -304,6 +315,38 @@ def flat(obj, prefix="") -> dict[str, object]:
     else:
         out[prefix] = obj
     return out
+
+
+DRIFT_GLOBS = ("deploy/**/*", "deploy-*/**/*", "cicd.yaml", "Dockerfile", "Containerfile")
+
+
+def source_files(src: Path) -> dict[str, str]:
+    """sha256 of the source's own deploy files: what a wrapped app ignores, and so watches."""
+    import hashlib
+    out = {}
+    for g in DRIFT_GLOBS:
+        for p in sorted(src.glob(g)):
+            if p.is_file():
+                out[str(p.relative_to(src))] = hashlib.sha256(p.read_bytes()).hexdigest()
+    return out
+
+
+def drift_check(app_dir: Path, put):
+    """A wrapped app ignores its source's own deploy/, cicd.yaml and Dockerfile (docs/enrollment.md). When
+    those change after wrapping, say which: the developers may have meant something the IaC root should get."""
+    base = app_dir / ".wrap" / "source-files.json"
+    if not base.is_file():
+        return
+    rec = json.loads(base.read_text())
+    src = app_dir / rec.get("source", "src")
+    now = source_files(src)
+    then = rec.get("files") or {}
+    changed = sorted(p for p in set(now) | set(then) if now.get(p) != then.get(p))
+    if changed:
+        put("source-drift", "warn", ", ".join(f"{rec.get('source', 'src')}/{p}" for p in changed[:6])
+            + (f" and {len(changed) - 6} more" if len(changed) > 6 else ""), base)
+    else:
+        put("source-drift", "ok")
 
 
 def overlay_check(app_dir: Path, deploy: Path, spec: dict, put):

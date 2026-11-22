@@ -856,7 +856,7 @@ def load_tenants(root: Path) -> dict[str, dict]:
     return out
 
 
-MODES = ("direct", "wrapped", "monorepo")
+MODES = ("direct", "wrapped", "monorepo", "prebuilt")
 KINDS = ("App", "Stack")
 UPDATES = ("follow", "pin")
 
@@ -874,8 +874,12 @@ def tenant_spec(t: dict) -> dict:
         raise ValueError(f"{name}: kind must be one of {', '.join(KINDS)}")
     if spec["mode"] not in MODES:
         raise ValueError(f"{name}: mode must be one of {', '.join(MODES)}")
-    if spec["mode"] == "direct" and spec["sources"]:
-        raise ValueError(f"{name}: a direct app has no sources (its code is in its own repo)")
+    if spec["mode"] in ("direct", "prebuilt") and spec["sources"]:
+        raise ValueError(f"{name}: a {spec['mode']} app has no sources")
+    if spec["mode"] == "prebuilt":
+        spec["image"] = {"update": "follow", **(spec.get("image") or {})}
+        if spec["image"]["update"] not in UPDATES:
+            raise ValueError(f"{name}: image update must be follow or pin")
     seen = set()
     for x in spec["sources"]:
         for k in ("path", "repo"):
@@ -988,14 +992,101 @@ def bump(root: Path, args) -> str:
         return f"{target}: {path} -> {args.sha[:7]}"
     if not has_target:         # a pin PR needs its base to exist: the src/<slug> branch starts at dev
         git("push", "-q", "origin", f"origin/{dev}:refs/heads/{target}")
-    head = f"bump/{slug(src['path'], 20)}-{args.sha[:7]}"
+    # one bump PR per source and target branch: later pushes move its head and update it (coalesced)
+    head = f"bump/{slug(src['path'], 20)}" + ("" if target == dev else f"-{slug(target, 30)}")
     git("push", "-q", "-f", "origin", f"HEAD:refs/heads/{head}")
-    code, pr = api("POST", server, f"/repos/{spec['repo']}/pulls", token, {
-        "head": head, "base": target, "title": f"bump {src['path']} to {args.sha[:7]}",
-        "body": "\n".join(msg[2:]) + "\n\nMerging deploys it (docs/enrollment.md, pin)."})
+    title = f"bump {src['path']} to {args.sha[:7]}"
+    body = "\n".join(msg[2:]) + "\n\nMerging deploys it (docs/enrollment.md, pin). Later pushes to the source update this PR."
+    code, prs = api("GET", server, f"/repos/{spec['repo']}/pulls?state=open&limit=50", token)
+    pr = next((p for p in (prs if code == 200 else []) if p["head"]["ref"] == head and p["base"]["ref"] == target), None)
+    if pr:
+        code, out = api("PATCH", server, f"/repos/{spec['repo']}/pulls/{pr['number']}", token, {"title": title, "body": body})
+        if code not in (200, 201):
+            sys.exit(f"could not update bump PR #{pr['number']}: {code} {out}")
+        return f"PR #{pr['number']} updated: {path} -> {args.sha[:7]} into {target}"
+    code, pr = api("POST", server, f"/repos/{spec['repo']}/pulls", token, {"head": head, "base": target, "title": title, "body": body})
     if code not in (200, 201):
         sys.exit(f"could not open the bump PR: {code} {pr}")
     return f"PR #{pr['number']}: {path} -> {args.sha[:7]} into {target}"
+
+
+def set_image_digest(text: str, digest: str) -> str:
+    """cicd.yaml with spec.image.digest replaced, everything else (comments too) as it was."""
+    m = re.search(r"(?m)^(\s*)image:\s*(\{.*\}|$)", text)
+    if not m:
+        raise ValueError("no spec.image in cicd.yaml")
+    if m.group(2):          # flow style: image: {repository: x, tag: y, digest: sha256:...}
+        line = re.sub(r"digest:\s*[\w:]+", f"digest: {digest}", m.group(0))
+        return text[:m.start()] + line + text[m.end():]
+    rest = text[m.end():]
+    n = re.search(r"(?m)^(\s+)digest:\s*\S+", rest)
+    if not n:
+        raise ValueError("spec.image has no digest line")
+    return text[:m.end()] + rest[:n.start()] + f"{n.group(1)}digest: {digest}" + rest[n.end():]
+
+
+def check_images(root: Path, args) -> list[str]:
+    """Prebuilt apps (docs/enrollment.md): when the tag spec.image follows points at a new digest, write it into
+    the IaC root's cicd.yaml: a commit (follow) or a PR (pin, one per app, updated). That push then deploys."""
+    token = os.environ["FORGEJO_TOKEN"]
+    done = []
+    for name, t in sorted(load_tenants(root).items()):
+        try:
+            spec = tenant_spec(t)
+        except ValueError:
+            continue
+        if spec["mode"] != "prebuilt" or not approved(t):
+            continue
+        code, repo = api("GET", args.server, f"/repos/{spec['repo']}", token)
+        if code != 200:
+            done.append(f"{name}: cannot read {spec['repo']} ({code})")
+            continue
+        dev = repo.get("default_branch") or "main"
+        path = os.path.normpath(os.path.join(spec["path"], "cicd.yaml"))
+        code, f = api("GET", args.server, f"/repos/{spec['repo']}/contents/{path}?ref={dev}", token)
+        if code != 200:
+            done.append(f"{name}: no {path}")
+            continue
+        import base64
+        text = base64.b64decode(f["content"]).decode()
+        img = (yaml.safe_load(text).get("spec") or {}).get("image") or {}
+        if not (img.get("repository") and img.get("tag")):
+            continue
+        r = subprocess.run(["crane", "digest", "--insecure", f"{img['repository']}:{img['tag']}"], capture_output=True, text=True)
+        now = r.stdout.strip()
+        if r.returncode != 0 or not now.startswith("sha256:"):
+            done.append(f"{name}: cannot resolve {img['repository']}:{img['tag']}: {r.stderr.strip()[-120:]}")
+            continue
+        if now == img.get("digest"):
+            continue
+        new = set_image_digest(text, now)
+        msg = (f"image {img['tag']} is now {now[:19]}\n\nImage-Repo: {img['repository']}\nImage-Tag: {img['tag']}\n"
+               f"Image-Digest: {now}\nPrevious-Digest: {img.get('digest')}")
+        body = {"content": base64.b64encode(new.encode()).decode(), "message": msg, "sha": f["sha"],
+                "author": {"name": "cicd-bot", "email": "cicd-bot@noreply.invalid"}}
+        if spec["image"]["update"] == "follow":
+            code, out = api("PUT", args.server, f"/repos/{spec['repo']}/contents/{path}", token, {**body, "branch": dev})
+            done.append(f"{name}: {dev} -> {now[:19]}" + ("" if code in (200, 201) else f" failed ({code} {out})"))
+            continue
+        head = "bump/image"
+        code, b = api("GET", args.server, f"/repos/{spec['repo']}/contents/{path}?ref={head}", token)
+        if code == 200:
+            code, out = api("PUT", args.server, f"/repos/{spec['repo']}/contents/{path}", token, {**body, "sha": b["sha"], "branch": head})
+        else:
+            code, out = api("PUT", args.server, f"/repos/{spec['repo']}/contents/{path}", token, {**body, "branch": dev, "new_branch": head})
+        if code not in (200, 201):
+            done.append(f"{name}: could not write {head} ({code} {out})")
+            continue
+        code, prs = api("GET", args.server, f"/repos/{spec['repo']}/pulls?state=open&limit=50", token)
+        pr = next((p for p in (prs if code == 200 else []) if p["head"]["ref"] == head), None)
+        title = f"image {img['tag']} -> {now[:19]}"
+        if pr:
+            api("PATCH", args.server, f"/repos/{spec['repo']}/pulls/{pr['number']}", token, {"title": title, "body": msg})
+            done.append(f"{name}: PR #{pr['number']} updated")
+        else:
+            code, pr = api("POST", args.server, f"/repos/{spec['repo']}/pulls", token, {"head": head, "base": dev, "title": title, "body": msg})
+            done.append(f"{name}: PR #{pr['number'] if code in (200, 201) else '?'} opened")
+    return done
 
 
 def approved(t: dict) -> bool:
@@ -1138,6 +1229,9 @@ def main():
     r.add_argument("--prod-manifests", help="the deploy-prod/ overlay built for this commit: kept as app-prod.yaml for its promotion")
     r.add_argument("--sources", default="", help="JSON list of {path, repo, commit}: the source commits this build is from")
 
+    ci = sub.add_parser("check-images", help="prebuilt apps: follow their image tags (commit or PR the new digest)")
+    ci.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
+
     tn = sub.add_parser("tenant", help="print an enrolled app's normalized tenant spec (JSON), or key=value lines")
     tn.add_argument("app")
     tn.add_argument("--github-output", action="store_true")
@@ -1210,6 +1304,9 @@ def main():
             print("skip")
     elif args.cmd == "manage":
         print(manage(root, args))
+    elif args.cmd == "check-images":
+        for line in check_images(root, args):
+            print(line)
     elif args.cmd == "tenant":
         t = load_tenants(root).get(args.app)
         if t is None:

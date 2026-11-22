@@ -31,6 +31,9 @@ rules:
   - id: no-namespace
     what: no metadata.namespace in the base
     hint: "Remove metadata.namespace: each environment sets its own"
+  - id: source-drift
+    what: "wrapped: the source's own deploy/, cicd.yaml and Dockerfile are as they were when it was wrapped"
+    hint: "The source changed files the IaC root owns (they are ignored): check whether the IaC root needs the change, then refresh .wrap/source-files.json"
   - id: overlays
     what: "each deploy-<env>/ overlay builds, passes the same checks as the base, and changes only what spec.overlays.allow lists"
     hint: "Fix the overlay named: it is what that environment would run (an overlay that doesn't build stops the run)"

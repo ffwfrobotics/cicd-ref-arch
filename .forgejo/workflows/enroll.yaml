@@ -10,7 +10,8 @@ on:
   workflow_dispatch:
     inputs:
       app: {description: "the app's name", required: true}
-      mode: {description: "wrapped | monorepo", required: true}
+      mode: {description: "wrapped | monorepo | prebuilt", required: true}
+      image: {description: "prebuilt: the image to follow, repository:tag", default: ""}
       source: {description: "wrapped: the source repo, owner/name", default: ""}
       repo: {description: "monorepo: the monorepo, owner/name", default: ""}
       path: {description: "monorepo: the project's IaC root in it", default: ""}
@@ -34,19 +35,20 @@ jobs:
         SOURCE: ${{ inputs.source }}
         REPO: ${{ inputs.repo }}
         IPATH: ${{ inputs.path }}
+        IMAGE: ${{ inputs.image }}
         UPDATE: ${{ inputs.update }}
         ACTOR: ${{ inputs.actor }}
         HOOK: ${{ inputs.hook_url }}
       run: |
         set -eu
         [[ "$APP" =~ ^[a-z][a-z0-9-]{1,23}[a-z0-9]$ ]] || { echo "::error::bad app name"; exit 1; }
-        case "$MODE" in wrapped|monorepo) ;; *) echo "::error::mode is wrapped or monorepo"; exit 1 ;; esac
+        case "$MODE" in wrapped|monorepo|prebuilt) ;; *) echo "::error::mode is wrapped, monorepo or prebuilt"; exit 1 ;; esac
         case "$UPDATE" in follow|pin) ;; *) echo "::error::update is follow or pin"; exit 1 ;; esac
         auth="AUTHORIZATION: basic $(printf '%s:%s' "$BOT" "$FORGEJO_TOKEN" | base64 -w0)"
         git config user.name cicd-bot; git config user.email cicd-bot@noreply.invalid
         args=(--app "$APP" --mode "$MODE" --update "$UPDATE" --requested-by "$ACTOR" --root . --server '${{ github.server_url }}')
         [ -n "$HOOK" ] && args+=(--hook-url "$HOOK")
-        if [ "$MODE" = wrapped ]; then args+=(--source "$SOURCE"); else args+=(--repo "$REPO" --path "$IPATH"); fi
+        case "$MODE" in wrapped) args+=(--source "$SOURCE") ;; prebuilt) args+=(--image "$IMAGE") ;; *) args+=(--repo "$REPO" --path "$IPATH") ;; esac
         python3 tools/wrap.py "${args[@]}"
         for attempt in 1 2 3 4 5; do
           git add "tenants/$APP.yaml"

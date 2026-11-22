@@ -51,6 +51,11 @@ jobs:
         done
         # a due promotion that failed its checks turns the run red (after committing anything else)
         [ "$rc" = 0 ] || { echo "::error::a due promotion was refused: see promote.log above"; exit "$rc"; }
+    - name: follow prebuilt images     # a moved tag becomes a commit or a PR in the app's IaC root (docs/enrollment.md)
+      if: always()
+      env:
+        FORGEJO_TOKEN: ${{ secrets.CICD_BOT_TOKEN }}
+      run: python3 tools/cicd.py check-images --server '${{ github.server_url }}'
     - name: dispatch missed pushes
       if: always()
       env:
