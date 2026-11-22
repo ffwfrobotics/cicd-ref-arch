@@ -1,6 +1,6 @@
 {
   "stack": "stack-ref",
-  "run": "1046",
+  "run": "1058",
   "provider": "k0s-pod@1",
   "isolation": "none",
   "capabilities": [
@@ -11,7 +11,7 @@
   "steps": {
     "up": {
       "result": "ok",
-      "seconds": 182,
+      "seconds": 35,
       "api": "https://api.stack-slot-1.svc.cluster.local:6443",
       "nodes": 1,
       "ready": 1,
@@ -20,7 +20,7 @@
     "bootstrap": {
       "result": "ok",
       "repo": "ffwf-iac/stack-ref",
-      "commit": "5c216c1ba456ee49c67728ac68ec2dd4d687a8a5",
+      "commit": "880f9076209f410e482f4a6d0d22283ba5e51e51",
       "path": "cluster/providers/k0s-pod",
       "sources": [
         {
@@ -33,11 +33,11 @@
       "deploy_keys": [
         "ffwf-iac/stack-ref"
       ],
-      "seconds": 88
+      "seconds": 27
     },
     "check": {
       "result": "ready",
-      "seconds": 159,
+      "seconds": 162,
       "kustomizations": [
         {
           "name": "cicd-sources",
@@ -67,7 +67,7 @@
           "name": "stack",
           "ready": true,
           "reason": "ReconciliationSucceeded",
-          "message": "Applied revision: sha1:5c216c1ba456ee49c67728ac68ec2dd4d687a8a5"
+          "message": "Applied revision: sha1:880f9076209f410e482f4a6d0d22283ba5e51e51"
         },
         {
           "name": "traefik",
@@ -110,6 +110,6 @@
     ]
   },
   "word": "ready",
-  "commit": "5c216c1ba456ee49c67728ac68ec2dd4d687a8a5",
-  "runUrl": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1046"
+  "commit": "880f9076209f410e482f4a6d0d22283ba5e51e51",
+  "runUrl": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1058"
 }
