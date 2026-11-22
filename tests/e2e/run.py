@@ -450,6 +450,63 @@ def v2_overlays():
     unenroll(app)
 
 
+def push_image(src, tag):
+    """Put a local docker image into c-local's registry as fx-prebuilt:<tag> (the host side of the registry)."""
+    for cmd in (["docker", "pull", "-q", src], ["docker", "tag", src, f"127.0.0.1:5003/fx-prebuilt:{tag}"],
+                ["docker", "push", "-q", f"127.0.0.1:5003/fx-prebuilt:{tag}"]):
+        subprocess.run(cmd, check=True, capture_output=True)
+    r = subprocess.run(["docker", "inspect", f"127.0.0.1:5003/fx-prebuilt:{tag}", "--format", "{{index .RepoDigests 0}}"],
+                       capture_output=True, text=True, check=True)
+    return r.stdout.strip().rsplit("@", 1)[1]
+
+
+def dispatch_enroll(**inputs):
+    code, out = api("POST", f"/repos/{STATE}/actions/workflows/enroll.yaml/dispatches",
+                    {"ref": "master", "inputs": {k: str(v) for k, v in inputs.items()}})
+    if code not in (200, 201, 204):
+        raise Fail(f"enroll dispatch failed: {code} {out}")
+
+
+def approve(app):
+    def ok(d):
+        p = d / "tenants" / f"{app}.yaml"
+        t = yaml.safe_load(p.read_text())
+        t["spec"]["status"] = "approved"
+        p.write_text(yaml.safe_dump(t, sort_keys=False))
+    platform_change(f"e2e: approve {app}", ok)
+
+
+@scenario
+def vp_prebuilt():
+    """fx-prebuilt (prebuilt, via the enroll workflow): an existing image deploys with an SBOM; a moved tag is followed."""
+    app, iac = "fxb", "ffwf-iac/fxb"
+    unenroll(app, iac)
+    d1 = push_image("docker.io/nginxinc/nginx-unprivileged:1.29-alpine", "stable")
+    ref = "registry.buildkit.svc.cluster.local:5000/fx-prebuilt:stable"      # as the runners see c-local's registry
+    dispatch_enroll(app=app, mode="prebuilt", image=ref, update="follow", actor="cicd-e2e", hook_url=DEV_HOOK)
+    wait("the enroll workflow to write tenants/fxb.yaml", lambda: api("GET", f"/repos/{STATE}/contents/tenants/{app}.yaml")[0] == 200, timeout=600)
+    t = cicd.tenant_spec(yaml.safe_load(raw_state(f"tenants/{app}.yaml")))
+    check(t["mode"] == "prebuilt" and t.get("status") == "pending", "enrolled as prebuilt, pending")
+    code, cfg = api("GET", f"/repos/{iac}/raw/cicd.yaml")
+    spec = yaml.safe_load(cfg)["spec"]
+    check(spec["image"]["digest"] == d1 and "build" not in spec, "the IaC repo pins the image's digest, with no build")
+    approve(app)
+    h1 = iac_head(iac)["sha"]
+    dispatch(app=app, branch="main", sha=h1, action="deploy", actor="cicd-e2e")
+    meta, rt = deployed(app, "dev", h1, iac)
+    check(meta["image"].endswith("@" + d1), "dev runs the same digest")
+    check(rt == "success", "cicd/runtime: running")
+    code, sbom = api("GET", f"/repos/{STATE}/raw/envs/{CLUSTER}/{app}/dev/evidence/sbom.cdx.json")
+    n = len((sbom if isinstance(sbom, dict) else {}).get("components") or [])
+    check(code == 200 and n > 10, f"an SBOM of the prebuilt image is kept ({n} components)")
+    d2 = push_image("docker.io/nginxinc/nginx-unprivileged:1.28-alpine", "stable")
+    check(d2 != d1, "the tag now points at another image")
+    h2 = wait("the bot to follow the tag", lambda: (lambda c: c if c and f"Image-Digest: {d2}" in c["commit"]["message"] else None)(
+        iac_head(iac)), timeout=900, every=20)
+    meta, rt = deployed(app, "dev", h2["sha"], iac)
+    check(meta["image"].endswith("@" + d2) and rt == "success", "dev runs the new digest")
+
+
 def raw_state(path):
     req = __import__("urllib.request").request.Request(f"{SERVER}/api/v1/repos/{STATE}/raw/{path}?ref=master",
                                                        headers={"Authorization": f"token {TOKEN}"})

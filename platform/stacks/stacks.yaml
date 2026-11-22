@@ -2,8 +2,8 @@
 # a free slot, checks it and stands it down. There are two slots: that is the capacity budget, and the
 # only namespaces where privileged pods may run for CI.
 #
-# The ServiceAccount cicd-stack/runner can manage pods (and exec into them) and ConfigMaps in the
-# slots, and nothing else: it can't create namespaces, read Secrets elsewhere, or touch app
+# The ServiceAccount cicd-stack/runner can manage pods (exec, port-forward), Services and ConfigMaps in
+# the slots, and nothing else: it can't create namespaces, read Secrets elsewhere, or touch app
 # environments. The pipeline gets its token as the Actions secret CICD_STACK_KUBECONFIG of the
 # platform repo, never on the runner pods. Rotate: delete the Secret runner-token (Flux recreates it),
 # then update the Actions secret.
@@ -31,10 +31,10 @@ kind: ClusterRole
 metadata: {name: cicd-stack-slot}
 rules:
 - apiGroups: [""]
-  resources: [pods, configmaps]
+  resources: [pods, configmaps, services]
   verbs: [get, list, watch, create, update, patch, delete]
 - apiGroups: [""]
-  resources: [pods/exec]
+  resources: [pods/exec, pods/portforward]
   verbs: [create, get]
 - apiGroups: [""]
   resources: [pods/log, events]

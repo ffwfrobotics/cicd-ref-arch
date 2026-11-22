@@ -1,0 +1,7 @@
+# The stack slots on this cluster (docs/stacks.md), allocated by the platform, never by a provider: each
+# slot's address ranges differ from the host's (10.244.0.0/16 pods, 10.96.0.0/12 services) and from
+# every other slot's, so nested clusters can't collide with the host or with each other by construction.
+# The namespaces and RBAC are platform/stacks; a slot's nested API is the Service `api` in it.
+slots:
+- {name: stack-slot-1, podCIDR: 10.250.0.0/16, serviceCIDR: 10.251.0.0/16, apiPort: 6443}
+- {name: stack-slot-2, podCIDR: 10.252.0.0/16, serviceCIDR: 10.253.0.0/16, apiPort: 6443}
