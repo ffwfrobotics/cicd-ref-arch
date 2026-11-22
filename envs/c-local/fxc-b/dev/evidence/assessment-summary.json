@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "fxc-b",
  "env": "dev",
- "commit": "044de02ecbcb45473cdf8ed096ce15c9f2272c56",
+ "commit": "ac094161a651965b29a454e9b8890e5719798078",
  "image": "localhost:5000/fxc-b@sha256:3f166a6aebc268749d563fe74e99316e10f0f73b6f5b030e4db740680eeb0102",
- "generated": "2026-11-21T23:55:42Z",
+ "generated": "2026-11-22T00:04:03Z",
  "counts": {
   "satisfied": 32,
   "not-satisfied": 8
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 044de02ecbcb, image pinned by digest"
+     "found": "commit ac094161a651, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 044de02ecbcb, image pinned by digest"
+     "found": "commit ac094161a651, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 044de02ecbcb, image pinned by digest"
+     "found": "commit ac094161a651, image pinned by digest"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/196c178b24dff75a/hostexecutor/.cicd/oscal/platform.yaml"
+   "path": "/runner/work/4b767fc8e4e92a7e/hostexecutor/.cicd/oscal/platform.yaml"
   }
  ]
 }
