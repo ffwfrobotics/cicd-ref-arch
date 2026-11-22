@@ -1,0 +1,21 @@
+# What tools/cicd.py and the CI actions need to know about the target c-nested (target.yaml).
+# Flux's copy of the same facts is cicd-vars.yaml (postBuild substitution).
+cluster: c-nested
+zone: k.ffwf.net
+registry:
+  push: registry.buildkit.svc.cluster.local:5000   # BuildKit pushes here (proxy to the node's registry)
+  pull: localhost:5000            # what pods pull from (containerd mirror on the node)
+gateway: {name: edge, namespace: gateway-system, httpsListener: https}
+keda:
+  namespace: keda
+  scaler: keda-add-ons-http-external-scaler.keda:9090
+  interceptor: {service: keda-add-ons-http-interceptor-proxy, port: 8080}
+buildkit: tcp://buildkitd.buildkit.svc.cluster.local:1234
+# The owner's compliance repo: OSCAL content, IT Security's findings (ledger), advisories, releases
+compliance: {repo: ffwf/cicd-compliance, branch: main}
+# Endpoint checks (an IT Security finding like "missing HSTS") connect here, with the app's host
+# name as SNI and Host header: the gateway, as any LAN client reaches it.
+probe: {via: "traefik.gateway-system.svc.cluster.local:443"}
+# The runtime check after each deploy (tools/runtime.py) reads pods, events and logs as this
+# ServiceAccount; every environment binds the ClusterRole to it (platform/runtime).
+runtime: {serviceAccount: cicd-runtime/reader, clusterRole: cicd-runtime-reader}

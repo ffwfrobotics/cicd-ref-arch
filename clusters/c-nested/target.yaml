@@ -1,0 +1,14 @@
+# A deploy target (docs/stacks.md "Targets"): a stack-ref cluster kept up in a c-local stack slot. Apps reach it
+# only through envs/c-nested/ (an environment's cicd.yaml says environments.<env>.cluster: c-nested); its Flux
+# follows that tree. It pulls localhost:5000/... from c-local's registry (the slot's registry mirror), so a
+# digest built on c-local runs here unchanged.
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Target
+metadata: {name: c-nested}
+spec:
+  managedBy: stack/ffwf-iac/stack-ref
+  provider: k0s-pod
+  host: {cluster: c-local, slot: stack-slot-2}
+  isolation: none
+  capabilities: [api, nodes, cni]
+  registry: {pull: "localhost:5000", push: "registry.buildkit.svc.cluster.local:5000"}

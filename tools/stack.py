@@ -49,6 +49,7 @@ class Slot:                 # allocated by the platform, never the provider
     svc_cidr: str
     api_port: int
     dns_name: str
+    mirrors: tuple = ()     # ((host, endpoint), ...): image names this cluster resolves to the host's registry
 
 
 @dataclass(frozen=True)
@@ -88,7 +89,8 @@ class Provider(Protocol):
 
 def load_slots(root: Path, cluster: str) -> list[Slot]:
     d = yaml.safe_load((root / "clusters" / cluster / "stack-slots.yaml").read_text())
-    return [Slot(s["name"], s["podCIDR"], s["serviceCIDR"], int(s.get("apiPort", 6443)), f"api.{s['name']}.svc.cluster.local")
+    mirrors = tuple((m["host"], m["endpoint"]) for m in d.get("registryMirrors") or [])
+    return [Slot(s["name"], s["podCIDR"], s["serviceCIDR"], int(s.get("apiPort", 6443)), f"api.{s['name']}.svc.cluster.local", mirrors)
             for s in d["slots"]]
 
 
@@ -158,8 +160,20 @@ class K0sPod:
     def manifests(self, req: ClusterRequest) -> str:
         s = req.slot
         labels = {"app.kubernetes.io/name": "stack-node", "cicd.ffwf.net/stack": req.name, "cicd.ffwf.net/run": str(req.run)}
-        cm = {"apiVersion": "v1", "kind": "ConfigMap", "metadata": {"name": "node-config", "labels": labels},
-              "data": {"k0s.yaml": self.k0s_config(s, req.k0s_config)}}
+        data = {"k0s.yaml": self.k0s_config(s, req.k0s_config)}
+        if s.mirrors:     # containerd (config v3) reads hosts.toml per registry from config_path
+            data["containerd-mirrors.toml"] = ('version = 3\n[plugins."io.containerd.cri.v1.images".registry]\n'
+                                               '  config_path = "/etc/k0s/certs.d"\n')
+            for i, (host, endpoint) in enumerate(s.mirrors):
+                data[f"hosts-{i}.toml"] = (f'server = "{endpoint}"\n[host."{endpoint}"]\n'
+                                           '  capabilities = ["pull", "resolve"]\n  skip_verify = true\n')
+        cm = {"apiVersion": "v1", "kind": "ConfigMap", "metadata": {"name": "node-config", "labels": labels}, "data": data}
+        # k0s writes into /etc/k0s, so the drop-ins are copied there at start rather than mounted
+        setup = "mkdir -p /etc/k0s/containerd.d && "
+        if s.mirrors:
+            setup += "cp /etc/stack/containerd-mirrors.toml /etc/k0s/containerd.d/ && "
+            for i, (host, _) in enumerate(s.mirrors):
+                setup += f"mkdir -p '/etc/k0s/certs.d/{host}' && cp /etc/stack/hosts-{i}.toml '/etc/k0s/certs.d/{host}/hosts.toml' && "
         svc = {"apiVersion": "v1", "kind": "Service", "metadata": {"name": "api", "labels": labels},
                "spec": {"selector": {"app.kubernetes.io/name": "stack-node"},
                         "ports": [{"name": "api", "port": s.api_port, "targetPort": 6443}]}}
@@ -167,6 +181,7 @@ class K0sPod:
                "spec": {"hostname": f"{req.name}-{req.run}"[:63], "enableServiceLinks": False, "automountServiceAccountToken": False,
                         "containers": [{
                             "name": "k0s", "image": self.image, "imagePullPolicy": "IfNotPresent",
+                            "command": ["/bin/sh", "-c", setup + 'exec /usr/local/bin/stack-node-entry "$@"', "sh"],
                             "args": ["k0s", "controller", "--config=/etc/stack/k0s.yaml", "--enable-worker", "--no-taints",
                                      "--kubelet-extra-args=--eviction-hard=imagefs.available<1Gi,nodefs.available<1Gi,memory.available<100Mi"],
                             "ports": [{"name": "api", "containerPort": 6443}],
@@ -320,6 +335,15 @@ def bootstrap(h: ClusterHandle, a) -> dict:
              {"apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization", "metadata": {"name": "stack", "namespace": "flux-system"},
               "spec": {"interval": "10m", "retryInterval": "20s", "path": f"./{a.path.strip('./')}", "prune": True,
                        "sourceRef": {"kind": "GitRepository", "name": "stack"}}}]
+    if a.serve_target:   # a kept stack as a deploy target (docs/stacks.md "Targets"): its Flux also follows envs/<target>/
+        items += [{"apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository", "metadata": {"name": "platform-envs", "namespace": "flux-system"},
+                   "spec": {"interval": "1m", "url": f"{server}/{a.platform_repo}.git", "ref": {"branch": "master"},
+                            "ignore": f"/*\n!/envs/{a.serve_target}/\n"}},
+                  {"apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization", "metadata": {"name": "envs", "namespace": "flux-system"},
+                   "spec": {"interval": "1m", "retryInterval": "20s", "path": f"./envs/{a.serve_target}", "prune": True,
+                            "dependsOn": [{"name": "stack"}], "sourceRef": {"kind": "GitRepository", "name": "platform-envs"}}}]
+        if not anonymous_ok(a.server, a.platform_repo):
+            raise RuntimeError(f"{a.platform_repo} can't be read anonymously: a target needs a per-target deploy key (not built)")
     k("apply", "-f", "-", input=json.dumps({"apiVersion": "v1", "kind": "List", "items": items}))
     return {"repo": a.repo, "commit": a.sha, "path": a.path, "sources": [{"name": n, **x} for n, x in subs.items()],
             "deploy_keys": [k["repo"] for k in a.deploy_keys]}
@@ -433,6 +457,8 @@ def main():
     ap.add_argument("--timeout", type=int, default=900)
     ap.add_argument("--min-kustomizations", type=int, default=2)
     ap.add_argument("--needs", nargs="*", default=[], help="capabilities the stack's checks need")
+    ap.add_argument("--serve-target", help="keep it up as this deploy target: its Flux follows envs/<target>/ of the platform repo")
+    ap.add_argument("--platform-repo", default=os.environ.get("STATE_REPO", "ffwf/cicd-ref-arch"))
     ap.add_argument("--smoke", help="the stack's check script (a path in its repo), run inside the nested cluster")
     ap.add_argument("--smoke-needs", nargs="*", default=["api"])
     ap.add_argument("--root", default=str(ROOT), help="the platform repo (clusters/<cluster>/stack-slots.yaml)")

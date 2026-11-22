@@ -662,11 +662,25 @@ def reassess(root: Path, args) -> list[str]:
     return done
 
 
+def image_for(image: str, src: dict, dst: dict) -> str:
+    """The image as the target cluster pulls it. Same registry: the same reference. Another one: copied there by
+    digest (crane), so the digest in the evidence is still the one that runs."""
+    if src["registry"] == dst["registry"]:
+        return image
+    spull, dpull = src["registry"]["pull"], dst["registry"]["pull"]
+    path = image[len(spull) + 1:] if image.startswith(spull + "/") else image.split("/", 1)[-1]
+    if src["registry"]["push"] != dst["registry"]["push"]:
+        subprocess.run(["crane", "copy", "--insecure", f"{src['registry']['push']}/{path}", f"{dst['registry']['push']}/{path}"],
+                       check=True, capture_output=True)
+    return f"{dpull}/{path}"
+
+
 def apply_due(root: Path, args) -> tuple[int, int]:
     """Returns (applied, refused). Every due promotion on master is applied: the merge decided. Its
     approval and its security re-scan are recorded with it. Refused means only a malformed record."""
     pending = sorted((root / "promotions" / "pending").glob("*/promotion.yaml"))
     applied = refused = 0
+    targets_touched: set[str] = set()
     for p in pending:
         promo = load_yaml(p)
         d = p.parent
@@ -687,13 +701,19 @@ def apply_due(root: Path, args) -> tuple[int, int]:
         sec_ok, sec_why = security_of(root, d, promo, cl)
         if not sec_ok:     # recorded, and shown on prod; the merge already decided (docs/security.md)
             sec_why = "applied with " + sec_why
-        render_env(root, app, cl, promo["to"], None, promo["image"], (d / "app.yaml").read_text(), {
+        # the environment's target cluster (cicd.yaml environments.<env>.cluster, docs/stacks.md "Targets"): its own
+        # clusters/<target>/ facts and envs/<target>/ tree; the image moves by digest if its registry differs
+        target = ((app["spec"].get("environments") or {}).get(promo["to"]) or {}).get("cluster") or args.cluster
+        tcl = cl if target == args.cluster else load_cluster(root, target)
+        image = image_for(promo["image"], cl, tcl)
+        targets_touched.add(target)
+        render_env(root, app, tcl, promo["to"], None, image, (d / "app.yaml").read_text(), {
             "commit": promo.get("commit"), "promotion": promo["id"], "approval": why, "separated": approval["separated"],
             **({"sources": promo["sources"]} if promo.get("sources") else {}),
-            "security": sec_why,
+            "security": sec_why, **({"builtOn": args.cluster} if target != args.cluster else {}),
             "renderedAt": now_utc().isoformat().replace("+00:00", "Z")},
             app_config_text=(d / "cicd.yaml").read_text())
-        out_env = root / "envs" / args.cluster / promo["app"] / promo["to"]
+        out_env = root / "envs" / target / promo["app"] / promo["to"]
         for extra in ("findings-source.json", "security-record.json"):
             if (d / extra).exists():
                 shutil.copy(d / extra, out_env / extra)
@@ -714,7 +734,8 @@ def apply_due(root: Path, args) -> tuple[int, int]:
         write(out_env / "evidence" / "approval.json", json.dumps({**approval, "promotion": promo["id"]}, indent=2) + "\n")
         print(f"{promo['id']}: applied ({why}; {sec_why})")
         applied += 1
-    build_index(root, args.cluster)
+    for c in {args.cluster} | targets_touched:
+        build_index(root, c)
     return applied, refused
 
 

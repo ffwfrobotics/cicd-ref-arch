@@ -5,3 +5,7 @@
 slots:
 - {name: stack-slot-1, podCIDR: 10.250.0.0/16, serviceCIDR: 10.251.0.0/16, apiPort: 6443}
 - {name: stack-slot-2, podCIDR: 10.252.0.0/16, serviceCIDR: 10.253.0.0/16, apiPort: 6443}
+# Image names a nested cluster resolves to this cluster's registry (its node's address on the docker bridge):
+# the digests built here run there unchanged, and nothing is copied.
+registryMirrors:
+- {host: "localhost:5000", endpoint: "http://172.17.0.6:5000"}
