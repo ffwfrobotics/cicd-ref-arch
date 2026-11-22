@@ -28,11 +28,21 @@ spec:
 
 | Step | What it does |
 |---|---|
-| `up` | makes the cluster (provider), bootstraps Flux at the stack's definition, and seeds the Secrets it names (from the platform's own Secrets, never from the stack repo) |
+| `up` | the provider makes the cluster in a platform-allocated slot and returns a handle (a kubeconfig); then Flux is bootstrapped at the stack's commit, with one GitRepository per pinned submodule |
 | `check` | waits for every Flux Kustomization to be Ready, deploys `hello` and runs the runtime check on it, then the stack's smoke test. One word, as for apps: `ready`, `not-ready <kustomization>`, `smoke-failed`, `timeout` |
 | `down` | removes the cluster and everything it made in the host |
 
 A dev run is `up`, `check`, `down`, and `down` runs even when `check` failed. A failed check is recorded and shown; the evidence stays after the cluster is gone.
+
+## The provider contract
+
+`tools/stack.py` (akb #493) defines `Slot`, `ClusterRequest`, `ClusterHandle` and `Provider`:
+- **The platform allocates the slots:** names, pod and service ranges, API port (`clusters/<cluster>/stack-slots.yaml`). A provider never chooses them, so nested clusters can't collide with the host or with each other.
+- **A provider** turns a request into a cluster and returns a handle: a kubeconfig, the API endpoint, the registry, its capabilities (`api`, `nodes`, `cni`, `csi`, ...) and its isolation (`none`, `userns`, `vm`). Everything after `up` uses only the handle.
+- **A check names the capabilities it needs.** On a provider without one, the check is recorded as **not exercised**, never as passed.
+- **The lifecycle is the provider's,** implemented here, never in the stack repo. The stack's own check script (`spec.check.smoke`) runs **inside** the nested cluster as a Job, with that cluster's kubectl and a read-only role without Secrets. It never runs on the platform's runner, next to the platform's credentials.
+
+**No platform credentials go into a stack's cluster.** Whoever writes a stack repo decides what Flux applies there, as cluster-admin, so they could read anything put there. Public repos need no credentials. A private stack, or a private submodule, is refused until it has a per-stack, read-only credential (`secrets_ref`, not built yet).
 
 ## Providers
 

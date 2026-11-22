@@ -251,6 +251,12 @@ def pinned_submodules(server: str, repo: str, sha: str, token: str) -> dict[str,
     return out
 
 
+def repo_private(server: str, repo: str, token: str) -> bool:
+    req = urllib.request.Request(f"{server.rstrip('/')}/api/v1/repos/{repo}", headers={"Authorization": f"token {token}"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return bool(json.loads(r.read()).get("private"))
+
+
 def bootstrap(h: ClusterHandle, a) -> dict:
     """Flux in the cluster, at the stack's IaC repo commit and each submodule it pins (one GitRepository each:
     Flux's recurseSubmodules can't check out a submodule of a specific commit)."""
@@ -263,13 +269,17 @@ def bootstrap(h: ClusterHandle, a) -> dict:
     token = os.environ["FORGEJO_TOKEN"]
     server = a.server.rstrip("/")
     subs = pinned_submodules(a.server, a.repo, a.sha, token)
+    # No platform credentials go into a stack's cluster: whoever writes the stack repo decides what Flux applies
+    # there (as cluster-admin), so they could read them. Public repos need none; a private one needs a per-stack,
+    # read-only credential (ClusterRequest.secrets_ref, not built yet) and is refused until then.
+    private = [r for r in [a.repo, *[x["repo"] for x in subs.values()]] if repo_private(a.server, r, token)]
+    if private:
+        raise RuntimeError(f"private repos need per-stack read credentials (secrets_ref), not the platform's: {', '.join(private)}")
 
     def git(name, repo, commit):
         return {"apiVersion": "source.toolkit.fluxcd.io/v1", "kind": "GitRepository", "metadata": {"name": name, "namespace": "flux-system"},
-                "spec": {"interval": "10m", "url": f"{server}/{repo}.git", "ref": {"commit": commit}, "secretRef": {"name": "forge"}}}
-    items = [{"apiVersion": "v1", "kind": "Secret", "metadata": {"name": "forge", "namespace": "flux-system"},
-              "stringData": {"username": os.environ.get("BOT", "cicd-bot"), "password": token}},
-             git("stack", a.repo, a.sha), *[git(n, x["repo"], x["commit"]) for n, x in subs.items()],
+                "spec": {"interval": "10m", "url": f"{server}/{repo}.git", "ref": {"commit": commit}}}
+    items = [git("stack", a.repo, a.sha), *[git(n, x["repo"], x["commit"]) for n, x in subs.items()],
              {"apiVersion": "kustomize.toolkit.fluxcd.io/v1", "kind": "Kustomization", "metadata": {"name": "stack", "namespace": "flux-system"},
               "spec": {"interval": "10m", "retryInterval": "20s", "path": f"./{a.path.strip('./')}", "prune": True,
                        "sourceRef": {"kind": "GitRepository", "name": "stack"}}}]
@@ -312,6 +322,16 @@ def smoke(h: ClusterHandle, script: str, needs: list[str], timeout: int = 300) -
              {"apiVersion": "v1", "kind": "ServiceAccount", "metadata": {"name": "smoke", "namespace": ns}},
              {"apiVersion": "rbac.authorization.k8s.io/v1", "kind": "ClusterRoleBinding", "metadata": {"name": "stack-smoke"},
               "roleRef": {"apiGroup": "rbac.authorization.k8s.io", "kind": "ClusterRole", "name": "view"},
+              "subjects": [{"kind": "ServiceAccount", "name": "smoke", "namespace": ns}]},
+             # view has no cluster-scoped kinds: the CRDs, nodes, classes and API services a platform check reads. Never Secrets.
+             {"apiVersion": "rbac.authorization.k8s.io/v1", "kind": "ClusterRole", "metadata": {"name": "stack-smoke-cluster"},
+              "rules": [{"apiGroups": ["apiextensions.k8s.io"], "resources": ["customresourcedefinitions"], "verbs": ["get", "list"]},
+                        {"apiGroups": [""], "resources": ["nodes", "namespaces"], "verbs": ["get", "list"]},
+                        {"apiGroups": ["networking.k8s.io"], "resources": ["ingressclasses"], "verbs": ["get", "list"]},
+                        {"apiGroups": ["gateway.networking.k8s.io"], "resources": ["*"], "verbs": ["get", "list"]},
+                        {"apiGroups": ["apiregistration.k8s.io"], "resources": ["apiservices"], "verbs": ["get", "list"]}]},
+             {"apiVersion": "rbac.authorization.k8s.io/v1", "kind": "ClusterRoleBinding", "metadata": {"name": "stack-smoke-cluster"},
+              "roleRef": {"apiGroup": "rbac.authorization.k8s.io", "kind": "ClusterRole", "name": "stack-smoke-cluster"},
               "subjects": [{"kind": "ServiceAccount", "name": "smoke", "namespace": ns}]},
              {"apiVersion": "v1", "kind": "ConfigMap", "metadata": {"name": "smoke", "namespace": ns}, "data": {"smoke.sh": script}},
              {"apiVersion": "batch/v1", "kind": "Job", "metadata": {"name": "smoke", "namespace": ns},
