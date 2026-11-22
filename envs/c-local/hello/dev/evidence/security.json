@@ -1,13 +1,13 @@
 {
   "schema": "security-findings/v1",
   "app": "hello",
-  "image": "localhost:5000/hello@sha256:32e87241208ecf189de9ec08aa4fe481c86e20f5e942efb456b665ebd71bd26e",
-  "commit": "8724d625e22e7e5349e7ee0f96584eee2cf508f3",
-  "generated": "2026-11-22T05:19:47Z",
+  "image": "localhost:5000/hello@sha256:7c9ff3e391af4f743c543a3ce9a629f7622495ee33b5cdab975fc8619ae80ed5",
+  "commit": "479fc72b2e25381f10b41bff955c8b0b7a5f1f7a",
+  "generated": "2026-11-22T15:08:42Z",
   "scans": {
     "source": {
-      "generated": "2026-11-22T02:25:15Z",
-      "commit": "8724d625e22e7e5349e7ee0f96584eee2cf508f3",
+      "generated": "2026-11-22T15:07:26Z",
+      "commit": "479fc72b2e25381f10b41bff955c8b0b7a5f1f7a",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -21,27 +21,35 @@
         },
         "opengrep": {
           "file": "opengrep.sarif",
-          "sha256": "8dc71c569b00c9ab9f33b1d057aa551dff450bd91f2f72d9a53b9411531e2c09"
+          "sha256": "d8778bbf94db1c32dd11c30c5d50ac6dba51f6b2437f658992d224e5fb7900e2"
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "46ecda905bdfca39a39b054a714dd4f939843fa0b883d85a0123ad77e16f7179"
+          "sha256": "62fffe61f88ca983934fec714b6c85d8233a31b899a6ab0a3abce88a434b8f91"
         }
       }
     },
     "image": {
-      "generated": "2026-11-22T05:19:47Z",
-      "commit": "d285401e21bfa56c8ffe6d45fe9a5d3adfe1e173",
-      "image": "localhost:5000/hello@sha256:32e87241208ecf189de9ec08aa4fe481c86e20f5e942efb456b665ebd71bd26e",
+      "generated": "2026-11-22T15:08:42Z",
+      "commit": "479fc72b2e25381f10b41bff955c8b0b7a5f1f7a",
+      "image": "localhost:5000/hello@sha256:7c9ff3e391af4f743c543a3ce9a629f7622495ee33b5cdab975fc8619ae80ed5",
       "tools": {
-        "syft": "(SBOM kept from the build)",
+        "syft": "16.1.13",
         "grype": "6",
-        "grype-db": "2026-11-21T06:20:06Z"
+        "grype-db": "2026-11-22T06:19:59Z"
       },
       "evidence": {
+        "sbom-cyclonedx": {
+          "file": "sbom.cdx.json",
+          "sha256": "155c10607b584ec3d2466590c3566dbbc8f2a80bc2ec2f19d98ef52b21ace7e1"
+        },
+        "sbom-spdx": {
+          "file": "sbom.spdx.json",
+          "sha256": "dcb62a46d537abb2d305ad5b50203922f69643683bed5a9d08d1da7de9c5ffb6"
+        },
         "grype": {
           "file": "grype.json",
-          "sha256": "8deab31129480a5063bbfe09731fcd561570ded41f97fa1c69e2f7b0de4e2af9"
+          "sha256": "62327e5287bdccf3d1ed17d2e9750937e7d30b0c07f50bd429ce44cf15e4644a"
         }
       }
     }
@@ -52,10 +60,10 @@
     "status": "warn",
     "blocking": 0,
     "counts": {
-      "fail": 2,
+      "fail": 6,
       "suppressed": 6,
-      "no-fix-available": 80,
-      "below-threshold": 156
+      "no-fix-available": 79,
+      "below-threshold": 159
     },
     "notes": []
   },
@@ -67,7 +75,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "Dockerfile:4",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/8b5575555c3260ce/hostexecutor/examples/hello/Dockerfile.FROM)",
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/c448ad4ce3fd18e5/hostexecutor/examples/hello/Dockerfile.FROM)",
       "outcome": "fail"
     },
     {
@@ -161,20 +169,6 @@
       }
     },
     {
-      "id": "961de21f8b83",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-82560",
-      "severity": "high",
-      "location": "pkg:deb/debian/perl-base@5.40.1-6%2Bdeb13u1?arch=amd64&distro=debian-13.7&upstream=perl",
-      "message": "perl-base 5.40.1-6+deb13u1 (deb): Pod::Text versions before 6.1.1 for Perl allow CPU and memory exhaustion formatting a POD document whose =over nesting drives the margin to the output width.  Each =over adds its indent to the margin, which wrap() subtracts from the output width to get the space ava",
-      "package": "perl-base",
-      "version": "5.40.1-6+deb13u1",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
-    },
-    {
       "id": "8fdf977d63b1",
       "category": "vuln",
       "tool": "grype",
@@ -213,6 +207,20 @@
       "package": "openssl-provider-legacy",
       "version": "3.5.7-1~deb13u3",
       "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "961de21f8b83",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-82560",
+      "severity": "high",
+      "location": "pkg:deb/debian/perl-base@5.40.1-6%2Bdeb13u1?arch=amd64&distro=debian-13.7&upstream=perl",
+      "message": "perl-base 5.40.1-6+deb13u1 (deb): Pod::Text versions before 6.1.1 for Perl allow CPU and memory exhaustion formatting a POD document whose =over nesting drives the margin to the output width.  Each =over adds its indent to the margin, which wrap() subtracts from the output width to get the space ava",
+      "package": "perl-base",
+      "version": "5.40.1-6+deb13u1",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "no-fix-available"
     },
@@ -285,48 +293,6 @@
       "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "no-fix-available"
-    },
-    {
-      "id": "aac63cc19c08",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-114691",
-      "severity": "medium",
-      "location": "pkg:deb/debian/gcc-14-base@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "gcc-14-base 14.2.0-19 (deb): A flaw was found in the libstdc++ component of GCC. An attacker who can provide an excessively large element count to a boolean vector (std::vector<bool>) constructor can trigger an integer wrap during internal memory calculations. This issue leaves the container in an i",
-      "package": "gcc-14-base",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "644e34c05447",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-114691",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libgcc-s1@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "libgcc-s1 14.2.0-19 (deb): A flaw was found in the libstdc++ component of GCC. An attacker who can provide an excessively large element count to a boolean vector (std::vector<bool>) constructor can trigger an integer wrap during internal memory calculations. This issue leaves the container in an inc",
-      "package": "libgcc-s1",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "59690bb27657",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-114691",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libstdc%2B%2B6@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "libstdc++6 14.2.0-19 (deb): A flaw was found in the libstdc++ component of GCC. An attacker who can provide an excessively large element count to a boolean vector (std::vector<bool>) constructor can trigger an integer wrap during internal memory calculations. This issue leaves the container in an in",
-      "package": "libstdc++6",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
     },
     {
       "id": "08c38d34a38c",
@@ -429,6 +395,48 @@
       "outcome": "no-fix-available"
     },
     {
+      "id": "aac63cc19c08",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-114691",
+      "severity": "medium",
+      "location": "pkg:deb/debian/gcc-14-base@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "gcc-14-base 14.2.0-19 (deb): A flaw was found in the libstdc++ component of GCC. An attacker who can provide an excessively large element count to a boolean vector (std::vector<bool>) constructor can trigger an integer wrap during internal memory calculations. This issue leaves the container in an i",
+      "package": "gcc-14-base",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "644e34c05447",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-114691",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libgcc-s1@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "libgcc-s1 14.2.0-19 (deb): A flaw was found in the libstdc++ component of GCC. An attacker who can provide an excessively large element count to a boolean vector (std::vector<bool>) constructor can trigger an integer wrap during internal memory calculations. This issue leaves the container in an inc",
+      "package": "libgcc-s1",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "59690bb27657",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-114691",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libstdc%2B%2B6@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "libstdc++6 14.2.0-19 (deb): A flaw was found in the libstdc++ component of GCC. An attacker who can provide an excessively large element count to a boolean vector (std::vector<bool>) constructor can trigger an integer wrap during internal memory calculations. This issue leaves the container in an in",
+      "package": "libstdc++6",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "d47b50cdec50",
       "category": "vuln",
       "tool": "grype",
@@ -469,34 +477,6 @@
       "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "no-fix-available"
-    },
-    {
-      "id": "b5e11af70802",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2018-20796",
-      "severity": "negligible",
-      "location": "pkg:deb/debian/libc-bin@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
-      "message": "libc-bin 2.41-12+deb13u4 (deb): In the GNU C Library (aka glibc or libc6) through 2.29, check_dst_limits_calc_pos_1 in posix/regexec.c has Uncontrolled Recursion, as demonstrated by '(\\227|)(\\\\1\\\\1|t1|\\\\\\2537)+' in grep.",
-      "package": "libc-bin",
-      "version": "2.41-12+deb13u4",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "e83b4031d81f",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2018-20796",
-      "severity": "negligible",
-      "location": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
-      "message": "libc6 2.41-12+deb13u4 (deb): In the GNU C Library (aka glibc or libc6) through 2.29, check_dst_limits_calc_pos_1 in posix/regexec.c has Uncontrolled Recursion, as demonstrated by '(\\227|)(\\\\1\\\\1|t1|\\\\\\2537)+' in grep.",
-      "package": "libc6",
-      "version": "2.41-12+deb13u4",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "below-threshold"
     },
     {
       "id": "ac208099bd76",
@@ -541,6 +521,118 @@
       "outcome": "no-fix-available"
     },
     {
+      "id": "b5e11af70802",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2018-20796",
+      "severity": "negligible",
+      "location": "pkg:deb/debian/libc-bin@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
+      "message": "libc-bin 2.41-12+deb13u4 (deb): In the GNU C Library (aka glibc or libc6) through 2.29, check_dst_limits_calc_pos_1 in posix/regexec.c has Uncontrolled Recursion, as demonstrated by '(\\227|)(\\\\1\\\\1|t1|\\\\\\2537)+' in grep.",
+      "package": "libc-bin",
+      "version": "2.41-12+deb13u4",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e83b4031d81f",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2018-20796",
+      "severity": "negligible",
+      "location": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
+      "message": "libc6 2.41-12+deb13u4 (deb): In the GNU C Library (aka glibc or libc6) through 2.29, check_dst_limits_calc_pos_1 in posix/regexec.c has Uncontrolled Recursion, as demonstrated by '(\\227|)(\\\\1\\\\1|t1|\\\\\\2537)+' in grep.",
+      "package": "libc6",
+      "version": "2.41-12+deb13u4",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "2269d86dd914",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121482",
+      "severity": "high",
+      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Verifying a maliciously crafted CMS or PKCS#7 SignedData message with CRL checking enabled may consume excessive CPU time, growing with the square of the message size.",
+      "package": "libssl3t64",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "efffd7977dab",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121482",
+      "severity": "high",
+      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
+      "message": "openssl 3.5.7-1~deb13u3 (deb): Verifying a maliciously crafted CMS or PKCS#7 SignedData message with CRL checking enabled may consume excessive CPU time, growing with the square of the message size.",
+      "package": "openssl",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "d4a6a687816c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121482",
+      "severity": "high",
+      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Verifying a maliciously crafted CMS or PKCS#7 SignedData message with CRL checking enabled may consume excessive CPU time, growing with the square of the message size.",
+      "package": "openssl-provider-legacy",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "9a37ecc1650d",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121481",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Issue summary: Calling EVP_EncodeBlock() with an input length close to INT_MAX may overflow the calculation of the encoded output size and write past the end of the caller-supplied output buffer.  Impact summary: No path by which an attacker can trigger this has bee",
+      "package": "libssl3t64",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "7436b05dcacb",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121481",
+      "severity": "medium",
+      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
+      "message": "openssl 3.5.7-1~deb13u3 (deb): Issue summary: Calling EVP_EncodeBlock() with an input length close to INT_MAX may overflow the calculation of the encoded output size and write past the end of the caller-supplied output buffer.  Impact summary: No path by which an attacker can trigger this has been i",
+      "package": "openssl",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "8bc18b4d51c0",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121481",
+      "severity": "medium",
+      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Issue summary: Calling EVP_EncodeBlock() with an input length close to INT_MAX may overflow the calculation of the encoded output size and write past the end of the caller-supplied output buffer.  Impact summary: No path by which an attacker can trigger",
+      "package": "openssl-provider-legacy",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "fa9e412037d6",
       "category": "vuln",
       "tool": "grype",
@@ -551,6 +643,34 @@
       "package": "tar",
       "version": "1.35+dfsg-3.1",
       "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "0d6f81fa9520",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121758",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libc-bin@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
+      "message": "libc-bin 2.41-12+deb13u4 (deb): Converting crafted ISO-2022-CN-EXT input to UTF-8 character encoding, in the GNU C Library version 2.2 through 2.44 may result in the converter reading past the end of the input buffer, causing the calling application to crash.  When the ISO-2022-CN-EXT decoder encoun",
+      "package": "libc-bin",
+      "version": "2.41-12+deb13u4",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "b48d0696eb54",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-121758",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
+      "message": "libc6 2.41-12+deb13u4 (deb): Converting crafted ISO-2022-CN-EXT input to UTF-8 character encoding, in the GNU C Library version 2.2 through 2.44 may result in the converter reading past the end of the input buffer, causing the calling application to crash.  When the ISO-2022-CN-EXT decoder encounter",
+      "package": "libc6",
+      "version": "2.41-12+deb13u4",
+      "fix_state": "not-fixed",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
@@ -718,9 +838,11 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): Calling strfmon and strfmon_l in the GNU C Library version 2.38 to 2.44 can write past the end of the caller-supplied output buffer when a conversion uses right-justified width padding.  Exploitation requires an application code path that calls strfmon or strfmon_l wi",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
+      "outcome": "fail"
     },
     {
       "id": "3c49908103a6",
@@ -732,23 +854,11 @@
       "message": "libc6 2.41-12+deb13u4 (deb): Calling strfmon and strfmon_l in the GNU C Library version 2.38 to 2.44 can write past the end of the caller-supplied output buffer when a conversion uses right-justified width padding.  Exploitation requires an application code path that calls strfmon or strfmon_l with ",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
-    },
-    {
-      "id": "60169cb901e9",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-119379",
-      "severity": "high",
-      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 built with the session extension contains a heap buffer overflow vulnerability in sqlite3changeset_apply() that allows attackers to corrupt heap memory by supplying crafted changesets. Attackers can repeat a table name in a second changeset b",
-      "package": "libsqlite3-0",
-      "version": "3.46.1-7+deb13u2",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
+      "outcome": "fail"
     },
     {
       "id": "7cc79657a5ba",
@@ -793,6 +903,20 @@
       "outcome": "no-fix-available"
     },
     {
+      "id": "60169cb901e9",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-119379",
+      "severity": "high",
+      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 built with the session extension contains a heap buffer overflow vulnerability in sqlite3changeset_apply() that allows attackers to corrupt heap memory by supplying crafted changesets. Attackers can repeat a table name in a second changeset b",
+      "package": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "ae3e06dea641",
       "category": "vuln",
       "tool": "grype",
@@ -830,8 +954,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): The deprecated functions ns_printrrf, ns_printrr and fp_nquery in the GNU C Library version 2.0.1 to version 2.43 fail to validate the RDATA content against the RDATA length in a DNS response when processing A6, CERT, LOC, TKEY or TSIG records, which may allow an atta",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -844,8 +970,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): The deprecated functions ns_printrrf, ns_printrr and fp_nquery in the GNU C Library version 2.0.1 to version 2.43 fail to validate the RDATA content against the RDATA length in a DNS response when processing A6, CERT, LOC, TKEY or TSIG records, which may allow an attacke",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -862,34 +990,6 @@
       "fixed_in": [
         "3.15.0a6"
       ],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "0d6f81fa9520",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-121758",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libc-bin@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
-      "message": "libc-bin 2.41-12+deb13u4 (deb): Converting crafted ISO-2022-CN-EXT input to UTF-8 character encoding, in the GNU C Library version 2.2 through 2.44 may result in the converter reading past the end of the input buffer, causing the calling application to crash.  When the ISO-2022-CN-EXT decoder encoun",
-      "package": "libc-bin",
-      "version": "2.41-12+deb13u4",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "b48d0696eb54",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-121758",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
-      "message": "libc6 2.41-12+deb13u4 (deb): Converting crafted ISO-2022-CN-EXT input to UTF-8 character encoding, in the GNU C Library version 2.2 through 2.44 may result in the converter reading past the end of the input buffer, causing the calling application to crash.  When the ISO-2022-CN-EXT decoder encounter",
-      "package": "libc6",
-      "version": "2.41-12+deb13u4",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
       "outcome": "below-threshold"
     },
     {
@@ -958,8 +1058,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): Converting crafted SHIFT_JISX0213 input to UCS-4 or the internal wide character encoding, for example with iconv, in the GNU C Library version 2.3 to 2.44 may result in the converter making no progress, causing the calling application to hang.  Some SHIFT_JISX0213 seq",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -972,8 +1074,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): Converting crafted EUC_JISX0213 input to UCS-4 or the internal wide character encoding, for example with iconv, in the GNU C Library version 2.3 to 2.44 may result in the converter making no progress, causing the calling application to hang.  Some EUC_JISX0213 sequenc",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -986,8 +1090,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): Converting crafted SHIFT_JISX0213 input to UCS-4 or the internal wide character encoding, for example with iconv, in the GNU C Library version 2.3 to 2.44 may result in the converter making no progress, causing the calling application to hang.  Some SHIFT_JISX0213 sequen",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -1000,8 +1106,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): Converting crafted EUC_JISX0213 input to UCS-4 or the internal wide character encoding, for example with iconv, in the GNU C Library version 2.3 to 2.44 may result in the converter making no progress, causing the calling application to hang.  Some EUC_JISX0213 sequences ",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -1056,6 +1164,20 @@
       "message": "libpam0g 1.7.0-5 (deb): Linux-PAM through 1.7.2 contains an observable timing discrepancy (CWE-208) in the pam_userdb module's plaintext-password comparison path in modules/pam_userdb/pam_userdb.c that allows a local or network-adjacent attacker able to repeatedly drive authentication through a call",
       "package": "libpam0g",
       "version": "1.7.0-5",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "1936eb9d9efa",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-119378",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains a use-after-free vulnerability in the R-Tree extension that allows attackers to make applications use freed heap memory by manipulating the %_node shadow table. Attackers can supply a database declaring %_node WITHOUT ROWID or with a",
+      "package": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
       "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
@@ -1201,44 +1323,44 @@
       "outcome": "no-fix-available"
     },
     {
-      "id": "a0116bc0dfff",
+      "id": "6181b0298238",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-95690",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
-      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Receiving crafted out-of-sequence DTLS handshake fragments may cause OpenSSL to allocate a full message-length reassembly buffer for each buffered message, so a small amount of wire data consumes a large amount of memory.",
-      "package": "libssl3t64",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
+      "rule": "CVE-2026-115456",
+      "severity": "low",
+      "location": "pkg:deb/debian/gcc-14-base@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "gcc-14-base 14.2.0-19 (deb): A flaw was found in gcc. An attacker could cause a Denial of Service (DoS) by passing a string that is not null-terminated to the std::from_chars() function in the libstdc++ library. This issue triggers an out-of-bounds read beyond the allocated buffer, potentially leadi",
+      "package": "gcc-14-base",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
     {
-      "id": "0b2111391885",
+      "id": "9901099b6abd",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-95690",
-      "severity": "medium",
-      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
-      "message": "openssl 3.5.7-1~deb13u3 (deb): Receiving crafted out-of-sequence DTLS handshake fragments may cause OpenSSL to allocate a full message-length reassembly buffer for each buffered message, so a small amount of wire data consumes a large amount of memory.",
-      "package": "openssl",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
+      "rule": "CVE-2026-115456",
+      "severity": "low",
+      "location": "pkg:deb/debian/libgcc-s1@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "libgcc-s1 14.2.0-19 (deb): A flaw was found in gcc. An attacker could cause a Denial of Service (DoS) by passing a string that is not null-terminated to the std::from_chars() function in the libstdc++ library. This issue triggers an out-of-bounds read beyond the allocated buffer, potentially leading",
+      "package": "libgcc-s1",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
     {
-      "id": "fd91bafe1368",
+      "id": "1919c04e6b34",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-95690",
-      "severity": "medium",
-      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
-      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Receiving crafted out-of-sequence DTLS handshake fragments may cause OpenSSL to allocate a full message-length reassembly buffer for each buffered message, so a small amount of wire data consumes a large amount of memory.",
-      "package": "openssl-provider-legacy",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
+      "rule": "CVE-2026-115456",
+      "severity": "low",
+      "location": "pkg:deb/debian/libstdc%2B%2B6@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "libstdc++6 14.2.0-19 (deb): A flaw was found in gcc. An attacker could cause a Denial of Service (DoS) by passing a string that is not null-terminated to the std::from_chars() function in the libstdc++ library. This issue triggers an out-of-bounds read beyond the allocated buffer, potentially leadin",
+      "package": "libstdc++6",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
@@ -1252,9 +1374,11 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): The deprecated functions ns_printrrf, ns_printrr and fp_nquery in the GNU C Library version 2.2 and newer fail to enforce the caller-supplied buffer length, and can result in an out-of-bounds write when printing TSIG records.",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
+      "outcome": "fail"
     },
     {
       "id": "3bc164f1f08e",
@@ -1266,9 +1390,11 @@
       "message": "libc6 2.41-12+deb13u4 (deb): The deprecated functions ns_printrrf, ns_printrr and fp_nquery in the GNU C Library version 2.2 and newer fail to enforce the caller-supplied buffer length, and can result in an out-of-bounds write when printing TSIG records.",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
+      "outcome": "fail"
     },
     {
       "id": "a5bb18059ad8",
@@ -1397,6 +1523,62 @@
       "outcome": "no-fix-available"
     },
     {
+      "id": "c57813f27631",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84786",
+      "severity": "high",
+      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Issue summary: A DANE-enabled TLS client may crash by dereferencing a NULL pointer when processing an unusual combination of certificate and TLSA records.  Impact summary: The impact is limited to a client crash (potential Denial of Service).  CWE: CWE-476: NULL Poi",
+      "package": "libssl3t64",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "fd21c5709575",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84786",
+      "severity": "high",
+      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
+      "message": "openssl 3.5.7-1~deb13u3 (deb): Issue summary: A DANE-enabled TLS client may crash by dereferencing a NULL pointer when processing an unusual combination of certificate and TLSA records.  Impact summary: The impact is limited to a client crash (potential Denial of Service).  CWE: CWE-476: NULL Pointe",
+      "package": "openssl",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "bfa2c691574f",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-84786",
+      "severity": "high",
+      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Issue summary: A DANE-enabled TLS client may crash by dereferencing a NULL pointer when processing an unusual combination of certificate and TLSA records.  Impact summary: The impact is limited to a client crash (potential Denial of Service).  CWE: CWE-",
+      "package": "openssl-provider-legacy",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "8366803defae",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-119373",
+      "severity": "high",
+      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 built with FTS5 contains a heap buffer overflow in fts5MergeRowidLists() that undersizes the output buffer when merging detail=none prefix doclists. Attackers who can populate a detail=none FTS5 table with negative rowids and run a prefix MAT",
+      "package": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
+    },
+    {
       "id": "96f72a97b37b",
       "category": "vuln",
       "tool": "grype",
@@ -1462,8 +1644,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): Initializing the DNS stub resolver from an /etc/resolv.conf file, or a LOCALDOMAIN environment variable, whose search list contains a domain of roughly 200 characters or more in the GNU C Library version 2.26 to 2.44 results in an assertion failure which aborts the pr",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -1476,8 +1660,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): Initializing the DNS stub resolver from an /etc/resolv.conf file, or a LOCALDOMAIN environment variable, whose search list contains a domain of roughly 200 characters or more in the GNU C Library version 2.26 to 2.44 results in an assertion failure which aborts the proce",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -1533,6 +1719,20 @@
       "package": "libc6",
       "version": "2.41-12+deb13u4",
       "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "5c2b5a8a2b42",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-119376",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains a stack exhaustion vulnerability that allows attackers to bypass the SQLITE_LIMIT_EXPR_DEPTH limit by chaining COLLATE postfix operators. Attackers can supply roughly 175,000 chained COLLATE operators in SQL or an untrusted database ",
+      "package": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
@@ -1749,16 +1949,44 @@
       "outcome": "below-threshold"
     },
     {
-      "id": "1936eb9d9efa",
+      "id": "a0116bc0dfff",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-119378",
+      "rule": "CVE-2026-95690",
       "severity": "medium",
-      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains a use-after-free vulnerability in the R-Tree extension that allows attackers to make applications use freed heap memory by manipulating the %_node shadow table. Attackers can supply a database declaring %_node WITHOUT ROWID or with a",
-      "package": "libsqlite3-0",
-      "version": "3.46.1-7+deb13u2",
-      "fix_state": "wont-fix",
+      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Issue summary: Receiving crafted out-of-sequence DTLS handshake fragments may cause OpenSSL to allocate a full message-length reassembly buffer for each buffered message, so a small amount of wire data consumes a large amount of memory.  Impact summary: A remote att",
+      "package": "libssl3t64",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "0b2111391885",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-95690",
+      "severity": "medium",
+      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
+      "message": "openssl 3.5.7-1~deb13u3 (deb): Issue summary: Receiving crafted out-of-sequence DTLS handshake fragments may cause OpenSSL to allocate a full message-length reassembly buffer for each buffered message, so a small amount of wire data consumes a large amount of memory.  Impact summary: A remote attack",
+      "package": "openssl",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "fd91bafe1368",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-95690",
+      "severity": "medium",
+      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Issue summary: Receiving crafted out-of-sequence DTLS handshake fragments may cause OpenSSL to allocate a full message-length reassembly buffer for each buffered message, so a small amount of wire data consumes a large amount of memory.  Impact summary:",
+      "package": "openssl-provider-legacy",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
@@ -1931,6 +2159,34 @@
       "outcome": "below-threshold"
     },
     {
+      "id": "3010b6fa9235",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-119375",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains an information disclosure vulnerability that allows attackers to read uninitialized page-cache memory by supplying a WAL file with an undersized page size. Attackers can craft a database and WAL file whose oversized record payload ma",
+      "package": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e892dc5c5243",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-119371",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains a stack exhaustion vulnerability that allows attackers to bypass the SQLITE_LIMIT_EXPR_DEPTH nesting limit because common table expressions are not counted against it. Attackers can supply a WITH clause chaining tens of thousands of ",
+      "package": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "0688a714b209",
       "category": "vuln",
       "tool": "grype",
@@ -1989,60 +2245,18 @@
       "outcome": "below-threshold"
     },
     {
-      "id": "c57813f27631",
+      "id": "3ba02d4d716d",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-84786",
-      "severity": "high",
-      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
-      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): A DANE-enabled TLS client may crash by dereferencing a NULL pointer when processing an unusual combination of certificate and TLSA records.",
-      "package": "libssl3t64",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
-    },
-    {
-      "id": "fd21c5709575",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-84786",
-      "severity": "high",
-      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
-      "message": "openssl 3.5.7-1~deb13u3 (deb): A DANE-enabled TLS client may crash by dereferencing a NULL pointer when processing an unusual combination of certificate and TLSA records.",
-      "package": "openssl",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
-    },
-    {
-      "id": "bfa2c691574f",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-84786",
-      "severity": "high",
-      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
-      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): A DANE-enabled TLS client may crash by dereferencing a NULL pointer when processing an unusual combination of certificate and TLSA records.",
-      "package": "openssl-provider-legacy",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
-    },
-    {
-      "id": "8366803defae",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-119373",
-      "severity": "high",
+      "rule": "CVE-2026-119372",
+      "severity": "medium",
       "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 built with FTS5 contains a heap buffer overflow in fts5MergeRowidLists() that undersizes the output buffer when merging detail=none prefix doclists. Attackers who can populate a detail=none FTS5 table with negative rowids and run a prefix MAT",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 built with FTS3/FTS4 and SQLITE_ENABLE_FTS3_PARENTHESIS contains a use-after-free vulnerability in fts3BestSnippet() caused by dangling cached position-list pointers. Attackers can run a full-text MATCH query combining OR and NEAR operators w",
       "package": "libsqlite3-0",
       "version": "3.46.1-7+deb13u2",
       "fix_state": "wont-fix",
       "fixed_in": [],
-      "outcome": "no-fix-available"
+      "outcome": "below-threshold"
     },
     {
       "id": "c65df52b6bb4",
@@ -2073,6 +2287,20 @@
       "outcome": "below-threshold"
     },
     {
+      "id": "e812ea2fdd77",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-119591",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains a stack exhaustion vulnerability in countOfViewOptimization() that allows attackers to crash the host process via count(*) over a large multi-row VALUES clause. Attackers supplying SQL or a database file with a crafted view can trigg",
+      "package": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "9375a398d9ac",
       "category": "vuln",
       "tool": "grype",
@@ -2098,8 +2326,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): When expanding paths that begin with a tilde (~) followed by a username, the internal parse_tilde function extracts the username to determine the user's home directory.  The implementation allocates memory for this username directly on the stack using the strndupa mac",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2112,50 +2342,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): When expanding paths that begin with a tilde (~) followed by a username, the internal parse_tilde function extracts the username to determine the user's home directory.  The implementation allocates memory for this username directly on the stack using the strndupa macro.",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "6181b0298238",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-115456",
-      "severity": "low",
-      "location": "pkg:deb/debian/gcc-14-base@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "gcc-14-base 14.2.0-19 (deb): A flaw was found in gcc. An attacker could cause a Denial of Service (DoS) by passing a string that is not null-terminated to the std::from_chars() function in the libstdc++ library. This issue triggers an out-of-bounds read beyond the allocated buffer, potentially leadi",
-      "package": "gcc-14-base",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "9901099b6abd",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-115456",
-      "severity": "low",
-      "location": "pkg:deb/debian/libgcc-s1@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "libgcc-s1 14.2.0-19 (deb): A flaw was found in gcc. An attacker could cause a Denial of Service (DoS) by passing a string that is not null-terminated to the std::from_chars() function in the libstdc++ library. This issue triggers an out-of-bounds read beyond the allocated buffer, potentially leading",
-      "package": "libgcc-s1",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "1919c04e6b34",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-115456",
-      "severity": "low",
-      "location": "pkg:deb/debian/libstdc%2B%2B6@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "libstdc++6 14.2.0-19 (deb): A flaw was found in gcc. An attacker could cause a Denial of Service (DoS) by passing a string that is not null-terminated to the std::from_chars() function in the libstdc++ library. This issue triggers an out-of-bounds read beyond the allocated buffer, potentially leadin",
-      "package": "libstdc++6",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2215,6 +2405,48 @@
       "outcome": "below-threshold"
     },
     {
+      "id": "aef3c6676edb",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35190",
+      "severity": "medium",
+      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Issue summary: A server configured with the Suite B certificate flag through SSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a fixed group list when it processes a ClientHello whose supported_groups and key_share contain no Suite B group. ",
+      "package": "libssl3t64",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e755017e57f0",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35190",
+      "severity": "medium",
+      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
+      "message": "openssl 3.5.7-1~deb13u3 (deb): Issue summary: A server configured with the Suite B certificate flag through SSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a fixed group list when it processes a ClientHello whose supported_groups and key_share contain no Suite B group.  Im",
+      "package": "openssl",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "cd7fcb221d74",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-35190",
+      "severity": "medium",
+      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Issue summary: A server configured with the Suite B certificate flag through SSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a fixed group list when it processes a ClientHello whose supported_groups and key_share contain no Su",
+      "package": "openssl-provider-legacy",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
       "id": "947fee72fa05",
       "category": "vuln",
       "tool": "grype",
@@ -2224,8 +2456,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): Calling tdelete on a sufficiently deep tree in the GNU C Library version 2.1 to 2.44 may write one pointer past the end of an alloca-allocated array on the stack, which may crash the application.  The tdelete implementation keeps an explicit stack of parent nodes for ",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2238,8 +2472,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): Calling tdelete on a sufficiently deep tree in the GNU C Library version 2.1 to 2.44 may write one pointer past the end of an alloca-allocated array on the stack, which may crash the application.  The tdelete implementation keeps an explicit stack of parent nodes for reb",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2285,32 +2521,46 @@
       "outcome": "below-threshold"
     },
     {
-      "id": "3010b6fa9235",
+      "id": "57f608984b92",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-119375",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains an information disclosure vulnerability that allows attackers to read uninitialized page-cache memory by supplying a WAL file with an undersized page size. Attackers can craft a database and WAL file whose oversized record payload ma",
-      "package": "libsqlite3-0",
-      "version": "3.46.1-7+deb13u2",
-      "fix_state": "wont-fix",
+      "rule": "CVE-2026-107493",
+      "severity": "high",
+      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Issue summary: When an application passes a stack to PEM_X509_INFO_read_bio_ex() to add entries to, and reading fails, OpenSSL frees every entry in the stack, both the old ones and any new ones, but leaves them in the stack.  Impact summary: An application that pass",
+      "package": "libssl3t64",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
       "fixed_in": [],
-      "outcome": "below-threshold"
+      "outcome": "no-fix-available"
     },
     {
-      "id": "e892dc5c5243",
+      "id": "8d12a8626bae",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-119371",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains a stack exhaustion vulnerability that allows attackers to bypass the SQLITE_LIMIT_EXPR_DEPTH nesting limit because common table expressions are not counted against it. Attackers can supply a WITH clause chaining tens of thousands of ",
-      "package": "libsqlite3-0",
-      "version": "3.46.1-7+deb13u2",
-      "fix_state": "wont-fix",
+      "rule": "CVE-2026-107493",
+      "severity": "high",
+      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
+      "message": "openssl 3.5.7-1~deb13u3 (deb): Issue summary: When an application passes a stack to PEM_X509_INFO_read_bio_ex() to add entries to, and reading fails, OpenSSL frees every entry in the stack, both the old ones and any new ones, but leaves them in the stack.  Impact summary: An application that passes ",
+      "package": "openssl",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
       "fixed_in": [],
-      "outcome": "below-threshold"
+      "outcome": "no-fix-available"
+    },
+    {
+      "id": "93cec860d2b8",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-107493",
+      "severity": "high",
+      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
+      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Issue summary: When an application passes a stack to PEM_X509_INFO_read_bio_ex() to add entries to, and reading fails, OpenSSL frees every entry in the stack, both the old ones and any new ones, but leaves them in the stack.  Impact summary: An applicat",
+      "package": "openssl-provider-legacy",
+      "version": "3.5.7-1~deb13u3",
+      "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "no-fix-available"
     },
     {
       "id": "2c14c0b4a776",
@@ -2364,8 +2614,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): The nscd service in the GNU C Library 2.3.4 onwards may crash due to a  stack overflow when a malicious DNS server returns too large a response  for a DNS query, resulting in degraded DNS resolution for the system.    Exploitation of this bug needs a system that has n",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2378,64 +2630,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): The nscd service in the GNU C Library 2.3.4 onwards may crash due to a  stack overflow when a malicious DNS server returns too large a response  for a DNS query, resulting in degraded DNS resolution for the system.    Exploitation of this bug needs a system that has nscd",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "57f608984b92",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-107493",
-      "severity": "high",
-      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
-      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Issue summary: When an application passes a stack to PEM_X509_INFO_read_bio_ex() to add entries to, and reading fails, OpenSSL frees every entry in the stack, both the old ones and any new ones, but leaves them in the stack.  Impact summary: An application that pass",
-      "package": "libssl3t64",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
-    },
-    {
-      "id": "8d12a8626bae",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-107493",
-      "severity": "high",
-      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
-      "message": "openssl 3.5.7-1~deb13u3 (deb): Issue summary: When an application passes a stack to PEM_X509_INFO_read_bio_ex() to add entries to, and reading fails, OpenSSL frees every entry in the stack, both the old ones and any new ones, but leaves them in the stack.  Impact summary: An application that passes ",
-      "package": "openssl",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
-    },
-    {
-      "id": "93cec860d2b8",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-107493",
-      "severity": "high",
-      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
-      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Issue summary: When an application passes a stack to PEM_X509_INFO_read_bio_ex() to add entries to, and reading fails, OpenSSL frees every entry in the stack, both the old ones and any new ones, but leaves them in the stack.  Impact summary: An applicat",
-      "package": "openssl-provider-legacy",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "no-fix-available"
-    },
-    {
-      "id": "5c2b5a8a2b42",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-119376",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains a stack exhaustion vulnerability that allows attackers to bypass the SQLITE_LIMIT_EXPR_DEPTH limit by chaining COLLATE postfix operators. Attackers can supply roughly 175,000 chained COLLATE operators in SQL or an untrusted database ",
-      "package": "libsqlite3-0",
-      "version": "3.46.1-7+deb13u2",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2455,44 +2653,44 @@
       "outcome": "below-threshold"
     },
     {
-      "id": "aef3c6676edb",
+      "id": "945f10aef52c",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-35190",
+      "rule": "CVE-2026-114690",
       "severity": "medium",
-      "location": "pkg:deb/debian/libssl3t64@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
-      "message": "libssl3t64 3.5.7-1~deb13u3 (deb): Issue summary: A server configured with the Suite B certificate flag through SSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a fixed group list when it processes a ClientHello whose supported_groups and key_share contain no Suite B group. ",
-      "package": "libssl3t64",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
+      "location": "pkg:deb/debian/gcc-14-base@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "gcc-14-base 14.2.0-19 (deb): A flaw was found in GCC. An out-of-bounds memory access vulnerability exists in the libstdc++ parallel search implementation due to an undersized internal buffer. A local attacker can exploit this flaw by providing crafted search data to an application compiled with para",
+      "package": "gcc-14-base",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
     {
-      "id": "e755017e57f0",
+      "id": "9e2f3f6e1d44",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-35190",
+      "rule": "CVE-2026-114690",
       "severity": "medium",
-      "location": "pkg:deb/debian/openssl@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7",
-      "message": "openssl 3.5.7-1~deb13u3 (deb): Issue summary: A server configured with the Suite B certificate flag through SSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a fixed group list when it processes a ClientHello whose supported_groups and key_share contain no Suite B group.  Im",
-      "package": "openssl",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
+      "location": "pkg:deb/debian/libgcc-s1@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "libgcc-s1 14.2.0-19 (deb): A flaw was found in GCC. An out-of-bounds memory access vulnerability exists in the libstdc++ parallel search implementation due to an undersized internal buffer. A local attacker can exploit this flaw by providing crafted search data to an application compiled with parall",
+      "package": "libgcc-s1",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
     {
-      "id": "cd7fcb221d74",
+      "id": "70bb5517d65a",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-35190",
+      "rule": "CVE-2026-114690",
       "severity": "medium",
-      "location": "pkg:deb/debian/openssl-provider-legacy@3.5.7-1~deb13u3?arch=amd64&distro=debian-13.7&upstream=openssl",
-      "message": "openssl-provider-legacy 3.5.7-1~deb13u3 (deb): Issue summary: A server configured with the Suite B certificate flag through SSL_CTX_set_cert_flags() and with TLS 1.3 enabled may read past the end of a fixed group list when it processes a ClientHello whose supported_groups and key_share contain no Su",
-      "package": "openssl-provider-legacy",
-      "version": "3.5.7-1~deb13u3",
-      "fix_state": "not-fixed",
+      "location": "pkg:deb/debian/libstdc%2B%2B6@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "libstdc++6 14.2.0-19 (deb): A flaw was found in GCC. An out-of-bounds memory access vulnerability exists in the libstdc++ parallel search implementation due to an undersized internal buffer. A local attacker can exploit this flaw by providing crafted search data to an application compiled with paral",
+      "package": "libstdc++6",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
@@ -2553,48 +2751,6 @@
       "outcome": "below-threshold"
     },
     {
-      "id": "e812ea2fdd77",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-119591",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains a stack exhaustion vulnerability in countOfViewOptimization() that allows attackers to crash the host process via count(*) over a large multi-row VALUES clause. Attackers supplying SQL or a database file with a crafted view can trigg",
-      "package": "libsqlite3-0",
-      "version": "3.46.1-7+deb13u2",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "bc8e03ae6428",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-97399",
-      "severity": "low",
-      "location": "pkg:deb/debian/libc-bin@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
-      "message": "libc-bin 2.41-12+deb13u4 (deb): The strncasecmp function in the GNU C Library 2.24 and later optimized for the Power8 architecture may read one byte beyond the input size limit, which may crash a program when that byte is not readable.  This condition may happen when the input strings to the strncas",
-      "package": "libc-bin",
-      "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "430d21773073",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-97399",
-      "severity": "low",
-      "location": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
-      "message": "libc6 2.41-12+deb13u4 (deb): The strncasecmp function in the GNU C Library 2.24 and later optimized for the Power8 architecture may read one byte beyond the input size limit, which may crash a program when that byte is not readable.  This condition may happen when the input strings to the strncasecm",
-      "package": "libc6",
-      "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
       "id": "effd070440ad",
       "category": "vuln",
       "tool": "grype",
@@ -2611,17 +2767,35 @@
       "outcome": "below-threshold"
     },
     {
-      "id": "3ba02d4d716d",
+      "id": "bc8e03ae6428",
       "category": "vuln",
       "tool": "grype",
-      "rule": "CVE-2026-119372",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 built with FTS3/FTS4 and SQLITE_ENABLE_FTS3_PARENTHESIS contains a use-after-free vulnerability in fts3BestSnippet() caused by dangling cached position-list pointers. Attackers can run a full-text MATCH query combining OR and NEAR operators w",
-      "package": "libsqlite3-0",
-      "version": "3.46.1-7+deb13u2",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "rule": "CVE-2026-97399",
+      "severity": "low",
+      "location": "pkg:deb/debian/libc-bin@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
+      "message": "libc-bin 2.41-12+deb13u4 (deb): The strncasecmp function in the GNU C Library 2.24 and later optimized for the Power8 architecture may read one byte beyond the input size limit, which may crash a program when that byte is not readable.  This condition may happen when the input strings to the strncas",
+      "package": "libc-bin",
+      "version": "2.41-12+deb13u4",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "430d21773073",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-97399",
+      "severity": "low",
+      "location": "pkg:deb/debian/libc6@2.41-12%2Bdeb13u4?arch=amd64&distro=debian-13.7&upstream=glibc",
+      "message": "libc6 2.41-12+deb13u4 (deb): The strncasecmp function in the GNU C Library 2.24 and later optimized for the Power8 architecture may read one byte beyond the input size limit, which may crash a program when that byte is not readable.  This condition may happen when the input strings to the strncasecm",
+      "package": "libc6",
+      "version": "2.41-12+deb13u4",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2741,48 +2915,6 @@
       "outcome": "below-threshold"
     },
     {
-      "id": "945f10aef52c",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-114690",
-      "severity": "medium",
-      "location": "pkg:deb/debian/gcc-14-base@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "gcc-14-base 14.2.0-19 (deb): A flaw was found in GCC. An out-of-bounds memory access vulnerability exists in the libstdc++ parallel search implementation due to an undersized internal buffer. A local attacker can exploit this flaw by providing crafted search data to an application compiled with para",
-      "package": "gcc-14-base",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "9e2f3f6e1d44",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-114690",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libgcc-s1@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "libgcc-s1 14.2.0-19 (deb): A flaw was found in GCC. An out-of-bounds memory access vulnerability exists in the libstdc++ parallel search implementation due to an undersized internal buffer. A local attacker can exploit this flaw by providing crafted search data to an application compiled with parall",
-      "package": "libgcc-s1",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "70bb5517d65a",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-114690",
-      "severity": "medium",
-      "location": "pkg:deb/debian/libstdc%2B%2B6@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "libstdc++6 14.2.0-19 (deb): A flaw was found in GCC. An out-of-bounds memory access vulnerability exists in the libstdc++ parallel search implementation due to an undersized internal buffer. A local attacker can exploit this flaw by providing crafted search data to an application compiled with paral",
-      "package": "libstdc++6",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
       "id": "724fe6735265",
       "category": "vuln",
       "tool": "grype",
@@ -2792,8 +2924,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): Passing an effectively empty string to the `,ccs=` syntax extension of the mode argument in the `fopen` function in the GNU C Library version 2.45 or earlier may result in a heap buffer overflow when the mode string input to the function is attacker controlled.    Thi",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2806,8 +2940,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): Passing an effectively empty string to the `,ccs=` syntax extension of the mode argument in the `fopen` function in the GNU C Library version 2.45 or earlier may result in a heap buffer overflow when the mode string input to the function is attacker controlled.    This u",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2918,8 +3054,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): A time-of-check to time-of-use (TOCTOU) race condition in the dynamic loader (ld.so) of the GNU C Library (glibc) versions 2.14 through 2.44 allows a local attacker to escalate privileges. When expanding $ORIGIN in DT_RPATH for setuid/setgid (AT_SECURE) programs, glib",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -2932,6 +3070,22 @@
       "message": "libc6 2.41-12+deb13u4 (deb): A time-of-check to time-of-use (TOCTOU) race condition in the dynamic loader (ld.so) of the GNU C Library (glibc) versions 2.14 through 2.44 allows a local attacker to escalate privileges. When expanding $ORIGIN in DT_RPATH for setuid/setgid (AT_SECURE) programs, glibc v",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "7cd911277d47",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-119377",
+      "severity": "low",
+      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
+      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains an authorization bypass vulnerability in lookupName() that invokes the authorizer only for the first joined table's USING column. Attackers able to submit SQL can query a shared USING column in a RIGHT or FULL JOIN to read columns de",
+      "package": "libsqlite3-0",
+      "version": "3.46.1-7+deb13u2",
       "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
@@ -2979,20 +3133,6 @@
       "outcome": "below-threshold"
     },
     {
-      "id": "7cd911277d47",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-119377",
-      "severity": "low",
-      "location": "pkg:deb/debian/libsqlite3-0@3.46.1-7%2Bdeb13u2?arch=amd64&distro=debian-13.7&upstream=sqlite3",
-      "message": "libsqlite3-0 3.46.1-7+deb13u2 (deb): SQLite before 3.54.0 contains an authorization bypass vulnerability in lookupName() that invokes the authorizer only for the first joined table's USING column. Attackers able to submit SQL can query a shared USING column in a RIGHT or FULL JOIN to read columns de",
-      "package": "libsqlite3-0",
-      "version": "3.46.1-7+deb13u2",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
       "id": "2e6bb473f785",
       "category": "vuln",
       "tool": "grype",
@@ -3002,8 +3142,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): A stack-based buffer overflow in the dynamic loader (ld.so) of the GNU C Library (glibc) versions 2.14 through 2.44 allows a local attacker to crash or corrupt the memory of setuid/setgid (AT_SECURE) programs.  When such a program's DT_RPATH or DT_RUNPATH begins with ",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -3016,8 +3158,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): A stack-based buffer overflow in the dynamic loader (ld.so) of the GNU C Library (glibc) versions 2.14 through 2.44 allows a local attacker to crash or corrupt the memory of setuid/setgid (AT_SECURE) programs.  When such a program's DT_RPATH or DT_RUNPATH begins with $OR",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -3058,8 +3202,10 @@
       "message": "libc-bin 2.41-12+deb13u4 (deb): Calling wordexp with WRDE_APPEND in the GNU C Library version 2.0 to version 2.43\u00a0can cause the interface to return invalid memory in the we_wordv member, which on subsequent calls to wordfree may abort the process.",
       "package": "libc-bin",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -3072,8 +3218,10 @@
       "message": "libc6 2.41-12+deb13u4 (deb): Calling wordexp with WRDE_APPEND in the GNU C Library version 2.0 to version 2.43\u00a0can cause the interface to return invalid memory in the we_wordv member, which on subsequent calls to wordfree may abort the process.",
       "package": "libc6",
       "version": "2.41-12+deb13u4",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.41-12+deb13u5"
+      ],
       "outcome": "below-threshold"
     },
     {
@@ -3087,6 +3235,48 @@
       "package": "perl-base",
       "version": "5.40.1-6+deb13u1",
       "fix_state": "not-fixed",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "c41c432baf0b",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-115455",
+      "severity": "negligible",
+      "location": "pkg:deb/debian/gcc-14-base@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "gcc-14-base 14.2.0-19 (deb): A flaw was found in GCC libstdc++. When an application extracts data into a bitset from a wide-character stream, internal stack memory allocation fails to properly account for character size and alignment. An attacker capable of supplying crafted input to an affected app",
+      "package": "gcc-14-base",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "e923f041d4ed",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-115455",
+      "severity": "negligible",
+      "location": "pkg:deb/debian/libgcc-s1@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "libgcc-s1 14.2.0-19 (deb): A flaw was found in GCC libstdc++. When an application extracts data into a bitset from a wide-character stream, internal stack memory allocation fails to properly account for character size and alignment. An attacker capable of supplying crafted input to an affected appli",
+      "package": "libgcc-s1",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
+      "fixed_in": [],
+      "outcome": "below-threshold"
+    },
+    {
+      "id": "f52e42be7147",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-115455",
+      "severity": "negligible",
+      "location": "pkg:deb/debian/libstdc%2B%2B6@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
+      "message": "libstdc++6 14.2.0-19 (deb): A flaw was found in GCC libstdc++. When an application extracts data into a bitset from a wide-character stream, internal stack memory allocation fails to properly account for character size and alignment. An attacker capable of supplying crafted input to an affected appl",
+      "package": "libstdc++6",
+      "version": "14.2.0-19",
+      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },
@@ -3255,48 +3445,6 @@
       "package": "util-linux",
       "version": "2.41.5-0+deb13u1",
       "fix_state": "not-fixed",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "c41c432baf0b",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-115455",
-      "severity": "negligible",
-      "location": "pkg:deb/debian/gcc-14-base@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "gcc-14-base 14.2.0-19 (deb): A flaw was found in GCC libstdc++. When an application extracts data into a bitset from a wide-character stream, internal stack memory allocation fails to properly account for character size and alignment. An attacker capable of supplying crafted input to an affected app",
-      "package": "gcc-14-base",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "e923f041d4ed",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-115455",
-      "severity": "negligible",
-      "location": "pkg:deb/debian/libgcc-s1@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "libgcc-s1 14.2.0-19 (deb): A flaw was found in GCC libstdc++. When an application extracts data into a bitset from a wide-character stream, internal stack memory allocation fails to properly account for character size and alignment. An attacker capable of supplying crafted input to an affected appli",
-      "package": "libgcc-s1",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
-      "fixed_in": [],
-      "outcome": "below-threshold"
-    },
-    {
-      "id": "f52e42be7147",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-115455",
-      "severity": "negligible",
-      "location": "pkg:deb/debian/libstdc%2B%2B6@14.2.0-19?arch=amd64&distro=debian-13.7&upstream=gcc-14",
-      "message": "libstdc++6 14.2.0-19 (deb): A flaw was found in GCC libstdc++. When an application extracts data into a bitset from a wide-character stream, internal stack memory allocation fails to properly account for character size and alignment. An attacker capable of supplying crafted input to an affected appl",
-      "package": "libstdc++6",
-      "version": "14.2.0-19",
-      "fix_state": "wont-fix",
       "fixed_in": [],
       "outcome": "below-threshold"
     },

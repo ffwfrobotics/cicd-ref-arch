@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "hello",
  "env": "dev",
- "commit": "8724d625e22e7e5349e7ee0f96584eee2cf508f3",
- "image": "localhost:5000/hello@sha256:32e87241208ecf189de9ec08aa4fe481c86e20f5e942efb456b665ebd71bd26e",
- "generated": "2026-11-22T05:19:47Z",
+ "commit": "479fc72b2e25381f10b41bff955c8b0b7a5f1f7a",
+ "image": "localhost:5000/hello@sha256:7c9ff3e391af4f743c543a3ce9a629f7622495ee33b5cdab975fc8619ae80ed5",
+ "generated": "2026-11-22T15:08:42Z",
  "counts": {
   "satisfied": 30,
   "not-satisfied": 10
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 8724d625e22e, image pinned by digest"
+     "found": "commit 479fc72b2e25, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 8724d625e22e, image pinned by digest"
+     "found": "commit 479fc72b2e25, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (23 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (9 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (23 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (9 h old)"
     }
    ]
   },
@@ -319,7 +319,7 @@
     {
      "selector": "findings:category=vuln",
      "holds": false,
-     "found": "1 vuln findings would block prod: CVE-2026-85091"
+     "found": "5 vuln findings would block prod: CVE-2026-19499, CVE-2026-5435, CVE-2026-85091"
     },
     {
      "selector": "findings:category=external",
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (23 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (9 h old)"
     }
    ]
   },
@@ -387,7 +387,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (242/244 checks passed)"
+     "found": "security ran: warn (244/250 checks passed)"
     }
    ]
   },
@@ -428,7 +428,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (242/244 checks passed)"
+     "found": "security ran: warn (244/250 checks passed)"
     }
    ]
   },
@@ -449,7 +449,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (242/244 checks passed)"
+     "found": "security ran: warn (244/250 checks passed)"
     }
    ]
   },
@@ -502,7 +502,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "2 findings would block prod: CKV_DOCKER_7, CVE-2026-85091"
+     "found": "6 findings would block prod: CKV_DOCKER_7, CVE-2026-19499, CVE-2026-5435, CVE-2026-85091"
     }
    ]
   },
@@ -549,7 +549,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (242/244 checks passed)"
+     "found": "security ran: warn (244/250 checks passed)"
     }
    ]
   },
@@ -565,7 +565,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "2 findings would block prod: CKV_DOCKER_7, CVE-2026-85091"
+     "found": "6 findings would block prod: CKV_DOCKER_7, CVE-2026-19499, CVE-2026-5435, CVE-2026-85091"
     }
    ]
   },
@@ -633,7 +633,7 @@
     {
      "selector": "findings:category=vuln",
      "holds": false,
-     "found": "1 vuln findings would block prod: CVE-2026-85091"
+     "found": "5 vuln findings would block prod: CVE-2026-19499, CVE-2026-5435, CVE-2026-85091"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 8724d625e22e, image pinned by digest"
+     "found": "commit 479fc72b2e25, image pinned by digest"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/a94b933da43c0e78/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/c448ad4ce3fd18e5/hostexecutor/oscal/platform.yaml"
   }
  ]
 }
