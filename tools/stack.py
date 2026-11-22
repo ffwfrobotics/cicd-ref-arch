@@ -522,6 +522,7 @@ def main():
     ap.add_argument("--cluster", default=os.environ.get("CLUSTER", "c-local"), help="the host cluster (its stack-slots.yaml)")
     ap.add_argument("--provider", default="k0s-pod", choices=sorted(PROVIDERS))
     ap.add_argument("--slot", help="a slot name (default: the first free one)")
+    ap.add_argument("--slot-wait", type=int, default=1800, help="seconds to wait for a free slot (runs queue for capacity)")
     ap.add_argument("--repo", help="the stack's IaC repo, owner/name")
     ap.add_argument("--sha", help="its commit")
     ap.add_argument("--path", default="cluster", help="the Flux tree in the IaC repo (without --definition)")
@@ -551,10 +552,18 @@ def main():
         return 0
 
     def free() -> Slot:
-        for s in slots.values():
-            if not kubectl("-n", s.name, "get", "pod", "node", "--ignore-not-found", "-o", "name").strip():
-                return s
-        raise RuntimeError("no free stack slot: all are in use")
+        """The first slot with nothing in it (no k0s-pod node, no vcluster). Waits for one (--slot-wait), so runs
+        queue for the capacity instead of failing."""
+        t0 = time.time()
+        while True:
+            for s in slots.values():
+                busy = kubectl("-n", s.name, "get", "pods", "-l", "app.kubernetes.io/name=stack-node", "-o", "name").strip() or \
+                    kubectl("-n", s.name, "get", "deploy", "vc", "--ignore-not-found", "-o", "name").strip()
+                if not busy:
+                    return s
+            if time.time() - t0 > a.slot_wait:
+                raise RuntimeError(f"no free stack slot after {a.slot_wait}s: all are in use")
+            time.sleep(20)
 
     slot, rc = None, 0
     try:
