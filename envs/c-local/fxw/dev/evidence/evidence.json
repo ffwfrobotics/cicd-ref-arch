@@ -1,84 +1,84 @@
 {
  "schema": "evidence/v1",
  "repo": "ffwfbot/cicd-evidence",
- "tag": "c-local/fxw/dev/185eab5ae6ef80d9",
- "release": "https://forge.goblincorps.com/ffwfbot/cicd-evidence/releases/tag/c-local/fxw/dev/185eab5ae6ef80d9",
- "created": "2026-11-22T15:10:02Z",
+ "tag": "c-local/fxw/dev/c905c5feedddc2a3",
+ "release": "https://forge.goblincorps.com/ffwfbot/cicd-evidence/releases/tag/c-local/fxw/dev/c905c5feedddc2a3",
+ "created": "2026-11-22T15:15:04Z",
  "meta": {
   "image": "localhost:5000/fxw@sha256:38fdfe74a5ff7989432734ee530bebec67285c2824784beccdf952760920c9e6",
   "commit": "ecbefc8be49dc07f9f6699bbfc24d48fc3606c46",
-  "run": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1221"
+  "reassessed": "2026-11-22T15:15:03+00:00"
  },
  "files": {
   "assessment-results.json": {
-   "sha256": "67943ec71efb4be606eb2a9b1cc6613d1507099f6dde8f0266268e026c4a7ad3",
+   "sha256": "e1b2ec7abba710a4250d2c76acdecddc20bd87efe49f6815e90a7cf3eb39cb9e",
    "bytes": 46544,
-   "url": "https://forge.goblincorps.com/attachments/ddb88d00-774e-4305-bee2-fdcab221992b"
+   "url": "https://forge.goblincorps.com/attachments/5f6e295d-2627-4e0b-97e7-219c77a6e10f"
   },
   "checkov.json": {
    "sha256": "3dacc4997ed3f36b803f90b0d7e10ffa4991a36f1d05a748e4757cc288a649d9",
    "bytes": 17511,
-   "url": "https://forge.goblincorps.com/attachments/2907f8b7-421f-4333-bdff-2547709355a5"
+   "url": "https://forge.goblincorps.com/attachments/09cc6dac-f1b6-4473-a279-fdb86df6b3e7"
   },
   "ci-result-security.json": {
-   "sha256": "8f77593abf35c8bce66bf12f4547fa317d94d06775364f9cc90e9c93c4e84e7e",
-   "bytes": 15195,
-   "url": "https://forge.goblincorps.com/attachments/40ecef65-5688-42d8-989d-77a632625260"
+   "sha256": "721f5450dce68c376f80ce960c81df24b744890b490b2240eb068b23ba267fec",
+   "bytes": 15193,
+   "url": "https://forge.goblincorps.com/attachments/ee2d018b-8a31-41e4-bae5-73759072687b"
   },
   "ci-result-test.json": {
    "sha256": "be62659158e10a8add8130ec41a13f6a78f7a91693033aaf90bb1d2d857786df",
    "bytes": 556,
-   "url": "https://forge.goblincorps.com/attachments/fe1c10ef-3f3e-443a-88b9-e483949940df"
+   "url": "https://forge.goblincorps.com/attachments/a62d699a-16f4-4a06-80ca-b9e9d293e346"
   },
   "findings-image.json": {
    "sha256": "fa4ca09a502d6262d309298b254d02e7660ece13a7230ca4d7d324dddf3f4902",
    "bytes": 154002,
-   "url": "https://forge.goblincorps.com/attachments/465ba8a6-8c4a-4367-a0af-94682ed551e1"
+   "url": "https://forge.goblincorps.com/attachments/5cbc3666-324a-46eb-ae82-01138390b5fc"
   },
   "findings-source.json": {
    "sha256": "3208948a7f23493f6683114cf7d8e889962cf125d1d8587ab731df6f1b0d2964",
    "bytes": 3532,
-   "url": "https://forge.goblincorps.com/attachments/b28900e2-b4a4-480e-adaa-bc8ad3b78f87"
+   "url": "https://forge.goblincorps.com/attachments/3934adc0-7232-4d6d-ada7-ae561ff36027"
   },
   "gitleaks.json": {
    "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
    "bytes": 3,
-   "url": "https://forge.goblincorps.com/attachments/30b4d1f2-c593-4428-ba55-433194256c46"
+   "url": "https://forge.goblincorps.com/attachments/444643a8-e8b5-422e-b739-060c07579949"
   },
   "grype.json": {
    "sha256": "01ba9f97baf6f7b89eb092105dcc3736cccc780735836c87bea090b510488d3c",
    "bytes": 1061191,
-   "url": "https://forge.goblincorps.com/attachments/3bf6ebe3-7c2b-4279-bdbc-29615bc4d5c0"
+   "url": "https://forge.goblincorps.com/attachments/6f3860d2-bbca-4777-af74-bc16ea56fd07"
   },
   "opengrep.sarif": {
    "sha256": "c04297bc405f79337fa3aa5e06edcdcaeb01469478f27d844799c94a84dc3759",
    "bytes": 4695,
-   "url": "https://forge.goblincorps.com/attachments/0662efad-25dc-4e37-8ff3-8d3c26a87eb1"
+   "url": "https://forge.goblincorps.com/attachments/58076281-0006-438d-b486-b66256048a3d"
   },
   "sbom.cdx.json": {
    "sha256": "532b4a91b2455d7b654d4f8f627e69062de80315d3570db555aff6a5d10dcc74",
    "bytes": 489379,
-   "url": "https://forge.goblincorps.com/attachments/88a02083-e7b5-4056-8d21-e6179c6860c7"
+   "url": "https://forge.goblincorps.com/attachments/8afb67a6-46cd-421d-92f0-4a99001d8dbc"
   },
   "sbom.spdx.json": {
    "sha256": "5689929ca94da56bdc8229c2d5394c937bdc7092d769e4bc95be98af996b3028",
    "bytes": 1060395,
-   "url": "https://forge.goblincorps.com/attachments/15cc3935-cde5-4e36-851d-b0359a60defe"
+   "url": "https://forge.goblincorps.com/attachments/f3ccd90f-5201-46f0-8b42-bfb699df1594"
   },
   "scan.log": {
    "sha256": "c06e51fe4bee2c10bd5dba410048a746adcac1f717fb8e2cc3abf1579ba6fec8",
    "bytes": 1197,
-   "url": "https://forge.goblincorps.com/attachments/a440d9ef-f5b1-4c6d-926e-f988698eab54"
+   "url": "https://forge.goblincorps.com/attachments/b53f0e07-64de-4a9d-8f52-f5678bf05082"
   },
   "security.json": {
-   "sha256": "d220db80ee5f9d75fb196755c304e8c940574be49ae2bb995d4cc9cd4040cfdf",
-   "bytes": 168300,
-   "url": "https://forge.goblincorps.com/attachments/9a1d9cb4-1921-4774-a2bf-af15a9a29383"
+   "sha256": "181bd11a3d812f66aff5e7b0744510bb86c00f3f79ef1b7348efec18d065cfa7",
+   "bytes": 168001,
+   "url": "https://forge.goblincorps.com/attachments/26d993a8-2f71-406a-97c9-64d2e8be870d"
   },
   "signature.json": {
    "sha256": "f2fae65388c60bc5f12533bc41138c343e9c73c1610e18619f3281150fb66790",
    "bytes": 198,
-   "url": "https://forge.goblincorps.com/attachments/477d5fd7-bd45-4f8e-81f1-30bef063dc6b"
+   "url": "https://forge.goblincorps.com/attachments/07840cb1-0cf6-4eb5-9759-ef2215c8ba3e"
   }
  }
 }
