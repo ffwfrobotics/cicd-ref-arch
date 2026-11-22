@@ -87,6 +87,10 @@ def generate(work: Path, app: str, source: str, d: dict, update: str) -> list[st
         (work / ".wrap" / "source-files.json").write_text(json.dumps(
             {"source": "src", "files": intake.source_files(work / "src")}, indent=2, sort_keys=True) + "\n")
         out.append(".wrap/source-files.json")
+    own = [f for f in (".gitleaksignore", "security/policy.yaml", "security/vex.openvex.json") if (work / "src" / f).exists()]
+    if own:   # the source's suppressions don't apply here: the IaC root's owners decide, with paths under src/
+        print(f"::notice::{source} has its own suppressions ({', '.join(own)}): they don't apply in the IaC repo. "
+              "Review them and copy what holds, with paths under src/")
     how = "each push to its default branch is committed here and deploys dev" if update == "follow" \
         else "each push opens a PR here; merging it deploys"
     (work / "README.md").write_text((TEMPLATES / "README.md").read_text().format(
