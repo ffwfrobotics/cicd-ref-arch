@@ -47,7 +47,7 @@ runs:
         # as an OCI archive so the SBOM and the scans see exactly what runs
         crane copy --insecure "$PREBUILT" "$PUSH/$NAME:$sha7"
         rm -rf "$out/oci"; crane pull --insecure --format=oci --platform linux/amd64 "$PREBUILT" "$out/oci"
-        tar -C "$out/oci" -cf "$out/image.oci.tar" .
+        tar -C "$out/oci" -cf "$out/image.oci.tar" oci-layout index.json blobs     # no "./" entry: syft refuses it
         jq -n --arg d "${PREBUILT##*@}" --arg src "$PREBUILT" '{"containerimage.digest": $d, prebuilt: $src}' > "$out/build-metadata.json"
       else
         buildctl --addr "$BUILDKIT" build --frontend dockerfile.v0 \

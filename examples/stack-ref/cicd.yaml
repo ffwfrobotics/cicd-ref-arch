@@ -4,8 +4,10 @@ apiVersion: cicd.ffwf.net/v1alpha1
 kind: Stack
 metadata: {name: stack-ref}
 spec:
-  provider: k0s-pod
-  definition: cluster
-  check: {timeout: 900s, minKustomizations: 6}
+  definition: cluster               # base/, k0s/config.yaml, providers/<provider>/ (what Flux applies)
+  check:
+    timeout: 900s
+    minKustomizations: 6
+    smoke: {run: checks/smoke.sh, needs: [api]}
   environments:
-    dev: {branch: main, target: nested}
+    dev: {branch: main, target: nested, provider: k0s-pod}

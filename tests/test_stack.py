@@ -56,3 +56,17 @@ class Check(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Config(unittest.TestCase):
+    def test_slot_wins_over_the_stack_config(self):
+        s = stack.load_slots(REPO, "c-local")[0]
+        mine = "apiVersion: k0s.k0sproject.io/v1beta1\nkind: ClusterConfig\nspec:\n  network: {podCIDR: 10.244.0.0/16}\n  api: {sans: [x.example]}\n"
+        cfg = yaml.safe_load(stack.K0sPod().k0s_config(s, mine))["spec"]
+        self.assertEqual(cfg["network"]["podCIDR"], s.pod_cidr)
+        self.assertIn("x.example", cfg["api"]["sans"])
+        self.assertIn(s.dns_name, cfg["api"]["sans"])
+
+    def test_smoke_not_exercised_without_the_capability(self):
+        h = stack.ClusterHandle("x", "https://a", "", frozenset({"api"}), "none", "t@1")
+        self.assertEqual(stack.smoke(h, "true", ["api", "nodes"])["result"], "not-exercised")

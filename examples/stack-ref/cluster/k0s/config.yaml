@@ -1,0 +1,8 @@
+# Node settings shared by every k0s-based provider of this stack. The provider merges them with the
+# slot it is given: the slot's pod and service ranges and the API's names always win (the platform
+# allocates them, docs/stacks.md), so they don't belong here.
+apiVersion: k0s.k0sproject.io/v1beta1
+kind: ClusterConfig
+metadata: {name: stack}
+spec:
+  telemetry: {enabled: false}

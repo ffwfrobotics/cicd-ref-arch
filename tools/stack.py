@@ -27,6 +27,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
 import urllib.request
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -56,6 +57,7 @@ class ClusterRequest:
     name: str               # the stack
     run: str
     fleet_ref: str          # <repo>@<commit>:<path>, what bootstrap points Flux at
+    k0s_config: str = ""    # the stack's cluster/k0s/config.yaml, if any: merged under the slot's settings
     registry: str = ""      # where the cluster pulls images from (a mirror); empty: the internet
     secrets_ref: str = ""   # per-stack secrets (SOPS/age), none yet
     data_ref: str | None = None
@@ -140,17 +142,24 @@ class K0sPod:
         self.port_forward = port_forward
         self._pf = None
 
-    def k0s_config(self, s: Slot) -> str:
-        return yaml.safe_dump({"apiVersion": "k0s.k0sproject.io/v1beta1", "kind": "ClusterConfig", "metadata": {"name": "stack"},
-                               "spec": {"api": {"sans": [s.dns_name, f"api.{s.name}", "127.0.0.1", "localhost"]},
-                                        "network": {"provider": "kuberouter", "podCIDR": s.pod_cidr, "serviceCIDR": s.svc_cidr},
-                                        "telemetry": {"enabled": False}}})
+    def k0s_config(self, s: Slot, stack_config: str = "") -> str:
+        """The stack's own k0s settings, with the slot's ranges and API names on top: the platform allocates those."""
+        cfg = yaml.safe_load(stack_config) if stack_config else None
+        cfg = cfg or {"apiVersion": "k0s.k0sproject.io/v1beta1", "kind": "ClusterConfig", "metadata": {"name": "stack"}, "spec": {}}
+        spec = cfg.setdefault("spec", {})
+        spec.setdefault("telemetry", {"enabled": False})
+        api = spec.setdefault("api", {})
+        api["sans"] = sorted(set(api.get("sans") or []) | {s.dns_name, f"api.{s.name}", "127.0.0.1", "localhost"})
+        net = spec.setdefault("network", {})
+        net.setdefault("provider", "kuberouter")
+        net["podCIDR"], net["serviceCIDR"] = s.pod_cidr, s.svc_cidr
+        return yaml.safe_dump(cfg)
 
     def manifests(self, req: ClusterRequest) -> str:
         s = req.slot
         labels = {"app.kubernetes.io/name": "stack-node", "cicd.ffwf.net/stack": req.name, "cicd.ffwf.net/run": str(req.run)}
         cm = {"apiVersion": "v1", "kind": "ConfigMap", "metadata": {"name": "node-config", "labels": labels},
-              "data": {"k0s.yaml": self.k0s_config(s)}}
+              "data": {"k0s.yaml": self.k0s_config(s, req.k0s_config)}}
         svc = {"apiVersion": "v1", "kind": "Service", "metadata": {"name": "api", "labels": labels},
                "spec": {"selector": {"app.kubernetes.io/name": "stack-node"},
                         "ports": [{"name": "api", "port": s.api_port, "targetPort": 6443}]}}
@@ -268,6 +277,17 @@ def bootstrap(h: ClusterHandle, a) -> dict:
     return {"repo": a.repo, "commit": a.sha, "path": a.path, "sources": [{"name": n, **x} for n, x in subs.items()]}
 
 
+def repo_file(a, path: str) -> str:
+    """A file of the stack's IaC repo at the commit being run ("" if it isn't there)."""
+    req = urllib.request.Request(f"{a.server.rstrip('/')}/api/v1/repos/{a.repo}/raw/{path}?ref={a.sha}",
+                                 headers={"Authorization": f"token {os.environ['FORGEJO_TOKEN']}"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return r.read().decode()
+    except urllib.error.HTTPError:
+        return ""
+
+
 def kustomizations(k) -> list[dict]:
     out = []
     for x in json.loads(k("get", "kustomizations.kustomize.toolkit.fluxcd.io", "-A", "-o", "json", timeout=60)).get("items", []):
@@ -275,6 +295,46 @@ def kustomizations(k) -> list[dict]:
         out.append({"name": x["metadata"]["name"], "ready": ready.get("status") == "True",
                     "reason": ready.get("reason"), "message": (ready.get("message") or "")[:200]})
     return out
+
+
+KUBECTL_IMAGE = os.environ.get("STACK_KUBECTL_IMAGE", "cgr.dev/chainguard/kubectl:latest-dev@sha256:ee975dba7273819f032fec5e7b2ccf27189b1389f0d0930a5a9c98a8d8e3dd80")  # has a shell for the script
+
+
+def smoke(h: ClusterHandle, script: str, needs: list[str], timeout: int = 300) -> dict:
+    """The stack's own check script, run INSIDE the nested cluster as a Job with that cluster's kubectl: never on
+    the platform's runner, where it would sit next to the platform's credentials (akb #493, correction 1)."""
+    missing = sorted(set(needs) - set(h.capabilities))
+    if missing:
+        return {"result": "not-exercised", "needs": sorted(needs), "not_exercised": missing}
+    k = HandleFile(h)
+    ns = "stack-checks"
+    items = [{"apiVersion": "v1", "kind": "Namespace", "metadata": {"name": ns}},
+             {"apiVersion": "v1", "kind": "ServiceAccount", "metadata": {"name": "smoke", "namespace": ns}},
+             {"apiVersion": "rbac.authorization.k8s.io/v1", "kind": "ClusterRoleBinding", "metadata": {"name": "stack-smoke"},
+              "roleRef": {"apiGroup": "rbac.authorization.k8s.io", "kind": "ClusterRole", "name": "view"},
+              "subjects": [{"kind": "ServiceAccount", "name": "smoke", "namespace": ns}]},
+             {"apiVersion": "v1", "kind": "ConfigMap", "metadata": {"name": "smoke", "namespace": ns}, "data": {"smoke.sh": script}},
+             {"apiVersion": "batch/v1", "kind": "Job", "metadata": {"name": "smoke", "namespace": ns},
+              "spec": {"backoffLimit": 0, "activeDeadlineSeconds": timeout, "template": {"spec": {
+                  "serviceAccountName": "smoke", "restartPolicy": "Never",
+                  "containers": [{"name": "smoke", "image": KUBECTL_IMAGE, "command": ["/usr/bin/sh", "/check/smoke.sh"],
+                                  "volumeMounts": [{"name": "check", "mountPath": "/check"}]}],
+                  "volumes": [{"name": "check", "configMap": {"name": "smoke", "defaultMode": 0o555}}]}}}}]
+    k("apply", "-f", "-", input=json.dumps({"apiVersion": "v1", "kind": "List", "items": items}))
+    t0 = time.time()
+    state = ""
+    while time.time() - t0 < timeout + 30:
+        st = json.loads(k("-n", ns, "get", "job", "smoke", "-o", "json", timeout=30)).get("status") or {}
+        if st.get("succeeded"):
+            state = "passed"
+            break
+        if st.get("failed"):
+            state = "failed"
+            break
+        time.sleep(5)
+    logs = k("-n", ns, "logs", "job/smoke", "--tail=20", check=False, timeout=30)
+    return {"result": state or "timeout", "seconds": round(time.time() - t0), "needs": sorted(needs),
+            "exercised": sorted(needs), "log": logs[-1500:]}
 
 
 def check(h: ClusterHandle, a) -> dict:
@@ -309,11 +369,14 @@ def main():
     ap.add_argument("--slot", help="a slot name (default: the first free one)")
     ap.add_argument("--repo", help="the stack's IaC repo, owner/name")
     ap.add_argument("--sha", help="its commit")
-    ap.add_argument("--path", default="cluster", help="the Flux tree in the IaC repo")
+    ap.add_argument("--path", default="cluster", help="the Flux tree in the IaC repo (without --definition)")
+    ap.add_argument("--definition", help="the stack's definition dir: base/, k0s/config.yaml, providers/<provider>/")
     ap.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
     ap.add_argument("--timeout", type=int, default=900)
     ap.add_argument("--min-kustomizations", type=int, default=2)
     ap.add_argument("--needs", nargs="*", default=[], help="capabilities the stack's checks need")
+    ap.add_argument("--smoke", help="the stack's check script (a path in its repo), run inside the nested cluster")
+    ap.add_argument("--smoke-needs", nargs="*", default=["api"])
     ap.add_argument("--root", default=str(ROOT), help="the platform repo (clusters/<cluster>/stack-slots.yaml)")
     ap.add_argument("--port-forward", action="store_true", help="reach the nested API through kubectl port-forward (a workstation)")
     ap.add_argument("--out", default="stack.json")
@@ -339,7 +402,10 @@ def main():
         slot = slots[a.slot] if a.slot else free()
         rec["slot"] = asdict(slot)
         t0 = time.time()
-        h = prov.up(ClusterRequest(slot=slot, name=a.name, run=a.run, fleet_ref=f"{a.repo}@{a.sha}:{a.path}"))
+        k0s_cfg = repo_file(a, f"{a.definition}/k0s/config.yaml") if a.definition else ""
+        if a.definition and repo_file(a, f"{a.definition}/providers/{prov.name}/kustomization.yaml"):
+            a.path = f"{a.definition}/providers/{prov.name}"       # the provider's overlay of the stack's base
+        h = prov.up(ClusterRequest(slot=slot, name=a.name, run=a.run, fleet_ref=f"{a.repo}@{a.sha}:{a.path}", k0s_config=k0s_cfg))
         rec["steps"]["up"] = {"result": "ok", "seconds": round(time.time() - t0), "api": h.api_endpoint, **prov.ready(h)}
         print(f"up: {slot.name}, {h.provider}, nested API {h.api_endpoint} in {rec['steps']['up']['seconds']}s")
         t0 = time.time()
@@ -349,6 +415,10 @@ def main():
         print(f"check: {c['result']} after {c['seconds']}s ({len(c['kustomizations'])} Kustomizations)"
               + (f"; not exercised here: {', '.join(c['not_exercised'])}" if c["not_exercised"] else ""))
         rc = 0 if c["result"] == "ready" else 1
+        if rc == 0 and a.smoke:
+            sm = rec["steps"]["smoke"] = smoke(h, repo_file(a, a.smoke), a.smoke_needs)
+            print(f"smoke: {sm['result']}" + (f" ({sm.get('seconds')}s)" if sm.get("seconds") is not None else ""))
+            rc = 0 if sm["result"] in ("passed", "not-exercised") else 1
     except (RuntimeError, TimeoutError, subprocess.CalledProcessError, KeyError) as e:
         rec["error"] = str(e)[-500:]
         print(f"error: {rec['error']}", file=sys.stderr)
@@ -358,7 +428,10 @@ def main():
             prov.down(slot)
             rec["steps"]["down"] = {"result": "ok"}
             print(f"down: {slot.name} is free")
-    rec["word"] = (rec["steps"].get("check") or {}).get("result") or ("error" if rc == 2 else "ok")
+    word = (rec["steps"].get("check") or {}).get("result") or ("error" if rc == 2 else "ok")
+    if word == "ready" and (rec["steps"].get("smoke") or {}).get("result") in ("failed", "timeout"):
+        word = f"smoke-{rec['steps']['smoke']['result']}"
+    rec["word"] = word
     Path(a.out).write_text(json.dumps(rec, indent=2) + "\n")
     print(f"result: {rec['word']}")
     return rc
