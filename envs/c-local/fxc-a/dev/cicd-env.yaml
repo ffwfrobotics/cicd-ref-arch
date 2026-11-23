@@ -1,0 +1,21 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: fxc-a
+env: dev
+dir: dev
+namespace: fxc-a-dev
+branch: main
+hosts:
+- fxc-a-dev.c-local.k.ffwf.net
+image: localhost:5000/fxc-a@sha256:1a0893c7e2cfff901462c5395f47eeff22a4cdbe710c44b30290b710877133ad
+repo: ffwf-iac/fx-mono-cfg
+commit: a8a1e51c9ba0f9ea70e1d26502a41ff21a2abde5
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1431
+sources:
+- path: svc-a
+  repo: ffwf-fixtures/fx-svc-a
+  commit: 2560275a71ad7a4de26ec53822298a2ce44cbf27
+- path: config
+  repo: ffwf-iac/fx-config
+  commit: 629770c2e41f6db8d3b8896f815674f9fa7489bd
+renderedAt: '2026-11-23T01:27:37Z'
