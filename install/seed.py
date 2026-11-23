@@ -73,3 +73,14 @@ for app, uris in (seed.get("oauth_apps") or {}).items():
     r = ok(c.post("/user/applications/oauth2", json={"name": app, "redirect_uris": uris, "confidential_client": True}), 201).json()
     keep(f, f"OAUTH_CLIENT_ID={r['client_id']}\nOAUTH_CLIENT_SECRET={r['client_secret']}")
     print(f"oauth app {app}: made ({f})")
+
+for repo, pr in (seed.get("protections") or {}).items():
+    if c.get(f"/repos/{repo}").status_code != 200:
+        print(f"protection {repo}: no repo yet"); continue
+    body = {"rule_name": pr["branch"], "enable_push": True, "enable_push_whitelist": True,
+            "push_whitelist_usernames": pr.get("push", []), "enable_merge_whitelist": True,
+            "merge_whitelist_usernames": pr.get("merge", []), "required_approvals": 0, "block_on_rejected_reviews": True}
+    have = [b["rule_name"] for b in ok(c.get(f"/repos/{repo}/branch_protections"), 200).json()]
+    r = c.patch(f"/repos/{repo}/branch_protections/{pr['branch']}", json=body) if pr["branch"] in have \
+        else c.post(f"/repos/{repo}/branch_protections", json=body)
+    ok(r, 200, 201); print(f"protection {repo}@{pr['branch']}: push {pr.get('push')}, merge {pr.get('merge')}")

@@ -22,3 +22,8 @@ tokens:                     # long-lived tokens; the factory bot has none (its c
   delivery-bot: [write:repository, write:issue, write:organization, read:user, read:misc]
 oauth_apps:
   dashboard: ["https://dashboard.c-johnopia.johnopia.net/auth/callback", "https://dashboard-dev.c-johnopia.johnopia.net/auth/callback"]
+protections:                # enforcement before the merge (docs/promotion.md): only the platform's account
+  johnopia/cicd-platform:   # pushes to master (environments) and merges promotions (an approver's Sign off)
+    branch: master
+    push: [delivery-bot]
+    merge: [delivery-bot]
