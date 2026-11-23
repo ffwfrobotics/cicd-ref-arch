@@ -35,7 +35,7 @@ class Names(unittest.TestCase):
 class Render(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
-        shutil.copytree(REPO / "clusters", self.root / "clusters")
+        shutil.copytree(REPO / "tests/fixtures/clusters", self.root / "clusters")   # a fixture: the product carries no instance
         self.app_path = REPO / "examples/hello/cicd.yaml"
         self.app = cicd.load_app(str(self.app_path))
         self.cl = cicd.load_cluster(self.root, "c-local")

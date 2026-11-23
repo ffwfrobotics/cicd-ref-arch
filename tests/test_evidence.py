@@ -167,7 +167,7 @@ class Render(unittest.TestCase):
 
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
-        shutil.copytree(REPO / "clusters", self.root / "clusters")
+        shutil.copytree(REPO / "tests/fixtures/clusters", self.root / "clusters")   # a fixture: the product carries no instance
         cfg = self.root / "clusters/c-local/cicd-cluster.yaml"
         c = yaml.safe_load(cfg.read_text())
         c["evidence"] = {"repo": "cicd/evidence", "keep": 1}
