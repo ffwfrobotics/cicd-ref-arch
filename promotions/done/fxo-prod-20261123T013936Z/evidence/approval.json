@@ -1,0 +1,10 @@
+{
+  "requestedBy": "cicd-e2e",
+  "pr": null,
+  "author": null,
+  "approvedBy": [],
+  "mergedBy": null,
+  "separated": false,
+  "summary": "commit 6e530ef did not arrive through a merged pull request (6e530ef: HTTP Error 404: Not Found)",
+  "promotion": "fxo-prod-20261123T013936Z"
+}

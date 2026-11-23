@@ -1,0 +1,27 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: fxo-prod-20261123T013936Z
+app: fxo
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/fxo@sha256:0ee8f95418b976002cd5807f4eaffc0582feec4f0d0f6ed12f4b48ae601ff606
+commit: f9bdd2d8ad5259712615061127f7478ac38d577a
+notBefore: '2026-11-23T01:39:36Z'
+requestedBy: cicd-e2e
+reason: ''
+appliedAt: '2026-11-23T01:56:37Z'
+approval: 'commit 6e530ef did not arrive through a merged pull request (6e530ef: HTTP
+  Error 404: Not Found)'
+approvalRecord:
+  requestedBy: cicd-e2e
+  pr: null
+  author: null
+  approvedBy: []
+  mergedBy: null
+  separated: false
+  summary: 'commit 6e530ef did not arrive through a merged pull request (6e530ef:
+    HTTP Error 404: Not Found)'
+security: 'applied with security gate fail (180 blocking: config/CKV_K8S_8, config/CKV_K8S_11,
+  config/CKV_K8S_40, config/CKV_K8S_22, vuln/CVE-2026-111497); self-assessment 25/40
+  satisfied'
