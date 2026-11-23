@@ -13,4 +13,4 @@ resources:
 images:
 - name: app-image
   newName: localhost:5000/dashboard
-  digest: sha256:feb6bc6a44a08f1984efe76f8ab680c095f7b3dd4afe6dbea4059491efbe356e
+  digest: sha256:cbda5ed2824d8ef4ed1bfca08cbdd199771dadf288ec1e1e961ea8f54b6e2004
