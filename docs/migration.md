@@ -49,6 +49,27 @@ Each technique below was used, or hit as a problem, in the Johnopia trial (akb #
 | Approval needed write on the platform repo | `spec.approvers` and the dashboard's Sign off (docs/promotion.md) |
 | An upgrade recorded a product commit that a later rebase replaced | Run `new-instance.sh` from a commit that is already pushed upstream |
 | The lab bootstrap's generated admin password ended with a newline | Fixed in `bootstrap.sh` |
+| Lint globbed `clusters/*/exposure/`, which a new instance doesn't have | `nullglob` |
+| `wrap.py` put new apps on `c-local` | `instance.yaml` `cluster` |
+| Wrapped apps' generated deployment had no liveness probe and a writable root: two blocking findings on every wrapped app | Same defaults as `templates/app` |
+| A wrapped app's developers (write on the source, not on the IaC repo) couldn't request promotions | Dashboard 0.15.1: write on a source counts |
+| The forge must trust the instance CA to deliver webhooks to the dashboard | Lab Forgejo mounts `ca-bundle` and sets `SSL_CERT_FILE` |
+| A factory grant added CI/CD's account even where the factory has its own | Dashboard 0.15.4: `FACTORY_BOT` |
+| With master protected, an admin can't push or merge the platform repo | Upgrades and enrollments go in as PRs that the platform's account merges (as intended) |
+
+## Verified on Johnopia (2026-11-23)
+
+- **The dashboard** was built, scanned and deployed by Johnopia's own CI from its own forge, and
+  serves the Johnopia brand and theme.
+- **`payments/checkout`**:
+  - wrapped into `johnopia-iac/checkout` and deployed to dev;
+  - **dana** (developer) requested a prod promotion;
+  - **avery** (read only, in `payments/approvers`) signed it off in the dashboard;
+  - `delivery-bot` merged it with trailers, prod went live, and `approval.json` shows
+    `separated: true` with `approvedVia`.
+- **Factory:** jo-admin granted `payments/checkout`, adding `factory-bot` as a collaborator. Dana ran
+  a pi session on the local model, which pushed `factory/<session>` with its trailers. Its token
+  was deleted, and `delivery-bot` kept read.
 
 ## Still open
 
