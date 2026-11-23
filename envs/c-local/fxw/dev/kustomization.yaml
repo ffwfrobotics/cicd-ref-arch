@@ -13,4 +13,4 @@ resources:
 images:
 - name: app-image
   newName: localhost:5000/fxw
-  digest: sha256:98d4ed8fe5883ff2251822bb35e693011730723dec5c14cedc0c7dea4a4c44dd
+  digest: sha256:f96ee7b68bf3ef77868213d7f85a667a98d73062ccb5e6dc060a483b7b0dfbbd
