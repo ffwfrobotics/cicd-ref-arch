@@ -69,6 +69,9 @@ spec:
         - mountPath: /var/run/secrets/dashboard-platform
           name: platform
           readOnly: true
+        - mountPath: /var/run/secrets/dashboard-factory
+          name: factory
+          readOnly: true
       enableServiceLinks: false
       securityContext:
         fsGroup: 65532
@@ -92,3 +95,8 @@ spec:
           defaultMode: 288
           optional: true
           secretName: dashboard-platform
+      - name: factory
+        secret:
+          defaultMode: 288
+          optional: true
+          secretName: dashboard-factory
