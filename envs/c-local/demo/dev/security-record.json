@@ -2,8 +2,8 @@
   "schema": "security-findings/v1",
   "app": "demo",
   "image": "localhost:5000/demo@sha256:2410c183a9c2b581516026af88e8c73afa156d060590da72768237f859b5685a",
-  "commit": "f184b3b97641845b0f13bb721c5a07bfa75404fd",
-  "generated": "2026-11-22T23:56:41Z",
+  "commit": "7692958684566252f39a302d82b0bb62f294d985",
+  "generated": "2026-11-23T00:00:21Z",
   "scans": {
     "source": {
       "generated": "2026-11-22T23:55:27Z",
@@ -30,26 +30,18 @@
       }
     },
     "image": {
-      "generated": "2026-11-22T23:56:41Z",
-      "commit": "f184b3b97641845b0f13bb721c5a07bfa75404fd",
+      "generated": "2026-11-23T00:00:21Z",
+      "commit": "b2ba9595e298818315169bf77776f08a92215830",
       "image": "localhost:5000/demo@sha256:2410c183a9c2b581516026af88e8c73afa156d060590da72768237f859b5685a",
       "tools": {
-        "syft": "16.1.13",
+        "syft": "(SBOM kept from the build)",
         "grype": "6",
         "grype-db": "2026-11-22T06:19:59Z"
       },
       "evidence": {
-        "sbom-cyclonedx": {
-          "file": "sbom.cdx.json",
-          "sha256": "0af9492f1969c363328b3d382849c2dd751aad605439af88bdf8c43c30379264"
-        },
-        "sbom-spdx": {
-          "file": "sbom.spdx.json",
-          "sha256": "b790cdc4a5d01fece6c737c7fdfd6d409dbb0a11c1c2136e7adeb6fda0756d08"
-        },
         "grype": {
           "file": "grype.json",
-          "sha256": "1b03f4dfa78093f3fdc2e0d55edfad19639a6e87d9a80dda0be39f849847ba36"
+          "sha256": "e15d6cf50bbaeed7b2973cb461839aa5219fffc13bf97fc5df8a9b30006a796e"
         }
       }
     }
@@ -57,15 +49,32 @@
   "gate": {
     "env": "dev",
     "mode": "report",
-    "status": "warn",
+    "status": "pass",
     "blocking": 0,
     "counts": {
       "suppressed": 8,
-      "below-threshold": 8,
-      "fail": 1
+      "below-threshold": 8
     },
     "notes": []
   },
+  "external": [
+    {
+      "test": "external/TEN-990001-b3426e",
+      "title": "gunicorn < 25.0 Unsupported Version (demo)",
+      "check": "package",
+      "result": "pass",
+      "detail": "no gunicorn <25.0 in the SBOM",
+      "source": "tenable-csv"
+    },
+    {
+      "test": "external/TEN-142960-b3426e",
+      "title": "HSTS Missing From HTTPS Server (RFC 6797)",
+      "check": "endpoint",
+      "result": "pass",
+      "detail": "https://demo-dev.c-local.k.ffwf.net/: Strict-Transport-Security: max-age=31536000; includeSubDomains",
+      "source": "tenable-csv"
+    }
+  ],
   "findings": [
     {
       "id": "8ecd1d8deb98",
@@ -186,19 +195,6 @@
         "reason": "the platform renders a default-deny NetworkPolicy for every environment",
         "expires": ""
       }
-    },
-    {
-      "id": "e2a20f26a4da",
-      "category": "external",
-      "tool": "ledger",
-      "rule": "external/TEN-142960-b3426e",
-      "severity": "medium",
-      "location": "demo.c-local.k.ffwf.net:443",
-      "message": "HSTS Missing From HTTPS Server (RFC 6797): checked after deploy (cicd-ref-arch assess workflow)",
-      "check": "endpoint",
-      "ledger_id": "TEN-142960-b3426e",
-      "unknown": true,
-      "outcome": "fail"
     }
   ]
 }
