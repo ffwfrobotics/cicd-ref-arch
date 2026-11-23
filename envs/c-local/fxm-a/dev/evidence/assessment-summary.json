@@ -1,0 +1,695 @@
+{
+ "schema": "assessment-summary/v1",
+ "kind": "self-assessment",
+ "app": "fxm-a",
+ "env": "dev",
+ "commit": "da6a4bb710159a8a069d5745c92f0e08c04c1999",
+ "image": "localhost:5000/fxm-a@sha256:1a0893c7e2cfff901462c5395f47eeff22a4cdbe710c44b30290b710877133ad",
+ "generated": "2026-11-23T00:21:32Z",
+ "counts": {
+  "satisfied": 30,
+  "not-satisfied": 10
+ },
+ "coverage": {
+  "automated": 31,
+  "uncovered": 5,
+  "not-applicable": 3,
+  "manual": 1
+ },
+ "objectives": [
+  {
+   "id": "cm-2_obj.a-1",
+   "control": "cm-2",
+   "objective": "a current baseline configuration of the system is developed and documented;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "The rendered manifests and the image digest of every environment are written to git by the pipeline.",
+   "evidence": [
+    {
+     "selector": "manifests",
+     "holds": true,
+     "found": "rendered manifests kept in git"
+    }
+   ]
+  },
+  {
+   "id": "cm-2_obj.a-2",
+   "control": "cm-2",
+   "objective": "a current baseline configuration of the system is maintained under configuration control;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "The baseline changes only through commits (app repo, then state repo); images are pinned by digest.",
+   "evidence": [
+    {
+     "selector": "config-control",
+     "holds": true,
+     "found": "commit da6a4bb71015, image pinned by digest"
+    }
+   ]
+  },
+  {
+   "id": "cm-2_obj.b.1",
+   "control": "cm-2",
+   "objective": "the baseline configuration of the system is reviewed and updated [cm-02_odp.01];",
+   "layer": null,
+   "coverage": "uncovered",
+   "state": "not-satisfied",
+   "reason": "no implementation statement in any layer",
+   "evidence": []
+  },
+  {
+   "id": "cm-2_obj.b.2",
+   "control": "cm-2",
+   "objective": "the baseline configuration of the system is reviewed and updated when required due to [cm-02_odp.02];",
+   "layer": null,
+   "coverage": "uncovered",
+   "state": "not-satisfied",
+   "reason": "no implementation statement in any layer",
+   "evidence": []
+  },
+  {
+   "id": "cm-2_obj.b.3",
+   "control": "cm-2",
+   "objective": "the baseline configuration of the system is reviewed and updated when system components are installed or upgraded.",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Installing or upgrading a component is a commit, which re-renders and re-records the baseline.",
+   "evidence": [
+    {
+     "selector": "config-control",
+     "holds": true,
+     "found": "commit da6a4bb71015, image pinned by digest"
+    },
+    {
+     "selector": "manifests",
+     "holds": true,
+     "found": "rendered manifests kept in git"
+    }
+   ]
+  },
+  {
+   "id": "cm-8_obj.a.1",
+   "control": "cm-8",
+   "objective": "an inventory of system components that accurately reflects the system is developed and documented;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "syft inventories the built image itself, so the inventory is what runs.",
+   "evidence": [
+    {
+     "selector": "sbom",
+     "holds": true,
+     "found": "SBOM with 1308 components"
+    }
+   ]
+  },
+  {
+   "id": "cm-8_obj.a.2",
+   "control": "cm-8",
+   "objective": "an inventory of system components that includes all components within the system is developed and documented;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "The SBOM covers every package in the image (OS and language packages).",
+   "evidence": [
+    {
+     "selector": "sbom",
+     "holds": true,
+     "found": "SBOM with 1308 components"
+    }
+   ]
+  },
+  {
+   "id": "cm-8_obj.a.3",
+   "control": "cm-8",
+   "objective": "an inventory of system components that does not include duplicate accounting of components or components assigned to any other system is developed and documented;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "One SBOM per image digest, per application; nothing is shared or counted twice.",
+   "evidence": [
+    {
+     "selector": "sbom",
+     "holds": true,
+     "found": "SBOM with 1308 components"
+    }
+   ]
+  },
+  {
+   "id": "cm-8_obj.a.4",
+   "control": "cm-8",
+   "objective": "an inventory of system components that is at the level of granularity deemed necessary for tracking and reporting is developed and documented;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Package level, with purl, version and licence (CycloneDX and SPDX).",
+   "evidence": [
+    {
+     "selector": "sbom",
+     "holds": true,
+     "found": "SBOM with 1308 components"
+    }
+   ]
+  },
+  {
+   "id": "cm-8_obj.a.5",
+   "control": "cm-8",
+   "objective": "an inventory of system components that includes [cm-08_odp.01] is developed and documented;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Each component has name, version, purl and licence where the package declares one.",
+   "evidence": [
+    {
+     "selector": "sbom",
+     "holds": true,
+     "found": "SBOM with 1308 components"
+    }
+   ]
+  },
+  {
+   "id": "cm-8_obj.b",
+   "control": "cm-8",
+   "objective": "the system component inventory is reviewed and updated [cm-08_odp.02].",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "The inventory is regenerated on every build, and re-checked daily against new advisories.",
+   "evidence": [
+    {
+     "selector": "sbom",
+     "holds": true,
+     "found": "SBOM with 1308 components"
+    },
+    {
+     "selector": "vuln-db:max_age_h=48",
+     "holds": true,
+     "found": "grype database built 2026-11-22T06:19:59Z (18 h old)"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.a-1",
+   "control": "ra-5",
+   "objective": "systems and hosted applications are monitored for vulnerabilities [ra-05_odp.01] and when new vulnerabilities potentially affecting the system are identified and reported;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "The SBOM of every live image is re-matched when the vulnerability database updates (daily) or an advisory arrives.",
+   "evidence": [
+    {
+     "selector": "vuln-db:max_age_h=48",
+     "holds": true,
+     "found": "grype database built 2026-11-22T06:19:59Z (18 h old)"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.a-2",
+   "control": "ra-5",
+   "objective": "systems and hosted applications are scanned for vulnerabilities [ra-05_odp.02] and when new vulnerabilities potentially affecting the system are identified and reported;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Every push is scanned; prod is re-scanned at promotion request and again at apply.",
+   "evidence": [
+    {
+     "selector": "scan:tool=grype",
+     "holds": true,
+     "found": "grype 6 ran"
+    },
+    {
+     "selector": "scan:tool=opengrep",
+     "holds": true,
+     "found": "opengrep 1.33.1 ran"
+    },
+    {
+     "selector": "scan:tool=checkov",
+     "holds": true,
+     "found": "checkov 3.4.6 ran"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.b.1",
+   "control": "ra-5",
+   "objective": "vulnerability monitoring tools and techniques are employed to automate parts of the vulnerability management process by using standards for enumerating platforms, software flaws, and improper configur",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Scanning, normalisation and the gate decision are automatic, per commit.",
+   "evidence": [
+    {
+     "selector": "gate",
+     "holds": true,
+     "found": "gate warn in dev (report)"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.b.2",
+   "control": "ra-5",
+   "objective": "vulnerability monitoring tools and techniques are employed to facilitate interoperability among tools and to automate parts of the vulnerability management process by using standards for formatting ch",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Findings are normalised to one record format with CVE ids and purls (security-findings/v1).",
+   "evidence": [
+    {
+     "selector": "scan:tool=grype",
+     "holds": true,
+     "found": "grype 6 ran"
+    },
+    {
+     "selector": "sbom",
+     "holds": true,
+     "found": "SBOM with 1308 components"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.b.3",
+   "control": "ra-5",
+   "objective": "vulnerability monitoring tools and techniques are employed to facilitate interoperability among tools and to automate parts of the vulnerability management process by using standards for measuring vul",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Configuration is checked with checkov's rule set and code with opengrep rules kept in git.",
+   "evidence": [
+    {
+     "selector": "scan:tool=checkov",
+     "holds": true,
+     "found": "checkov 3.4.6 ran"
+    },
+    {
+     "selector": "scan:tool=opengrep",
+     "holds": true,
+     "found": "opengrep 1.33.1 ran"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.c",
+   "control": "ra-5",
+   "objective": "vulnerability scan reports and results from vulnerability monitoring are analyzed;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Each finding gets an outcome (fail, suppressed with reason and expiry, below threshold, no fix) in the gate record.",
+   "evidence": [
+    {
+     "selector": "gate",
+     "holds": true,
+     "found": "gate warn in dev (report)"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.d",
+   "control": "ra-5",
+   "objective": "legitimate vulnerabilities are remediated [ra-05_odp.03] in accordance with an organizational assessment of risk;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "not-satisfied",
+   "reason": "A vulnerability with a fix blocks prod until it is fixed or recorded as not affecting the app.",
+   "evidence": [
+    {
+     "selector": "findings:category=vuln",
+     "holds": false,
+     "found": "176 vuln findings would block prod: CVE-2026-102633, CVE-2026-103111, CVE-2026-10536, CVE-2026-107891"
+    },
+    {
+     "selector": "findings:category=external",
+     "holds": true,
+     "found": "no external findings at or above the prod threshold"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.e",
+   "control": "ra-5",
+   "objective": "information obtained from the vulnerability monitoring process and control assessments is shared with [ra-05_odp.04] to help eliminate similar vulnerabilities in other systems;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "not-satisfied",
+   "reason": "The owner releases assessment packages to IT Security from the dashboard (release log in the compliance repo).",
+   "evidence": [
+    {
+     "selector": "release:within_days=30",
+     "holds": false,
+     "found": "nothing released to IT Security in the last 30 days"
+    }
+   ]
+  },
+  {
+   "id": "ra-5_obj.f",
+   "control": "ra-5",
+   "objective": "vulnerability monitoring tools that include the capability to readily update the vulnerabilities to be scanned are employed.",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "grype's database is refreshed daily and its build time is recorded with every scan.",
+   "evidence": [
+    {
+     "selector": "vuln-db:max_age_h=48",
+     "holds": true,
+     "found": "grype database built 2026-11-22T06:19:59Z (18 h old)"
+    }
+   ]
+  },
+  {
+   "id": "sa-11_obj.a-1",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to develop a plan for ongoing security assessments;",
+   "layer": null,
+   "coverage": "uncovered",
+   "state": "not-satisfied",
+   "reason": "no implementation statement in any layer",
+   "evidence": []
+  },
+  {
+   "id": "sa-11_obj.a-2",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to implement a plan for ongoing security assessments;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "The pipeline runs the security assessment on every commit of every branch.",
+   "evidence": [
+    {
+     "selector": "scan:tool=grype",
+     "holds": true,
+     "found": "grype 6 ran"
+    },
+    {
+     "selector": "ci-result:job=security",
+     "holds": true,
+     "found": "security ran: warn (127/307 checks passed)"
+    }
+   ]
+  },
+  {
+   "id": "sa-11_obj.a-3",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to develop a plan for privacy assessments;",
+   "layer": null,
+   "coverage": "uncovered",
+   "state": "not-satisfied",
+   "reason": "no implementation statement in any layer",
+   "evidence": []
+  },
+  {
+   "id": "sa-11_obj.a-4",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to implement a plan for ongoing privacy assessments;",
+   "layer": null,
+   "coverage": "uncovered",
+   "state": "not-satisfied",
+   "reason": "no implementation statement in any layer",
+   "evidence": []
+  },
+  {
+   "id": "sa-11_obj.b",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to perform [sa-11_odp.01] testing/evaluation [sa-11_odp.02] ",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Unit tests and static, configuration, secret and vulnerability scans on every commit.",
+   "evidence": [
+    {
+     "selector": "ci-result:job=test",
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
+    },
+    {
+     "selector": "ci-result:job=security",
+     "holds": true,
+     "found": "security ran: warn (127/307 checks passed)"
+    }
+   ]
+  },
+  {
+   "id": "sa-11_obj.c-1",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to produce evidence of the execution of the assessment plan;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Each job writes a ci-result/v1 record; the run log is kept by the forge.",
+   "evidence": [
+    {
+     "selector": "ci-result:job=test",
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
+    },
+    {
+     "selector": "ci-result:job=security",
+     "holds": true,
+     "found": "security ran: warn (127/307 checks passed)"
+    }
+   ]
+  },
+  {
+   "id": "sa-11_obj.c-2",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to produce the results of the testing and evaluation;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Results are recorded per commit next to the environment they produced.",
+   "evidence": [
+    {
+     "selector": "ci-result:job=test",
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
+    },
+    {
+     "selector": "gate",
+     "holds": true,
+     "found": "gate warn in dev (report)"
+    }
+   ]
+  },
+  {
+   "id": "sa-11_obj.d",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to implement a verifiable flaw remediation process;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Suppressions need a reason and an expiry, are versioned with the code, and show as a diff in every promotion.",
+   "evidence": [
+    {
+     "selector": "gate",
+     "holds": true,
+     "found": "gate warn in dev (report)"
+    }
+   ]
+  },
+  {
+   "id": "sa-11_obj.e",
+   "control": "sa-11",
+   "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to correct flaws identified during testing and evaluation.",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "not-satisfied",
+   "reason": "Findings at or above the threshold block prod until corrected.",
+   "evidence": [
+    {
+     "selector": "findings:category=all",
+     "holds": false,
+     "found": "180 findings would block prod: CKV_K8S_11, CKV_K8S_22, CKV_K8S_40, CKV_K8S_8"
+    }
+   ]
+  },
+  {
+   "id": "si-2_obj.a-1",
+   "control": "si-2",
+   "objective": "system flaws are identified;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Flaws are identified by the scans of every commit and by imported findings.",
+   "evidence": [
+    {
+     "selector": "scan:tool=grype",
+     "holds": true,
+     "found": "grype 6 ran"
+    },
+    {
+     "selector": "scan:tool=opengrep",
+     "holds": true,
+     "found": "opengrep 1.33.1 ran"
+    },
+    {
+     "selector": "scan:tool=checkov",
+     "holds": true,
+     "found": "checkov 3.4.6 ran"
+    }
+   ]
+  },
+  {
+   "id": "si-2_obj.a-2",
+   "control": "si-2",
+   "objective": "system flaws are reported;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Flaws are reported in the run, the gate record and the dashboard.",
+   "evidence": [
+    {
+     "selector": "gate",
+     "holds": true,
+     "found": "gate warn in dev (report)"
+    },
+    {
+     "selector": "ci-result:job=security",
+     "holds": true,
+     "found": "security ran: warn (127/307 checks passed)"
+    }
+   ]
+  },
+  {
+   "id": "si-2_obj.a-3",
+   "control": "si-2",
+   "objective": "system flaws are corrected;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "not-satisfied",
+   "reason": "Flaws that block prod are corrected before promotion.",
+   "evidence": [
+    {
+     "selector": "findings:category=all",
+     "holds": false,
+     "found": "180 findings would block prod: CKV_K8S_11, CKV_K8S_22, CKV_K8S_40, CKV_K8S_8"
+    }
+   ]
+  },
+  {
+   "id": "si-2_obj.b-1",
+   "control": "si-2",
+   "objective": "software updates related to flaw remediation are tested for effectiveness before installation;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "A fix is a commit; it is tested before it is deployed anywhere.",
+   "evidence": [
+    {
+     "selector": "ci-result:job=test",
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
+    }
+   ]
+  },
+  {
+   "id": "si-2_obj.b-2",
+   "control": "si-2",
+   "objective": "software updates related to flaw remediation are tested for potential side effects before installation;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "The same tests run on the fix, in a dev or branch environment before prod.",
+   "evidence": [
+    {
+     "selector": "ci-result:job=test",
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
+    }
+   ]
+  },
+  {
+   "id": "si-2_obj.b-3",
+   "control": "si-2",
+   "objective": "firmware updates related to flaw remediation are tested for effectiveness before installation;",
+   "layer": "platform",
+   "coverage": "not-applicable",
+   "state": "satisfied",
+   "reason": "Containers carry no firmware; host firmware belongs to the hosting system's plan (leveraged).",
+   "evidence": []
+  },
+  {
+   "id": "si-2_obj.b-4",
+   "control": "si-2",
+   "objective": "firmware updates related to flaw remediation are tested for potential side effects before installation;",
+   "layer": "platform",
+   "coverage": "not-applicable",
+   "state": "satisfied",
+   "reason": "Containers carry no firmware; host firmware belongs to the hosting system's plan (leveraged).",
+   "evidence": []
+  },
+  {
+   "id": "si-2_obj.c-1",
+   "control": "si-2",
+   "objective": "security-relevant software updates are installed within [si-02_odp] of the release of the updates;",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "not-satisfied",
+   "reason": "Security updates with a fix block prod until installed (rebuilt and promoted).",
+   "evidence": [
+    {
+     "selector": "findings:category=vuln",
+     "holds": false,
+     "found": "176 vuln findings would block prod: CVE-2026-102633, CVE-2026-103111, CVE-2026-10536, CVE-2026-107891"
+    }
+   ]
+  },
+  {
+   "id": "si-2_obj.c-2",
+   "control": "si-2",
+   "objective": "security-relevant firmware updates are installed within [si-02_odp] of the release of the updates;",
+   "layer": "platform",
+   "coverage": "not-applicable",
+   "state": "satisfied",
+   "reason": "Containers carry no firmware; host firmware belongs to the hosting system's plan (leveraged).",
+   "evidence": []
+  },
+  {
+   "id": "si-2_obj.d",
+   "control": "si-2",
+   "objective": "flaw remediation is incorporated into the organizational configuration management process.",
+   "layer": "platform",
+   "coverage": "automated",
+   "state": "satisfied",
+   "reason": "Every fix is a commit through the same pipeline and promotion as any change.",
+   "evidence": [
+    {
+     "selector": "config-control",
+     "holds": true,
+     "found": "commit da6a4bb71015, image pinned by digest"
+    }
+   ]
+  },
+  {
+   "id": "ia-5.7_obj",
+   "control": "ia-5.7",
+   "objective": "unencrypted static authenticators are not embedded in applications or other forms of static storage.",
+   "layer": "platform",
+   "coverage": "manual",
+   "state": "satisfied",
+   "reason": "gitleaks on every commit, and the forge refuses pushes that add a secret (pre-receive hook).",
+   "evidence": [
+    {
+     "selector": "findings:category=secrets",
+     "holds": true,
+     "found": "no secrets findings at or above the prod threshold"
+    },
+    {
+     "selector": "attested:name=forge-pre-receive-gitleaks",
+     "holds": true,
+     "found": "forge-pre-receive-gitleaks by arecibo-ffwf-goblincorps-hosting, authorised by john on 2026-11-20: gitleaks 8.30.1 in hooks/pre-receive.d of every enrolled repo on forge.goblincorps.com; smoke-tested"
+    }
+   ]
+  }
+ ],
+ "layers": [
+  {
+   "layer": "platform",
+   "component": "cicd-ref-arch",
+   "path": "/runner/work/7cbdf61e39349c2e/hostexecutor/.cicd/oscal/platform.yaml"
+  }
+ ]
+}
