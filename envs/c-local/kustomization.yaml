@@ -10,6 +10,7 @@ resources:
 - fxb/dev
 - fxp/branch-bump-src-4553d97
 - fxp/dev
+- fxw/dev
 - hello/dev
 - hello/prod
 - intake-sample/branch-rt-crash
