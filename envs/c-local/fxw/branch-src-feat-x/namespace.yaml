@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: fxw-src-feat-x
-  labels:
-    cicd.ffwf.net/app: fxw
-    cicd.ffwf.net/env: branch-src-feat-x
-    pod-security.kubernetes.io/enforce: restricted
-    pod-security.kubernetes.io/warn: restricted
