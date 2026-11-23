@@ -1,0 +1,21 @@
+# Cluster DNS for a lab cluster (lab-cluster.sh leaves k0s's own out). Names under the instance's
+# zone resolve to the platform's gateway, so pods reach the forge and the apps by their public
+# names, through the same TLS as people do.
+service: {clusterIP: 10.96.0.10, name: kube-dns}
+k8sAppLabelOverride: kube-dns
+replicaCount: 1
+servers:
+- zones: [{zone: .}]
+  port: 53
+  plugins:
+  - {name: errors}
+  - {name: health, configBlock: "lameduck 5s"}
+  - {name: ready}
+  - {name: rewrite, parameters: 'stop name regex (.*\.)?${ZONE_RE}\.$ traefik.gateway-system.svc.cluster.local. answer auto'}
+  - {name: kubernetes, parameters: cluster.local in-addr.arpa ip6.arpa, configBlock: "pods insecure\nfallthrough in-addr.arpa ip6.arpa\nttl 30"}
+  - {name: prometheus, parameters: 0.0.0.0:9153}
+  - {name: forward, parameters: . /etc/resolv.conf}
+  - {name: cache, parameters: 30}
+  - {name: loop}
+  - {name: reload}
+  - {name: loadbalance}

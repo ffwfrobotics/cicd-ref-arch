@@ -1,0 +1,40 @@
+# A Forgejo for the trial: an enterprise brings its own forge, so none of the platform depends on
+# this file. SQLite, one replica, local accounts only; reached at https://${FORGE_HOST} through the
+# platform's gateway (forge-route.yaml, once the gateway exists) and in-cluster at forgejo-http.forgejo:3000.
+apiVersion: v1
+kind: Namespace
+metadata: {name: forgejo}
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata: {name: forgejo, namespace: flux-system}
+spec: {interval: 12h, type: oci, url: oci://code.forgejo.org/forgejo-helm}
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata: {name: forgejo, namespace: forgejo}
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: forgejo
+      version: 17.3.3          # Forgejo 15.0.12
+      sourceRef: {kind: HelmRepository, name: forgejo, namespace: flux-system}
+  values:
+    test: {enabled: false}
+    persistence: {enabled: true, size: 20Gi}
+    gitea:
+      admin: {existingSecret: forgejo-admin, email: "admin@${ZONE}", passwordMode: initialOnlyNoReset}
+      config:
+        APP_NAME: "${BRAND} Forge"
+        server: {DOMAIN: "${FORGE_HOST}", ROOT_URL: "https://${FORGE_HOST}/", SSH_DOMAIN: forgejo-ssh.forgejo.svc.cluster.local, SSH_PORT: 22}
+        database: {DB_TYPE: sqlite3}
+        cache: {ADAPTER: memory}
+        session: {PROVIDER: db}
+        queue: {TYPE: level}
+        service: {DISABLE_REGISTRATION: true, REQUIRE_SIGNIN_VIEW: false, DEFAULT_KEEP_EMAIL_PRIVATE: true}
+        actions: {ENABLED: true, DEFAULT_ACTIONS_URL: "https://code.forgejo.org"}
+        webhook: {ALLOWED_HOST_LIST: "*"}
+        repository: {DEFAULT_BRANCH: main, DEFAULT_PRIVATE: private}
+        oauth2: {ENABLED: true}
+        security: {INSTALL_LOCK: true}

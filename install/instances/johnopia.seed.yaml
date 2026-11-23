@@ -1,0 +1,24 @@
+# Who and what the Johnopia trial's forge starts with (seed.py). Passwords are generated and kept in
+# the instance's secrets directory, never here.
+users:
+  delivery-bot: {full_name: "Johnopia Delivery (CI/CD)", bot: true}
+  factory-bot:  {full_name: "Johnopia Factory (agents)", bot: true}
+  dana:  {full_name: "Dana (developer)"}
+  avery: {full_name: "Avery (approver)"}
+orgs:
+  johnopia:                 # the platform: CI/CD, compliance, dashboard, factory
+    teams:
+      delivery: {permission: write, members: [delivery-bot], all_repos: true}
+      factory:  {permission: write, members: [factory-bot], repos: [cicd-factory]}
+  johnopia-iac:             # IaC repos that wrap developers' apps; CI/CD writes here
+    teams:
+      delivery:  {permission: write, members: [delivery-bot], all_repos: true}
+      approvers: {permission: read, members: [avery], all_repos: true}
+  payments:                 # a developer team's own org (a tenant)
+    teams:
+      developers: {permission: write, members: [dana], all_repos: true}
+      approvers:  {permission: read, members: [avery], all_repos: true}
+tokens:                     # long-lived tokens; the factory bot has none (its controller mints per session)
+  delivery-bot: [write:repository, write:issue, write:organization, read:user, read:misc]
+oauth_apps:
+  dashboard: ["https://dashboard.c-johnopia.johnopia.net/auth/callback", "https://dashboard-dev.c-johnopia.johnopia.net/auth/callback"]

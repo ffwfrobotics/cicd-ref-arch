@@ -1,0 +1,7 @@
+# The instance's private CA (bootstrap.sh makes it, name-constrained to the zone and the cluster's
+# service names). People trust it once (ca.crt); pods get it from ConfigMap lab-ca in their namespace.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata: {name: lab-ca}
+spec:
+  ca: {secretName: lab-ca}

@@ -1,0 +1,11 @@
+# k0s ClusterConfig for a lab cluster made by lab-cluster.sh. Only what differs from the defaults:
+# a ServiceAccount issuer of its own, so this cluster's tokens are never valid on another one.
+apiVersion: k0s.k0sproject.io/v1beta1
+kind: ClusterConfig
+metadata: {name: k0s, namespace: kube-system}
+spec:
+  api:
+    extraArgs:
+      service-account-issuer: https://kubernetes.default.svc.${NAME}
+    rawArgs:
+    - --service-account-issuer=https://kubernetes.default.svc
