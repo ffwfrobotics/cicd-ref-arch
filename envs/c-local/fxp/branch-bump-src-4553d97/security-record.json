@@ -3,7 +3,7 @@
   "app": "fxp",
   "image": "localhost:5000/fxp@sha256:ff0d40bef84cc890013ac9ba50cc63ac39ad4df3a3d0bd0fb2fafff9233d6444",
   "commit": "1ff35e525e9be51013c7055bda16ce064b09eb21",
-  "generated": "2026-11-22T05:19:38Z",
+  "generated": "2026-11-23T05:20:09Z",
   "scans": {
     "source": {
       "generated": "2026-11-21T23:05:26Z",
@@ -30,18 +30,18 @@
       }
     },
     "image": {
-      "generated": "2026-11-22T05:19:38Z",
-      "commit": "d285401e21bfa56c8ffe6d45fe9a5d3adfe1e173",
+      "generated": "2026-11-23T05:20:09Z",
+      "commit": "c3d72aa174bcdb38170f551b768571027407970f",
       "image": "localhost:5000/fxp@sha256:ff0d40bef84cc890013ac9ba50cc63ac39ad4df3a3d0bd0fb2fafff9233d6444",
       "tools": {
         "syft": "(SBOM kept from the build)",
         "grype": "6",
-        "grype-db": "2026-11-21T06:20:06Z"
+        "grype-db": "2026-11-22T06:19:59Z"
       },
       "evidence": {
         "grype": {
           "file": "grype.json",
-          "sha256": "bd3bd65a529ee3e28f166f1166cf608b5601379a4769cec996aa8e2bd76bcc20"
+          "sha256": "8c968778acfc1f8ac12089c4fc7cc5f7d60acfd7c5cddc9bf40a8cf59659da1a"
         }
       }
     }
@@ -640,6 +640,22 @@
       "outcome": "fail"
     },
     {
+      "id": "9d3969c0c94c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-66046",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-66046",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.4-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "a36df7a89137",
       "category": "vuln",
       "tool": "grype",
@@ -800,54 +816,6 @@
       "outcome": "fail"
     },
     {
-      "id": "f92490f69321",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-19931",
-      "severity": "critical",
-      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
-      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-19931",
-      "package": "curl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "4ce5113a7f7b",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-19931",
-      "severity": "critical",
-      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
-      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-19931",
-      "package": "libcurl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "9d3969c0c94c",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-66046",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
-      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-66046",
-      "package": "libexpat",
-      "version": "2.7.5-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "2.8.4-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
       "id": "132d2e442c7b",
       "category": "vuln",
       "tool": "grype",
@@ -876,6 +844,38 @@
       "fix_state": "fixed",
       "fixed_in": [
         "3.5.8-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "f92490f69321",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-19931",
+      "severity": "critical",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-19931",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "4ce5113a7f7b",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-19931",
+      "severity": "critical",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-19931",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
       ],
       "outcome": "fail"
     },
@@ -976,38 +976,6 @@
       "outcome": "fail"
     },
     {
-      "id": "eafc5ea4e879",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-87864",
-      "severity": "high",
-      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
-      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87864",
-      "package": "curl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.23.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "6a37ce75909e",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-87864",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
-      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87864",
-      "package": "libcurl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.23.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
       "id": "ca6515c778fa",
       "category": "vuln",
       "tool": "grype",
@@ -1031,6 +999,22 @@
       "severity": "high",
       "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
       "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87863",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.23.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "eafc5ea4e879",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-87864",
+      "severity": "high",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87864",
       "package": "curl",
       "version": "8.17.0-r1",
       "fix_state": "fixed",
@@ -1079,6 +1063,22 @@
       "severity": "high",
       "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
       "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87863",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.23.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "6a37ce75909e",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-87864",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87864",
       "package": "libcurl",
       "version": "8.17.0-r1",
       "fix_state": "fixed",
@@ -1504,38 +1504,6 @@
       "outcome": "fail"
     },
     {
-      "id": "80de40f25b26",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-18924",
-      "severity": "critical",
-      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
-      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-18924",
-      "package": "curl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "b41e52d6e99c",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-18924",
-      "severity": "critical",
-      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
-      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-18924",
-      "package": "libcurl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
       "id": "c3adf5a34951",
       "category": "vuln",
       "tool": "grype",
@@ -1632,6 +1600,38 @@
       "outcome": "fail"
     },
     {
+      "id": "80de40f25b26",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-18924",
+      "severity": "critical",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-18924",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "b41e52d6e99c",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-18924",
+      "severity": "critical",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-18924",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "b8628caeb6d8",
       "category": "vuln",
       "tool": "grype",
@@ -1676,38 +1676,6 @@
       "fix_state": "fixed",
       "fixed_in": [
         "4.7.2-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "f5dd487540b4",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-54874",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
-      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-54874",
-      "package": "libcrypto3",
-      "version": "3.5.6-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "3.5.8-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "617bd5288a4d",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-54874",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
-      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-54874",
-      "package": "libssl3",
-      "version": "3.5.6-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "3.5.8-r0"
       ],
       "outcome": "fail"
     },
@@ -1776,6 +1744,38 @@
       "outcome": "fail"
     },
     {
+      "id": "f5dd487540b4",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-54874",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcrypto3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libcrypto3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-54874",
+      "package": "libcrypto3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.8-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "617bd5288a4d",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-54874",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libssl3@3.5.6-r0?arch=x86_64&distro=alpine-3.23.4&upstream=openssl",
+      "message": "libssl3 3.5.6-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-54874",
+      "package": "libssl3",
+      "version": "3.5.6-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "3.5.8-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "413cee536e3c",
       "category": "vuln",
       "tool": "grype",
@@ -1804,38 +1804,6 @@
       "fix_state": "fixed",
       "fixed_in": [
         "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "0749006aebf3",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-87865",
-      "severity": "high",
-      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
-      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87865",
-      "package": "curl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.23.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "ef61a0f357da",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-87865",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
-      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87865",
-      "package": "libcurl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.23.0-r0"
       ],
       "outcome": "fail"
     },
@@ -2048,6 +2016,22 @@
       "outcome": "fail"
     },
     {
+      "id": "cc5bcbbacf12",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-117610",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-117610",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.10.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "dbf115e11013",
       "category": "vuln",
       "tool": "grype",
@@ -2080,6 +2064,38 @@
       "outcome": "fail"
     },
     {
+      "id": "0749006aebf3",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-87865",
+      "severity": "high",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87865",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.23.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "ef61a0f357da",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-87865",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-87865",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.23.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "a2cd71c314b3",
       "category": "vuln",
       "tool": "grype",
@@ -2108,6 +2124,22 @@
       "fix_state": "fixed",
       "fixed_in": [
         "8.23.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "a01698b50e21",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-118370",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-118370",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.10.0-r0"
       ],
       "outcome": "fail"
     },
@@ -2192,6 +2224,22 @@
       "outcome": "fail"
     },
     {
+      "id": "db168b4756e4",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-45186",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-45186",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.1-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "78c67a2ddeee",
       "category": "vuln",
       "tool": "grype",
@@ -2220,22 +2268,6 @@
       "fix_state": "fixed",
       "fixed_in": [
         "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "db168b4756e4",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-45186",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
-      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-45186",
-      "package": "libexpat",
-      "version": "2.7.5-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "2.8.1-r0"
       ],
       "outcome": "fail"
     },
@@ -2272,6 +2304,22 @@
       "outcome": "fail"
     },
     {
+      "id": "1444d18edf0e",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-77214",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-77214",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.9.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "76d45bdcbe0f",
       "category": "vuln",
       "tool": "grype",
@@ -2300,22 +2348,6 @@
       "fix_state": "fixed",
       "fixed_in": [
         "10.48-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "cc5bcbbacf12",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-117610",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
-      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-117610",
-      "package": "libexpat",
-      "version": "2.7.5-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "2.10.0-r0"
       ],
       "outcome": "fail"
     },
@@ -2416,22 +2448,6 @@
       "outcome": "fail"
     },
     {
-      "id": "a01698b50e21",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-118370",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
-      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-118370",
-      "package": "libexpat",
-      "version": "2.7.5-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "2.10.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
       "id": "dff5600652ff",
       "category": "vuln",
       "tool": "grype",
@@ -2512,6 +2528,22 @@
       "outcome": "fail"
     },
     {
+      "id": "a0c0d4c894de",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-76641",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-76641",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.4-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "e52f7f9b8e66",
       "category": "vuln",
       "tool": "grype",
@@ -2540,22 +2572,6 @@
       "fix_state": "fixed",
       "fixed_in": [
         "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "a0c0d4c894de",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-76641",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
-      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-76641",
-      "package": "libexpat",
-      "version": "2.7.5-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "2.8.4-r0"
       ],
       "outcome": "fail"
     },
@@ -2672,22 +2688,6 @@
       "outcome": "fail"
     },
     {
-      "id": "1444d18edf0e",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-77214",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
-      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-77214",
-      "package": "libexpat",
-      "version": "2.7.5-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "2.9.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
       "id": "fbc285d68216",
       "category": "vuln",
       "tool": "grype",
@@ -2720,38 +2720,6 @@
       "outcome": "fail"
     },
     {
-      "id": "cebb14f93987",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-8286",
-      "severity": "high",
-      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
-      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-8286",
-      "package": "curl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "88c1b1f38afc",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-8286",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
-      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-8286",
-      "package": "libcurl",
-      "version": "8.17.0-r1",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "8.22.0-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
       "id": "c2c7b0075f22",
       "category": "vuln",
       "tool": "grype",
@@ -2780,6 +2748,38 @@
       "fix_state": "fixed",
       "fixed_in": [
         "3.5.8-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "cebb14f93987",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-8286",
+      "severity": "high",
+      "location": "pkg:apk/alpine/curl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4",
+      "message": "curl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-8286",
+      "package": "curl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
+      "id": "88c1b1f38afc",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-8286",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libcurl@8.17.0-r1?arch=x86_64&distro=alpine-3.23.4&upstream=curl",
+      "message": "libcurl 8.17.0-r1 (apk): https://security.alpinelinux.org/vuln/CVE-2026-8286",
+      "package": "libcurl",
+      "version": "8.17.0-r1",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "8.22.0-r0"
       ],
       "outcome": "fail"
     },
@@ -2944,6 +2944,22 @@
       "outcome": "fail"
     },
     {
+      "id": "e402397bfe16",
+      "category": "vuln",
+      "tool": "grype",
+      "rule": "CVE-2026-76957",
+      "severity": "high",
+      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
+      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-76957",
+      "package": "libexpat",
+      "version": "2.7.5-r0",
+      "fix_state": "fixed",
+      "fixed_in": [
+        "2.8.4-r0"
+      ],
+      "outcome": "fail"
+    },
+    {
       "id": "0453049823d4",
       "category": "vuln",
       "tool": "grype",
@@ -2988,22 +3004,6 @@
       "fix_state": "fixed",
       "fixed_in": [
         "10.48-r0"
-      ],
-      "outcome": "fail"
-    },
-    {
-      "id": "e402397bfe16",
-      "category": "vuln",
-      "tool": "grype",
-      "rule": "CVE-2026-76957",
-      "severity": "high",
-      "location": "pkg:apk/alpine/libexpat@2.7.5-r0?arch=x86_64&distro=alpine-3.23.4&upstream=expat",
-      "message": "libexpat 2.7.5-r0 (apk): https://security.alpinelinux.org/vuln/CVE-2026-76957",
-      "package": "libexpat",
-      "version": "2.7.5-r0",
-      "fix_state": "fixed",
-      "fixed_in": [
-        "2.8.4-r0"
       ],
       "outcome": "fail"
     }

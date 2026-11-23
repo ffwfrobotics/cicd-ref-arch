@@ -1,84 +1,84 @@
 {
  "schema": "evidence/v1",
  "repo": "ffwf/cicd-compliance",
- "tag": "c-local/hello/dev/b2e9c319dc11cc30",
- "release": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/tag/c-local/hello/dev/b2e9c319dc11cc30",
- "created": "2026-11-23T05:02:22Z",
+ "tag": "c-local/hello/dev/a372950ade20663d",
+ "release": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/tag/c-local/hello/dev/a372950ade20663d",
+ "created": "2026-11-23T05:20:36Z",
  "meta": {
   "image": "localhost:5000/hello@sha256:801f1646159dd7a3841ef1a67add8e65cbb4b6e9715a856788c9078e12ce6630",
   "commit": "7e892a92dcde9ee87940c4c9571d99bb267eec72",
-  "run": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1508"
+  "reassessed": "2026-11-23T05:20:36+00:00"
  },
  "files": {
   "assessment-results.json": {
-   "sha256": "14fc04a21764bc47b5060d4523e767e9789e171064b8b1ad9f8ea16a97089986",
+   "sha256": "3ee71b7eaca7d5305685ef261c642ff485d3dd90f02611c8771a10cdc11c5133",
    "bytes": 46543,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/assessment-results.json"
+   "url": "https://forge.goblincorps.com/attachments/0834ae4b-8d6e-4a32-b556-93e541638fee"
   },
   "checkov.json": {
    "sha256": "b5f2b6f8b58b6ccdf710168d57f67a7a5ddc9dbef0b836d653ac67afdd2a5459",
    "bytes": 12801,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/checkov.json"
+   "url": "https://forge.goblincorps.com/attachments/18275d60-57a1-44f1-873e-1f6a7a454062"
   },
   "ci-result-security.json": {
-   "sha256": "60539d4b29409fed41e549cf0154e8dae84b3aa85bb9999313999025c631fd91",
-   "bytes": 3652,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/ci-result-security.json"
+   "sha256": "30617197e22d65533c418d9d5533d5d173fb940c2c0d633f0208ce5383c99803",
+   "bytes": 3642,
+   "url": "https://forge.goblincorps.com/attachments/5069bbe8-da9d-45f4-aec6-224ae2fd26fd"
   },
   "ci-result-test.json": {
    "sha256": "13ddc06787beb7c8ebdb544362371309086104ced7e0d3482f7cfe121945293d",
    "bytes": 1058,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/ci-result-test.json"
+   "url": "https://forge.goblincorps.com/attachments/3c00bd7c-b121-4896-8707-ca49281f49d9"
   },
   "findings-image.json": {
    "sha256": "ea4c445567392465af114c83e502bfba8413a81ed5e0806b2932e93be379029b",
    "bytes": 167720,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/findings-image.json"
+   "url": "https://forge.goblincorps.com/attachments/59962783-3aec-45eb-8ff5-83d5a9dac7ec"
   },
   "findings-source.json": {
    "sha256": "7407b31af1293cfd0b4f0b2f1e342bc1f829b0f6f4d9c92f81cd58a16a6c47ee",
    "bytes": 2698,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/findings-source.json"
+   "url": "https://forge.goblincorps.com/attachments/eda3853b-00ac-4dd0-a40e-0d9e82840a88"
   },
   "gitleaks.json": {
    "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
    "bytes": 3,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/gitleaks.json"
+   "url": "https://forge.goblincorps.com/attachments/3698e62c-d744-420d-8eeb-833620fbeb7c"
   },
   "grype.json": {
    "sha256": "a2244d8949e4c65c01288871eb44086da2b5ebaa3e9420ce26a93005f976f64e",
    "bytes": 1164320,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/grype.json"
+   "url": "https://forge.goblincorps.com/attachments/34d5efff-2a6f-4dc0-b608-20883af29493"
   },
   "opengrep.sarif": {
    "sha256": "117a0d3b43881688851cdcc52e60d7ee02aaf2590f7d3f3623ee611ccc12c05f",
    "bytes": 4587,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/opengrep.sarif"
+   "url": "https://forge.goblincorps.com/attachments/99882006-3ba4-483d-85ff-af3861155b2b"
   },
   "sbom.cdx.json": {
    "sha256": "440eb78438edc6be8a6faef1acaf84c432541d5ca3f58139599108f36cb00752",
    "bytes": 949116,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/sbom.cdx.json"
+   "url": "https://forge.goblincorps.com/attachments/8d405361-4e52-45dc-86d8-558c73e25184"
   },
   "sbom.spdx.json": {
    "sha256": "4d37458f6a1179f49941e34ef0fc0f9ecfe4ee4fc13ae5ad7b37f2519f0f1e93",
    "bytes": 2295152,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/sbom.spdx.json"
+   "url": "https://forge.goblincorps.com/attachments/e83eee3c-6ec2-469d-ae29-f03378d30d57"
   },
   "scan.log": {
    "sha256": "67f5416ec98abd0313d6b9d556e64b58b47ebd704f8dd43fae7309b1428061dd",
    "bytes": 1215,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/scan.log"
+   "url": "https://forge.goblincorps.com/attachments/d46e874b-d10a-4352-bd67-b1d1b3b66630"
   },
   "security.json": {
-   "sha256": "c15d3f6dd5c0f418f0231ffab8a8809e041d06f7ba3abe078737509e0885f54f",
-   "bytes": 181102,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/security.json"
+   "sha256": "40f3fa41ede903dd19704c1ded363a30f54d3286a804e981c629b0d81c92304d",
+   "bytes": 180803,
+   "url": "https://forge.goblincorps.com/attachments/9c0d2899-cfe8-4675-b3b7-8849818b438f"
   },
   "signature.json": {
    "sha256": "a19e425552151be46c9957e99b63d7df1f14a5924d4ff6aa9976dcc622eb3622",
    "bytes": 200,
-   "url": "https://forge.goblincorps.com/ffwf/cicd-compliance/releases/download/c-local%2Fhello%2Fdev%2Fb2e9c319dc11cc30/signature.json"
+   "url": "https://forge.goblincorps.com/attachments/9baa69bd-e4ae-451e-a31c-f362bb239bb8"
   }
  }
 }

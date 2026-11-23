@@ -5,7 +5,7 @@
  "env": "prod",
  "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
  "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
- "generated": "2026-11-22T05:19:19Z",
+ "generated": "2026-11-23T05:18:51Z",
  "counts": {
   "satisfied": 38,
   "not-satisfied": 2
@@ -199,7 +199,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (23 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (23 h old)"
     }
    ]
   },
@@ -215,7 +215,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (23 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (23 h old)"
     }
    ]
   },
@@ -368,7 +368,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-21T06:20:06Z (23 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (23 h old)"
     }
    ]
   },
@@ -707,12 +707,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/a94b933da43c0e78/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/81f3acc7041db044/hostexecutor/oscal/platform.yaml"
   },
   {
    "layer": "sysadmin",
    "component": "demo-owner",
-   "path": "/runner/work/a94b933da43c0e78/hostexecutor/.compliance/apps/demo/component.yaml"
+   "path": "/runner/work/81f3acc7041db044/hostexecutor/.compliance/apps/demo/component.yaml"
   }
  ]
 }

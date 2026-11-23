@@ -5,10 +5,10 @@
  "env": "prod",
  "commit": "f9bdd2d8ad5259712615061127f7478ac38d577a",
  "image": "localhost:5000/fxo@sha256:0ee8f95418b976002cd5807f4eaffc0582feec4f0d0f6ed12f4b48ae601ff606",
- "generated": "2026-11-23T01:56:37Z",
+ "generated": "2026-11-23T05:20:02Z",
  "counts": {
-  "satisfied": 25,
-  "not-satisfied": 15
+  "satisfied": 30,
+  "not-satisfied": 10
  },
  "coverage": {
   "automated": 31,
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-22T06:19:59Z (20 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (23 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-22T06:19:59Z (20 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (23 h old)"
     }
    ]
   },
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-22T06:19:59Z (20 h old)"
+     "found": "grype database built 2026-11-22T06:19:59Z (23 h old)"
     }
    ]
   },
@@ -417,13 +417,13 @@
    "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to perform [sa-11_odp.01] testing/evaluation [sa-11_odp.02] ",
    "layer": "platform",
    "coverage": "automated",
-   "state": "not-satisfied",
+   "state": "satisfied",
    "reason": "Unit tests and static, configuration, secret and vulnerability scans on every commit.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": false,
-     "found": "no ci-result for test"
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
@@ -438,13 +438,13 @@
    "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to produce evidence of the execution of the assessment plan;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "not-satisfied",
+   "state": "satisfied",
    "reason": "Each job writes a ci-result/v1 record; the run log is kept by the forge.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": false,
-     "found": "no ci-result for test"
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
@@ -459,13 +459,13 @@
    "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to produce the results of the testing and evaluation;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "not-satisfied",
+   "state": "satisfied",
    "reason": "Results are recorded per commit next to the environment they produced.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": false,
-     "found": "no ci-result for test"
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
     },
     {
      "selector": "gate",
@@ -575,13 +575,13 @@
    "objective": "software updates related to flaw remediation are tested for effectiveness before installation;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "not-satisfied",
+   "state": "satisfied",
    "reason": "A fix is a commit; it is tested before it is deployed anywhere.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": false,
-     "found": "no ci-result for test"
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
     }
    ]
   },
@@ -591,13 +591,13 @@
    "objective": "software updates related to flaw remediation are tested for potential side effects before installation;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "not-satisfied",
+   "state": "satisfied",
    "reason": "The same tests run on the fix, in a dev or branch environment before prod.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": false,
-     "found": "no ci-result for test"
+     "holds": true,
+     "found": "test ran: pass (0/0 checks passed)"
     }
    ]
   },
@@ -689,7 +689,7 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/553f09f5fe3fa015/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/81f3acc7041db044/hostexecutor/oscal/platform.yaml"
   }
  ]
 }

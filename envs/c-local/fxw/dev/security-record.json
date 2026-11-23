@@ -2,8 +2,8 @@
   "schema": "security-findings/v1",
   "app": "fxw",
   "image": "localhost:5000/fxw@sha256:f96ee7b68bf3ef77868213d7f85a667a98d73062ccb5e6dc060a483b7b0dfbbd",
-  "commit": "ca0f5bbc0a2596f8b73eb5aba6b04c0e8dda696b",
-  "generated": "2026-11-23T01:00:06Z",
+  "commit": "eb2a205d446d38811b1e89717c5e995f5807d08c",
+  "generated": "2026-11-23T05:20:22Z",
   "scans": {
     "source": {
       "generated": "2026-11-23T01:00:01Z",
@@ -30,26 +30,18 @@
       }
     },
     "image": {
-      "generated": "2026-11-23T01:00:06Z",
-      "commit": "ca0f5bbc0a2596f8b73eb5aba6b04c0e8dda696b",
+      "generated": "2026-11-23T05:20:22Z",
+      "commit": "c3d72aa174bcdb38170f551b768571027407970f",
       "image": "localhost:5000/fxw@sha256:f96ee7b68bf3ef77868213d7f85a667a98d73062ccb5e6dc060a483b7b0dfbbd",
       "tools": {
-        "syft": "16.1.13",
+        "syft": "(SBOM kept from the build)",
         "grype": "6",
         "grype-db": "2026-11-22T06:19:59Z"
       },
       "evidence": {
-        "sbom-cyclonedx": {
-          "file": "sbom.cdx.json",
-          "sha256": "2dc64c4128e6a6c505de17977ebf983a8b69d9ebb05a8e3c74691737d8eead7f"
-        },
-        "sbom-spdx": {
-          "file": "sbom.spdx.json",
-          "sha256": "8ba87a95b7007302757f2d258e13c7abf12ce7203e6794fd84af33901a9c79e0"
-        },
         "grype": {
           "file": "grype.json",
-          "sha256": "519199a360d2eafc02bfcc1bd4a3137315131a82def90eb764bf34e329cd49bc"
+          "sha256": "bf7c918de759fc345b8cea4781c773970256cb8ef8a475f18caee68921e70612"
         }
       }
     }
@@ -67,6 +59,7 @@
     },
     "notes": []
   },
+  "external": [],
   "findings": [
     {
       "id": "a50e12c4d749",
