@@ -1,0 +1,26 @@
+# Lab exposure: the node's ports 80 and 443 forward to Traefik, so the host reaches
+# https://<name>.${ZONE} at the node's address (a hosts-file entry per name). An enterprise cluster
+# exposes Traefik its own way (LoadBalancer, an ingress proxy); nothing else depends on this.
+apiVersion: v1
+kind: Namespace
+metadata: {name: lab-edge}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: edge, namespace: lab-edge}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: edge}}
+  template:
+    metadata: {labels: {app: edge}}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: https
+        image: alpine/socat:1.8.0.3
+        args: ["TCP-LISTEN:8443,fork,reuseaddr", "TCP:traefik.gateway-system.svc.cluster.local:443"]
+        ports: [{containerPort: 8443, hostPort: 443}]
+      - name: http
+        image: alpine/socat:1.8.0.3
+        args: ["TCP-LISTEN:8080,fork,reuseaddr", "TCP:traefik.gateway-system.svc.cluster.local:80"]
+        ports: [{containerPort: 8080, hostPort: 80}]

@@ -1,0 +1,166 @@
+# The CI/CD runner for a lab instance (install/runner/Dockerfile), adapted from the reference
+# deployment: one job at a time per pod, a shared actions/cache server. Out-of-band Secrets
+# ci/forgejo-runner (uuid, token: a pre-registered runner) and ci/actions-cache (secret).
+# The instance CA is added to the system trust bundle by an init container, so git, curl, Python
+# and Node (NODE_EXTRA_CA_CERTS) trust https://${FORGE_HOST} and the apps.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forgejo-runner
+  namespace: ci
+  annotations: {kustomize.toolkit.fluxcd.io/substitute: disabled}
+data:
+  # Runs one job at a time in a loop, wiping the workdir and /tmp between jobs, and exits
+  # after MAX_JOBS jobs so the kubelet starts a fresh container. Exiting after every job
+  # (bare one-job) put the pod into CrashLoopBackOff: skipped jobs (`if:` false) finish in
+  # about 1 s, and each quick exit doubles the kubelet's restart delay, up to 5 min.
+  loop.sh: |
+    #!/bin/sh
+    set -u
+    # Each job's runner output (debug level: every step's output) is kept in /logs, a PVC,
+    # as task-<id>-<start>.log for 14 days. It is also echoed to the pod log.
+    mkdir -p /logs
+    find /logs -name '*.log' -mtime +14 -delete 2>/dev/null
+    # SIGTERM (rollout, drain): an idle runner stops at once; a busy one (its job workdir
+    # exists) finishes the job and then exits. sh is PID 1, so the runner itself never sees
+    # the signal. terminationGracePeriodSeconds bounds the wait.
+    stop=0
+    pid=
+    trap 'stop=1; [ -d /runner/work ] || { [ -n "$pid" ] && kill -TERM "$pid" 2>/dev/null; }' TERM INT
+    n=0
+    while [ "$stop" = 0 ] && [ "$n" -lt "${MAX_JOBS:-20}" ]; do
+      start=$(date -u +%Y%m%dT%H%M%SZ)
+      log=/logs/run-$start-$HOSTNAME.log
+      set --; for l in $(echo "$RUNNER_LABEL" | tr ',' ' '); do set -- "$@" --label="$l"; done   # comma-separated
+      forgejo-runner one-job --wait --config=/config/config.yaml --url="$FORGEJO_URL" \
+        --uuid="$RUNNER_UUID" --token-url=file:/secrets/token "$@" \
+        --fetch-interval=20s >"$log" 2>&1 &
+      pid=$!
+      tail -n +1 -f --pid="$pid" "$log" &
+      while kill -0 "$pid" 2>/dev/null; do wait "$pid"; done   # the trap interrupts wait
+      task=$(grep -m1 -o 'task [0-9]* repo' "$log" | cut -d' ' -f2)
+      if [ -n "$task" ]; then
+        mv "$log" "/logs/task-$task-$start.log"
+      else
+        rm -f "$log"; [ "$stop" = 0 ] && sleep 10   # no job: an error or a stop; don't spin
+      fi
+      rm -rf /runner/work /tmp/* /tmp/.[!.]* 2>/dev/null
+      n=$((n + 1))
+    done
+  config.yaml: |
+    log: {level: debug, job_level: info}   # debug: step output also lands in the pod log (no Forgejo token needed to read it)
+    runner:
+      capacity: 1
+      timeout: 3h
+      shutdown_timeout: 3h      # a rollout lets the running job finish
+      fetch_timeout: 30s
+      fetch_interval: 5s
+      report_interval: 5s
+    cache:
+      enabled: true
+      # One cache server for all runner pods (its bolt DB can't be shared between
+      # processes); the runner's proxy authenticates to it with the shared secret.
+      external_server: http://actions-cache.ci.svc.cluster.local:4000/
+      secret_url: file:/cache-secret/secret
+    host:
+      workdir_parent: /runner/work   # container filesystem: gone when the container restarts
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: job-logs, namespace: ci}
+spec: {accessModes: [ReadWriteOnce], resources: {requests: {storage: 5Gi}}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: actions-cache, namespace: ci}
+spec: {accessModes: [ReadWriteOnce], resources: {requests: {storage: 20Gi}}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: forgejo-runner, namespace: ci}
+spec:
+  replicas: 3
+  strategy: {type: RollingUpdate, rollingUpdate: {maxSurge: 0, maxUnavailable: 1}}
+  selector: {matchLabels: {app: forgejo-runner}}
+  template:
+    metadata: {labels: {app: forgejo-runner}}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 3600
+      securityContext: {seccompProfile: {type: RuntimeDefault}}
+      initContainers:
+      - name: trust
+        image: ${RUNNER_IMAGE}
+        command: [sh, -c, 'cat /etc/ssl/certs/ca-certificates.crt /lab-ca/ca.crt > /trust/ca-certificates.crt']
+        volumeMounts: [{name: lab-ca, mountPath: /lab-ca}, {name: trust, mountPath: /trust}]
+      containers:
+      - name: runner
+        image: ${RUNNER_IMAGE}
+        command: [sh, /config/loop.sh]
+        env:
+        - {name: FORGEJO_URL, value: "https://${FORGE_HOST}/"}
+        - {name: RUNNER_LABEL, value: "cicd:host"}
+        - {name: MAX_JOBS, value: "20"}
+        - {name: NODE_EXTRA_CA_CERTS, value: /lab-ca/ca.crt}
+        - name: RUNNER_UUID
+          valueFrom: {secretKeyRef: {name: forgejo-runner, key: uuid}}
+        securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [NET_RAW]}}
+        resources: {requests: {cpu: 100m, memory: 512Mi}, limits: {cpu: "8", memory: 16Gi}}
+        volumeMounts:
+        - {name: config, mountPath: /config, readOnly: true}
+        - {name: token, mountPath: /secrets, readOnly: true}
+        - {name: cache-secret, mountPath: /cache-secret, readOnly: true}
+        - {name: logs, mountPath: /logs}
+        - {name: lab-ca, mountPath: /lab-ca, readOnly: true}
+        - {name: trust, mountPath: /etc/ssl/certs/ca-certificates.crt, subPath: ca-certificates.crt, readOnly: true}
+      volumes:
+      - {name: logs, persistentVolumeClaim: {claimName: job-logs}}
+      - {name: config, configMap: {name: forgejo-runner}}
+      - {name: token, secret: {secretName: forgejo-runner, items: [{key: token, path: token}], defaultMode: 0400}}
+      - {name: cache-secret, secret: {secretName: actions-cache, defaultMode: 0400}}
+      - {name: lab-ca, configMap: {name: lab-ca}}
+      - {name: trust, emptyDir: {}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: actions-cache, namespace: ci}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}     # one process owns the bolt DB
+  selector: {matchLabels: {app: actions-cache}}
+  template:
+    metadata:
+      labels: {app: actions-cache}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        seccompProfile: {type: RuntimeDefault}   # root with no capabilities: owns its local-path dir
+      containers:
+      - name: cache
+        image: ${RUNNER_IMAGE}
+        command: [sh, -c, 'exec forgejo-runner cache-server --dir /cache --port 4000 --secret "$(cat /cache-secret/secret)"']
+        ports: [{name: cache, containerPort: 4000}]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+        resources:
+          requests: {cpu: 50m, memory: 64Mi}
+          limits: {memory: 1Gi}
+        volumeMounts:
+        - {name: cache, mountPath: /cache}
+        - {name: cache-secret, mountPath: /cache-secret, readOnly: true}
+      volumes:
+      - name: cache
+        persistentVolumeClaim: {claimName: actions-cache}
+      - name: cache-secret
+        secret: {secretName: actions-cache, defaultMode: 0444}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: actions-cache, namespace: ci}
+spec:
+  selector: {app: actions-cache}
+  ports: [{name: cache, port: 4000, targetPort: cache}]
