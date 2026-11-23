@@ -23,6 +23,7 @@ product: {from: cicd-ref-arch, commit: $rev}
 platform_repo: $PLATFORM_REPO
 iac_org: $IAC_ORG
 tenant: $TENANT
+cluster: $CLUSTER
 forge_ssh: $FORGE_SSH
 compliance_url: https://$FORGE_HOST/$COMPLIANCE_REPO
 EOT

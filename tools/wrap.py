@@ -4,7 +4,7 @@ source repo as the submodule src/, a Dockerfile, cicd.yaml and deploy/ generated
 tenants/<app>.yaml here. Nothing is pushed to the source repo.
 
   FORGEJO_TOKEN=<owner of the IaC org> [CICD_HOOK_SECRET=...] tools/wrap.py --app mabel --source ffwf/mabel-src \
-    [--branch main] [--update follow|pin] [--org <iac org>] [--tenant <tenant>] [--cluster c-local] \
+    [--branch main] [--update follow|pin] [--org <iac org>] [--tenant <tenant>] [--cluster <cluster>] \
     [--hook-url https://<dashboard>/hooks/forge] [--requested-by john] [--approved]
 
 The Dockerfile: the source's own if it has one (build context src/, dockerfile src/Dockerfile);
@@ -193,7 +193,7 @@ def hooks(server: str, token: str, hook_url: str, secret: str, repos: list[str],
 
 
 def write_tenant(root: Path, a, spec: dict, note: str):
-    spec = {"kind": "App", "tenant": a.tenant, **spec, "clusters": a.cluster or ["c-local"],
+    spec = {"kind": "App", "tenant": a.tenant, **spec, "clusters": a.cluster or [cicd.instance(Path(a.root)).get("cluster") or os.environ.get("CICD_CLUSTER") or sys.exit("no --cluster, no cluster in instance.yaml")],
             "enrolled": cicd.now_utc().date().isoformat()}
     if not a.approved:
         spec["status"] = "pending"
