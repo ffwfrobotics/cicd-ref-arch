@@ -45,8 +45,14 @@ kubectl -n cert-manager wait helmrelease/cert-manager --for=condition=Ready --ti
 kubectl apply -f "$here/lab/issuer.yaml" >/dev/null
 mark "cert-manager + ClusterIssuer lab-ca ($here/ca.$INSTANCE.crt is the CA to trust)"
 
-# Forgejo and its admin
+# Forgejo and its admin; ConfigMap ca-bundle (public roots + the instance CA) for what calls the
+# instance's own HTTPS names: the forge's webhooks, and later the runner, dashboard and factory
 render "$here/lab/forgejo.yaml" | kubectl apply -f - >/dev/null
+cat /etc/ssl/certs/ca-certificates.crt "$SECRETS/ca.crt" > "$SECRETS/bundle.pem"
+for ns in forgejo ci dashboard-dev dashboard factory factory-sessions; do
+  kubectl create ns "$ns" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
+  kubectl -n "$ns" create configmap ca-bundle --from-file=bundle.pem="$SECRETS/bundle.pem" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
+done
 [ -s "$SECRETS/forgejo-admin" ] || { openssl rand -base64 24 | tr -d '/+=\n' > "$SECRETS/forgejo-admin"; chmod 600 "$SECRETS/forgejo-admin"; }
 kubectl -n forgejo create secret generic forgejo-admin --from-literal=username="$ADMIN_USER" \
   --from-file=password="$SECRETS/forgejo-admin" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
