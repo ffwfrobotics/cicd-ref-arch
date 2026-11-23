@@ -453,14 +453,28 @@ def approval_record(root: Path, promo_dir: Path, promo: dict) -> dict:
     approvers = sorted({r["user"]["login"] for r in reviews
                         if r.get("state") == "APPROVED" and not r.get("dismissed") and not r.get("stale")})
     merger = (pr.get("merged_by") or {}).get("login")
+    # An approver without write on this repo approves in the dashboard, under the app's rule
+    # (tenants/<app>.yaml spec.approvers); the dashboard merges as the platform's account with
+    # Approved-by trailers. Only the platform's account's merges are read that way.
+    via = {}
+    bot = os.environ.get("CICD_BOT_USER") or os.environ.get("BOT")
+    if bot and merger == bot and pr.get("merge_commit_sha"):
+        msg = subprocess.run(["git", "-C", str(root), "log", "-1", "--format=%B", pr["merge_commit_sha"]],
+                             capture_output=True, text=True).stdout
+        rule = next((l.split(":", 1)[1].strip() for l in msg.splitlines() if l.startswith("Approval-rule:")), "")
+        for l in msg.splitlines():
+            if l.startswith("Approved-by:") and l.split(":", 1)[1].strip():
+                via[l.split(":", 1)[1].strip()] = f"dashboard ({rule or 'rule'})"
+        approvers = sorted(set(approvers) | set(via))
     excluded = {author, promo.get("requestedBy")}
     second = [x for x in approvers + [merger] if x and x not in excluded]
-    how = ([f"approved by {', '.join(approvers)}"] if approvers else []) + ([f"merged by {merger}"] if merger else [])
+    how = ([f"approved by {', '.join(x + (' in the ' + via[x] if x in via else '') for x in approvers)}"] if approvers else []) \
+        + ([f"merged by {merger}"] if merger else [])
     summary = f"PR #{pr['number']} " + ", ".join(how or ["merged"])
     if not second:
         summary += f": no second person (requested by {promo.get('requestedBy')})"
     return {**rec, "pr": pr["number"], "author": author, "approvedBy": approvers, "mergedBy": merger,
-            "separated": bool(second), "summary": summary}
+            **({"approvedVia": via} if via else {}), "separated": bool(second), "summary": summary}
 
 
 # ---------------------------------------------------------------- compliance (docs/oscal.md)

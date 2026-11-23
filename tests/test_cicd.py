@@ -162,6 +162,34 @@ class Render(unittest.TestCase):
         finally:
             cicd.merged_pr_for, cicd.forgejo = real
 
+    def test_a_dashboard_rule_approval_counts_only_in_the_platform_accounts_merge(self):
+        promo = {"requestedBy": "dana"}
+        git = ["git", "-C", str(self.root), "-c", "user.name=t", "-c", "user.email=t@t"]
+        d = self.root / "promotions/pending/y"
+        d.mkdir(parents=True)
+        (d / "promotion.yaml").write_text("id: y\n")
+        subprocess.run(git + ["add", "-A"], check=True)
+        subprocess.run(git + ["commit", "-qm", "y"], check=True)
+        subprocess.run(git + ["commit", "-q", "--allow-empty", "-m",
+                              "Promote x\n\nApproved-by: avery\nApproval-rule: tenants/x.yaml spec.approvers"], check=True)
+        merge = subprocess.run(["git", "-C", str(self.root), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+        real = (cicd.merged_pr_for, cicd.forgejo)
+        cicd.forgejo = lambda m, path: []
+        os.environ["CICD_BOT_USER"] = "delivery-bot"
+        try:
+            for merger, want in (("delivery-bot", True), ("dana", False)):
+                pr = {"number": 3, "user": {"login": "delivery-bot"}, "merged_by": {"login": merger}, "merge_commit_sha": merge}
+                cicd.merged_pr_for = lambda root, sha: (pr, "")
+                r = cicd.approval_record(self.root, d, promo)
+                self.assertEqual(r["separated"], want, merger)
+                self.assertEqual("avery" in r["approvedBy"], want, merger)     # a trailer in anyone else's merge is ignored
+            pr["merged_by"] = {"login": "delivery-bot"}
+            self.assertEqual(cicd.approval_record(self.root, d, promo)["approvedVia"],
+                             {"avery": "dashboard (tenants/x.yaml spec.approvers)"})
+        finally:
+            cicd.merged_pr_for, cicd.forgejo = real
+            del os.environ["CICD_BOT_USER"]
+
 
 
 

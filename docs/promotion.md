@@ -50,6 +50,30 @@ request ──▶ PR "Promote hello to prod (id)" ──▶ approve + merge ─�
   - read pull requests and reviews;
   - open pull requests.
 
+## Approvers without write on the platform repo
+
+A team's approver usually has read access only: they review, and someone else writes. The app's
+tenant names them, and the dashboard does the merge for them:
+
+```yaml
+# tenants/checkout.yaml
+spec:
+  approvers: [avery, payments/approvers]    # logins, or org/team
+```
+
+- **In the dashboard**, an approver gets **Sign off** on an open promotion. The dashboard checks:
+  - that they match the rule: their login, or a team they belong to, seen with their own forge session;
+  - that they aren't the requester.
+- **Then the platform's account merges** the PR, with trailers in the merge message:
+  `Approved-by: avery`, `Approval-rule: tenants/checkout.yaml spec.approvers (payments/approvers)`
+  and `Requested-by: dana`.
+- **The approval record** (`approval.json`) counts the approver as the second person
+  (`approvedVia: {avery: dashboard (...)}`). Trailers are read only from merges made by the platform's
+  account (`CICD_BOT_USER`): in anyone else's merge they mean nothing.
+- **Enforcement stays in the forge**: protect `master` so that only the platform's account (and admins)
+  may merge. Then nobody without write can release except through the rule, and developers can't
+  merge their own promotions.
+
 ## Custom domains
 
 Hosts that aren't under the cluster zone go in `environments.prod.extraHosts`. Their domain needs three things:
