@@ -1,0 +1,14 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Environment
+app: fxo
+env: dev
+dir: dev
+namespace: fxo-dev
+branch: main
+hosts:
+- fxo-dev.c-local.k.ffwf.net
+image: localhost:5000/fxo@sha256:0ee8f95418b976002cd5807f4eaffc0582feec4f0d0f6ed12f4b48ae601ff606
+repo: ffwf-iac/fx-overlays
+commit: f9bdd2d8ad5259712615061127f7478ac38d577a
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1447
+renderedAt: '2026-11-23T01:37:12Z'
