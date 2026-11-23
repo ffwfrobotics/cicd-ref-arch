@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: fxo-prod-20261123T013936Z
+app: fxo
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/fxo@sha256:0ee8f95418b976002cd5807f4eaffc0582feec4f0d0f6ed12f4b48ae601ff606
+commit: f9bdd2d8ad5259712615061127f7478ac38d577a
+notBefore: '2026-11-23T01:39:36Z'
+requestedBy: cicd-e2e
+reason: ''
