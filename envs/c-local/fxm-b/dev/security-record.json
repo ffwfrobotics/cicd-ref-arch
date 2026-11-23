@@ -2,12 +2,12 @@
   "schema": "security-findings/v1",
   "app": "fxm-b",
   "image": "localhost:5000/fxm-b@sha256:3f166a6aebc268749d563fe74e99316e10f0f73b6f5b030e4db740680eeb0102",
-  "commit": "79f2b1ffb111763becb34960e75eb41a20589cf9",
-  "generated": "2026-11-23T01:17:25Z",
+  "commit": "c487e79db8d3a63cedc5084c6c123b7c5249b0eb",
+  "generated": "2026-11-23T01:28:03Z",
   "scans": {
     "source": {
-      "generated": "2026-11-23T01:17:11Z",
-      "commit": "79f2b1ffb111763becb34960e75eb41a20589cf9",
+      "generated": "2026-11-23T01:27:49Z",
+      "commit": "c487e79db8d3a63cedc5084c6c123b7c5249b0eb",
       "image": null,
       "tools": {
         "gitleaks": "8.30.1",
@@ -21,17 +21,17 @@
         },
         "opengrep": {
           "file": "opengrep.sarif",
-          "sha256": "44d853f4cc1029eaef715b5e7656596db586e2503677ae261dbb6b4eb6925a01"
+          "sha256": "21e27033dd8762bfc1ff46a6eec486c94a321fe8f18550268bfa8433cc41a9e0"
         },
         "checkov": {
           "file": "checkov.json",
-          "sha256": "132a7d280cc9caf69f50f54fcc9ccc0524d4f0607f611404ccf55b739298bf8e"
+          "sha256": "2b7e3becdef2368d5ccbda547772c48e0d313fb3e8e1ac5d1fae8775dbd70c0d"
         }
       }
     },
     "image": {
-      "generated": "2026-11-23T01:17:25Z",
-      "commit": "79f2b1ffb111763becb34960e75eb41a20589cf9",
+      "generated": "2026-11-23T01:28:03Z",
+      "commit": "c487e79db8d3a63cedc5084c6c123b7c5249b0eb",
       "image": "localhost:5000/fxm-b@sha256:3f166a6aebc268749d563fe74e99316e10f0f73b6f5b030e4db740680eeb0102",
       "tools": {
         "syft": "16.1.13",
@@ -41,15 +41,15 @@
       "evidence": {
         "sbom-cyclonedx": {
           "file": "sbom.cdx.json",
-          "sha256": "1d013ae0a9a999573b80aa4617428d2ab48cbf218a53827207e2ec506453b0e7"
+          "sha256": "c7aefad9f9dd9179792fb73bb58aa065ecfb261afd203b45a2999c90e5090e96"
         },
         "sbom-spdx": {
           "file": "sbom.spdx.json",
-          "sha256": "08cdca1e252ecdd120ea53249d0aa00ee554ff681cdef75c02f6c8cf1da93f22"
+          "sha256": "2e4ea0767494d6160d28b233c0659fd7fd9fac3fe1299291fd864fbc80db3b0b"
         },
         "grype": {
           "file": "grype.json",
-          "sha256": "5e15da09db5ebb3853a5281f8065487ab3892df4ff131a307e26a651fbe6b939"
+          "sha256": "c7e31368c4dcbf6947886a7f017d9742f44b587a25096d08a50067d7e160a89a"
         }
       }
     }
@@ -67,6 +67,21 @@
     "notes": []
   },
   "findings": [
+    {
+      "id": "78f4a1de708c",
+      "category": "config",
+      "tool": "checkov",
+      "rule": "CKV_DOCKER_2",
+      "severity": "high",
+      "location": "Dockerfile:1",
+      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/516947788c43d371/hostexecutor/app/apps/b/Dockerfile.)",
+      "outcome": "suppressed",
+      "suppressed": {
+        "by": "ignore (platform)",
+        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
+        "expires": ""
+      }
+    },
     {
       "id": "b9b77e041ed9",
       "category": "config",
@@ -169,21 +184,6 @@
       "suppressed": {
         "by": "ignore (platform)",
         "reason": "the platform renders a default-deny NetworkPolicy for every environment",
-        "expires": ""
-      }
-    },
-    {
-      "id": "78f4a1de708c",
-      "category": "config",
-      "tool": "checkov",
-      "rule": "CKV_DOCKER_2",
-      "severity": "high",
-      "location": "Dockerfile:1",
-      "message": "Ensure that HEALTHCHECK instructions have been added to container images (/runner/work/86d24d6fe0be5dec/hostexecutor/app/apps/b/Dockerfile.)",
-      "outcome": "suppressed",
-      "suppressed": {
-        "by": "ignore (platform)",
-        "reason": "Kubernetes probes replace a Dockerfile HEALTHCHECK; the app contract requires a readiness probe",
         "expires": ""
       }
     }
