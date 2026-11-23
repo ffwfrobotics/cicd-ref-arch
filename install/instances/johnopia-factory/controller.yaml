@@ -1,0 +1,61 @@
+# Out-of-band Secrets in this namespace (README): factory-bot (user, password: the bot's forge login,
+# used only to make and delete each session's token) and factory-api (token: shared with the dashboard).
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: controller, namespace: factory}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}      # one reaper
+  selector: {matchLabels: {app: factory-controller}}
+  template:
+    metadata:
+      labels: {app: factory-controller}
+    spec:
+      serviceAccountName: controller
+      enableServiceLinks: false
+      hostAliases: []
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+      - name: controller
+        image: localhost:5000/factory-controller@sha256:9c6a8b5d845e87ddf9e4b4ba7256f56425dd3271a6c3afc69f711642d74b73c2
+        ports: [{name: http, containerPort: 8080}]
+        env:
+        - {name: FORGE_URL, value: "https://forge.johnopia.net"}
+        - {name: FACTORY_REPO, value: "johnopia/cicd-factory"}
+        - {name: SESSIONS_NAMESPACE, value: factory-sessions}
+        - {name: FORGE_IP, value: ""}
+        - {name: CA_BUNDLE_CONFIGMAP, value: ca-bundle}
+        - {name: SSL_CERT_FILE, value: /etc/ca-bundle/bundle.pem}
+        - {name: HARNESS_IMAGE, value: "localhost:5000/factory-harness@sha256:61f2f5b19d89dd7b6b04b9d11c36a3a62246f5b811fdb1e30115df058b950a15"}
+        # M2's model: the llama.cpp server on the host (midlife), reached at the docker bridge
+        - {name: LOCAL_MODEL_URL, value: "http://172.17.0.1:8100"}
+        - {name: LOCAL_MODEL_ID, value: "local"}
+        readinessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 5}
+        livenessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 20}
+        resources:
+          requests: {cpu: 20m, memory: 64Mi}
+          limits: {memory: 256Mi}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+        volumeMounts:
+        - {name: bot, mountPath: /var/run/factory/bot, readOnly: true}
+        - {name: api, mountPath: /var/run/factory/api, readOnly: true}
+        - {name: ca-bundle, mountPath: /etc/ca-bundle, readOnly: true}
+      volumes:
+      - {name: ca-bundle, configMap: {name: ca-bundle}}
+      - {name: bot, secret: {secretName: factory-bot, defaultMode: 0440}}
+      - {name: api, secret: {secretName: factory-api, defaultMode: 0440}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: controller, namespace: factory}
+spec:
+  selector: {app: factory-controller}
+  ports: [{name: http, port: 8080, targetPort: http}]

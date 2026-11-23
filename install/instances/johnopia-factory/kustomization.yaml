@@ -1,0 +1,4 @@
+# The software factory on c-johnopia (factory-bot): kubecon2026shenanigans fleet/apps/factory adapted (forge via the gateway, the instance CA, no tailnet). kubectl apply -k.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: [namespaces.yaml, rbac.yaml, controller.yaml, networkpolicy.yaml]

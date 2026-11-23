@@ -1,0 +1,14 @@
+# The software factory (ffwf/cicd-factory): its controller, and the sessions it runs. Separate from
+# CI/CD: the factory acts on repos users grant it (the bot as a collaborator there); CI/CD only reads.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: factory
+  labels: {pod-security.kubernetes.io/enforce: restricted, pod-security.kubernetes.io/warn: restricted}
+---
+# One pod per session: a harness on one granted repo, with a token for that repo only.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: factory-sessions
+  labels: {pod-security.kubernetes.io/enforce: restricted, pod-security.kubernetes.io/warn: restricted}
