@@ -17,7 +17,7 @@ HOST = [ipaddress.ip_network("10.244.0.0/16"), ipaddress.ip_network("10.96.0.0/1
 
 class Slots(unittest.TestCase):
     def test_ranges_never_overlap(self):
-        slots = stack.load_slots(REPO, "c-local")
+        slots = stack.load_slots(REPO / "tests/fixtures", "c-local")
         nets = HOST[:]
         for s in slots:
             for cidr in (s.pod_cidr, s.svc_cidr):
@@ -29,7 +29,7 @@ class Slots(unittest.TestCase):
 
 class K0sPod(unittest.TestCase):
     def test_manifests_use_the_slot(self):
-        s = stack.load_slots(REPO, "c-local")[1]
+        s = stack.load_slots(REPO / "tests/fixtures", "c-local")[1]
         req = stack.ClusterRequest(slot=s, name="stack-ref", run="7", fleet_ref="o/r@x:cluster")
         items = json.loads(stack.K0sPod().manifests(req))["items"]
         kinds = {i["kind"]: i for i in items}
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
 class Config(unittest.TestCase):
     def test_slot_wins_over_the_stack_config(self):
-        s = stack.load_slots(REPO, "c-local")[0]
+        s = stack.load_slots(REPO / "tests/fixtures", "c-local")[0]
         mine = "apiVersion: k0s.k0sproject.io/v1beta1\nkind: ClusterConfig\nspec:\n  network: {podCIDR: 10.244.0.0/16}\n  api: {sans: [x.example]}\n"
         cfg = yaml.safe_load(stack.K0sPod().k0s_config(s, mine))["spec"]
         self.assertEqual(cfg["network"]["podCIDR"], s.pod_cidr)
@@ -74,7 +74,7 @@ class Config(unittest.TestCase):
 
 class VClusterProvider(unittest.TestCase):
     def test_template_is_namespaced_and_unprivileged(self):
-        s = stack.load_slots(REPO, "c-local")[0]
+        s = stack.load_slots(REPO / "tests/fixtures", "c-local")[0]
         req = stack.ClusterRequest(slot=s, name="x", run="1", fleet_ref="o/r@x:cluster")
         docs = json.loads(stack.VCluster().manifests(req))["items"]
         self.assertTrue(docs)

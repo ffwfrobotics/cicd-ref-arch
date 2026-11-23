@@ -17,6 +17,7 @@ env:
 jobs:
   test:
     runs-on: cicd
+    if: ${{ vars.CICD_EXAMPLES != 'false' }}   # an instance without the example sets CICD_EXAMPLES=false
     steps:
     - uses: actions/checkout@v4
     - uses: ./actions/setup

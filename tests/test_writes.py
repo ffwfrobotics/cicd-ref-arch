@@ -3,6 +3,7 @@ compliance and dashboard repos. A developer's repo is read only, even where the 
 software factory shares the bot account; a user's grant to it is not a grant to CI/CD)."""
 import re
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -50,12 +51,14 @@ class Writes(unittest.TestCase):
             self.assertTrue(cicd.writable(ROOT, repo), f"{name}: its IaC root {repo} is a developer's repo: wrap it")
 
     def test_writable(self):
-        self.assertTrue(cicd.writable(ROOT, "ffwf-iac/anything"))
-        self.assertTrue(cicd.writable(ROOT, "ffwf/cicd-ref-arch"))
-        self.assertFalse(cicd.writable(ROOT, "ffwf/cicd-demo-app"))
-        self.assertFalse(cicd.writable(ROOT, "ffwf-fixtures/fx-svc-a"))
-        self.assertFalse(cicd.writable(ROOT / "nowhere", "ffwf-iac/x"))     # no list: nothing is writable
-
+        root = Path(tempfile.mkdtemp())
+        (root / "tenants").mkdir()
+        (root / "tenants/_writable.yaml").write_text("owners: [acme-iac]\nrepos: [acme/cicd-platform]\n")
+        self.assertTrue(cicd.writable(root, "acme-iac/anything"))
+        self.assertTrue(cicd.writable(root, "acme/cicd-platform"))
+        self.assertFalse(cicd.writable(root, "acme/demo-app"))
+        self.assertFalse(cicd.writable(root, "acme-fixtures/fx-svc-a"))
+        self.assertFalse(cicd.writable(root / "nowhere", "acme-iac/x"))     # no list: nothing is writable
 
 if __name__ == "__main__":
     unittest.main()
