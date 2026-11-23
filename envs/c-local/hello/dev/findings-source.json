@@ -1,8 +1,8 @@
 {
   "schema": "security-findings/v1",
   "scope": "source",
-  "generated": "2026-11-23T00:01:53Z",
-  "commit": "0ec592649030ad4a9095fdd8ea05b9c77e4e6662",
+  "generated": "2026-11-23T04:37:24Z",
+  "commit": "40b43b6599fc01fc9f11fa5155bef6cb07b6977a",
   "image": null,
   "tools": {
     "gitleaks": "8.30.1",
@@ -16,11 +16,11 @@
     },
     "opengrep": {
       "file": "opengrep.sarif",
-      "sha256": "60c4bf8174d2694b698f2932c32ad6c0128eedeb25adefe71f83958b491b2f3a"
+      "sha256": "1714641336dbc57b5f894175a8bf40d5ac52c9e6d0caddd8279adddfd0fac71b"
     },
     "checkov": {
       "file": "checkov.json",
-      "sha256": "9ccc7a944e3a6793683df78d26219cff6a7d71d980b05ee0780a716387fc8c60"
+      "sha256": "ef45024ed6e514ddaf5b5b3a5da7785b8b76b273ae17abdc406c019d0552a911"
     }
   },
   "findings": [
@@ -31,7 +31,7 @@
       "rule": "CKV_DOCKER_7",
       "severity": "high",
       "location": "Dockerfile:4",
-      "message": "Ensure the base image uses a non latest version tag (/runner/work/e1042911ac55afe9/hostexecutor/examples/hello/Dockerfile.FROM)"
+      "message": "Ensure the base image uses a non latest version tag (/runner/work/b76dc685cc45f0b1/hostexecutor/examples/hello/Dockerfile.FROM)"
     },
     {
       "id": "b9b77e041ed9",
