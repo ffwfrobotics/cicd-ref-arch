@@ -7,8 +7,8 @@ namespace: dashboard-dev
 branch: main
 hosts:
 - dashboard-dev.c-local.k.ffwf.net
-image: localhost:5000/dashboard@sha256:1eb36e70737bf42d63f37bd114c75d4b5b57cdce40a47a98b7c07f681358b4ee
+image: localhost:5000/dashboard@sha256:a414937cab315d704e809f764e197d84bf93adf121d2d60a8f7f402e374ff1b9
 repo: ffwf/cicd-dashboard
-commit: afb052174ce5c2c5ccaa6c2990e58d1728d17460
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1505
-renderedAt: '2026-11-23T05:02:21Z'
+commit: b3ab5319f31342e7eda102d67c77c81212d87bfe
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1515
+renderedAt: '2026-11-23T05:10:45Z'
