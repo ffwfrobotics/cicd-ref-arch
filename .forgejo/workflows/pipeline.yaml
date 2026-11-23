@@ -32,7 +32,7 @@ env:
 jobs:
   # which repo and commit, and does this push go through CI/CD? (excluded, paused, the tenant's limit)
   route:
-    runs-on: ffwf-k8s
+    runs-on: cicd
     outputs:
       env: ${{ steps.route.outputs.env || steps.app.outputs.env }}
       repo: ${{ steps.app.outputs.repo }}
@@ -109,7 +109,7 @@ jobs:
   test:
     needs: route
     if: needs.route.outputs.env != 'manage' && needs.route.outputs.env != 'bump' && needs.route.outputs.env != 'stack' && !startsWith(needs.route.outputs.env, 'skip')
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
@@ -128,7 +128,7 @@ jobs:
   deliver:
     needs: [route, test]
     if: needs.route.outputs.env == 'dev' || needs.route.outputs.env == 'branch'
-    runs-on: ffwf-k8s
+    runs-on: cicd
     outputs:
       env_dir: ${{ steps.deploy.outputs.env-dir }}
     env:
@@ -212,7 +212,7 @@ jobs:
   runtime:
     needs: [route, deliver]
     if: needs.deliver.result == 'success'
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     - uses: actions/checkout@v4   # the platform repo as it is now: with this deploy's environment
       with: {path: .cicd, ref: "${{ github.ref }}", persist-credentials: false}
@@ -240,7 +240,7 @@ jobs:
   bump:
     needs: route
     if: needs.route.outputs.env == 'bump'
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
@@ -256,7 +256,7 @@ jobs:
   stack:
     needs: route
     if: needs.route.outputs.env == 'stack'
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
@@ -332,7 +332,7 @@ jobs:
   manage:
     needs: route
     if: needs.route.outputs.env == 'manage'
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}

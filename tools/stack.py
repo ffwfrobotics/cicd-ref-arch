@@ -2,7 +2,7 @@
 """stack: a cluster as a pipeline job (docs/stacks.md), behind a provider contract (akb #493).
 
   KUBECONFIG=<cicd-stack/runner> tools/stack.py lifecycle --name stack-ref --run 912 --cluster c-local \
-      --repo ffwf-iac/stack-ref --sha <commit> --path cluster [--provider k0s-pod] [--out stack.json] [--keep]
+      --repo <iac org>/stack-ref --sha <commit> --path cluster [--provider k0s-pod] [--out stack.json] [--keep]
 
 The platform owns the slots (clusters/<cluster>/stack-slots.yaml: names, address ranges, API port).
 A provider makes a cluster in a slot and returns a ClusterHandle; everything after `up` (Flux
@@ -38,6 +38,12 @@ from typing import Literal, Protocol
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def _instance() -> dict:
+    """instance.yaml at the repo root (tools/cicd.py instance())."""
+    p = Path(__file__).resolve().parent.parent / "instance.yaml"
+    return (yaml.safe_load(p.read_text()) or {}) if p.exists() else {}
 Isolation = Literal["none", "userns", "vm"]
 
 
@@ -341,7 +347,7 @@ def anonymous_ok(server: str, repo: str) -> bool:
         return False
 
 
-FORGE_SSH = os.environ.get("FORGE_SSH", "ssh://git@forge.goblincorps.com:42222")
+FORGE_SSH = os.environ.get("FORGE_SSH") or _instance().get("forge_ssh", "")
 
 
 def deploy_key(a, secret_name: str, repo: str, token: str) -> tuple[dict, dict]:
@@ -538,7 +544,7 @@ def main():
     ap.add_argument("--min-kustomizations", type=int, default=2)
     ap.add_argument("--needs", nargs="*", default=[], help="capabilities the stack's checks need")
     ap.add_argument("--serve-target", help="keep it up as this deploy target: its Flux follows envs/<target>/ of the platform repo")
-    ap.add_argument("--platform-repo", default=os.environ.get("STATE_REPO", "ffwf/cicd-ref-arch"))
+    ap.add_argument("--platform-repo", default=os.environ.get("STATE_REPO") or _instance().get("platform_repo"))
     ap.add_argument("--smoke", help="the stack's check script (a path in its repo), run inside the nested cluster")
     ap.add_argument("--smoke-needs", nargs="*", default=["api"])
     ap.add_argument("--root", default=str(ROOT), help="the platform repo (clusters/<cluster>/stack-slots.yaml)")

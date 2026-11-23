@@ -36,6 +36,12 @@ from pathlib import Path
 
 import yaml
 
+
+def _instance() -> dict:
+    """instance.yaml at the repo root (tools/cicd.py instance())."""
+    p = Path(__file__).resolve().parent.parent / "instance.yaml"
+    return (yaml.safe_load(p.read_text()) or {}) if p.exists() else {}
+
 NS = "https://ffwf.net/ns/cicd"
 OSCAL_VERSION = "1.2.3"
 UUID_NS = uuid.UUID("5d0f3c38-3f0e-4f43-9a8e-7b0c1c2d9e11")
@@ -388,7 +394,7 @@ def assess(objs: list[dict], stmts: dict[str, dict], ev: Evidence, meta: dict) -
         "back-matter": {"resources": [{"uuid": uid("ap-resource", meta["app"]), "title": "Assessment plan",
                                        "description": "The evidence selectors of the merged layers are the plan: "
                                                       "see the component definitions of each layer.",
-                                       "rlinks": [{"href": meta.get("compliance_url") or "https://forge.goblincorps.com/ffwf/cicd-compliance"}]}]}}}
+                                       "rlinks": [{"href": meta.get("compliance_url") or _instance().get("compliance_url", "")}]}]}}}
     summary = {"schema": "assessment-summary/v1", "kind": "self-assessment", "app": meta["app"], "env": meta["env"],
                "commit": meta["commit"], "image": meta.get("image"), "generated": generated,
                "counts": counts, "coverage": coverage, "objectives": summary_rows}

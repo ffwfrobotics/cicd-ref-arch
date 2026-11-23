@@ -1,0 +1,8 @@
+# Who this platform instance is: the names the tools use where a command doesn't give one.
+# A new instance (docs/install.md) writes its own; nothing else in the product names an organisation.
+name: ffwf
+platform_repo: ffwf/cicd-ref-arch          # this repo, as the forge names it
+iac_org: ffwf-iac                          # where wrapped apps' IaC repos are created (tools/wrap.py)
+tenant: ffwf                               # the tenant new apps join unless told otherwise
+forge_ssh: ssh://git@forge.goblincorps.com:42222   # how clusters clone (Flux deploy keys, stacks)
+compliance_url: https://forge.goblincorps.com/ffwf/cicd-compliance

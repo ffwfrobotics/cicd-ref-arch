@@ -4,7 +4,7 @@ source repo as the submodule src/, a Dockerfile, cicd.yaml and deploy/ generated
 tenants/<app>.yaml here. Nothing is pushed to the source repo.
 
   FORGEJO_TOKEN=<owner of the IaC org> [CICD_HOOK_SECRET=...] tools/wrap.py --app mabel --source ffwf/mabel-src \
-    [--branch main] [--update follow|pin] [--org ffwf-iac] [--tenant ffwf] [--cluster c-local] \
+    [--branch main] [--update follow|pin] [--org <iac org>] [--tenant <tenant>] [--cluster c-local] \
     [--hook-url https://<dashboard>/hooks/forge] [--requested-by john] [--approved]
 
 The Dockerfile: the source's own if it has one (build context src/, dockerfile src/Dockerfile);
@@ -333,8 +333,8 @@ def main():
     ap.add_argument("--path", help="monorepo: the project's IaC root in it, e.g. apps/api")
     ap.add_argument("--branch", help="the source branch that maps to the IaC repo's dev branch (default: its default)")
     ap.add_argument("--update", default="follow", choices=cicd.UPDATES)
-    ap.add_argument("--org", default="ffwf-iac")
-    ap.add_argument("--tenant", default="ffwf")
+    ap.add_argument("--org", help="the IaC org (default: instance.yaml iac_org)")
+    ap.add_argument("--tenant", help="default: instance.yaml tenant")
     ap.add_argument("--cluster", action="append", default=[])
     ap.add_argument("--hook-url", default=os.environ.get("CICD_HOOK_URL", ""))
     ap.add_argument("--requested-by", default="")
@@ -342,6 +342,9 @@ def main():
     ap.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
     ap.add_argument("--root", default=str(ROOT), help="the platform repo checkout to write tenants/<app>.yaml into")
     a = ap.parse_args()
+    inst = cicd.instance(Path(a.root))
+    a.org = a.org or inst.get("iac_org") or sys.exit("no --org and no iac_org in instance.yaml")
+    a.tenant = a.tenant or inst.get("tenant") or sys.exit("no --tenant and no tenant in instance.yaml")
     if not cicd.re.fullmatch(r"[a-z0-9][a-z0-9-]{0,62}", a.app):
         sys.exit("bad app name")
     token = os.environ.get("FORGEJO_TOKEN") or sys.exit("FORGEJO_TOKEN is not set")

@@ -18,7 +18,7 @@ env:
 
 jobs:
   reconcile:
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     # no persisted job token: pushes to master must come from the bot, which is on its push whitelist
     - uses: actions/checkout@v4

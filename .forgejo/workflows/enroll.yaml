@@ -21,7 +21,7 @@ on:
 
 jobs:
   enroll:
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     - uses: actions/checkout@v4
       with: {fetch-depth: 0, persist-credentials: false}

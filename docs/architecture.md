@@ -3,7 +3,7 @@
 CI builds images and writes the desired state into git; Flux applies it; the KEDA HTTP add-on handles scale-to-zero. Nothing in CI holds cluster credentials.
 
 ```
- developer ── git push ──▶ Forgejo ──▶ runner (ffwf-k8s label, ns ci)
+ developer ── git push ──▶ Forgejo ──▶ runner (`cicd` label, ns ci)
                                          │ 1 test          → ci-result/v1 record, job status
                                          │ 2 build         → buildctl ──▶ BuildKit (ns buildkit) ──▶ registry
                                          │ 3 sbom/scan/sign → report-only security records
@@ -28,7 +28,7 @@ CI builds images and writes the desired state into git; Flux applies it; the KED
 
 | Piece | Where | Job |
 |---|---|---|
-| Forgejo Actions runner | ns `ci`, label `ffwf-k8s` | Runs the pipeline. Unprivileged, no docker, no Kubernetes API access. |
+| Forgejo Actions runner | ns `ci`, label `cicd` | Runs the pipeline. Unprivileged, no docker, no Kubernetes API access. |
 | BuildKit (rootless) | ns `buildkit` | Builds images for the runners and pushes them by digest. It runs in its own namespace so the runners' namespace keeps its restricted settings. |
 | Registry | the cluster's own (`localhost:5000` mirror on c-local) | Image storage. The push and pull names come from `clusters/<c>/cicd-cluster.yaml`. |
 | State repo | `envs/`, `promotions/` in this repo | The desired state of every environment, written by CI and reviewed for prod. |

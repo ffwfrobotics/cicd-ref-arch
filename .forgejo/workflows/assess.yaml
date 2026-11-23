@@ -20,7 +20,7 @@ env:
 
 jobs:
   assess:
-    runs-on: ffwf-k8s
+    runs-on: cicd
     concurrency: {group: assess, cancel-in-progress: false}
     steps:
     - uses: actions/checkout@v4

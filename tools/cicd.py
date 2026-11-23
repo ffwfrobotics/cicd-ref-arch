@@ -897,6 +897,12 @@ def load_tenants(root: Path) -> dict[str, dict]:
     return out
 
 
+def instance(root: Path = None) -> dict:
+    """instance.yaml: this platform instance's names (IaC org, default tenant, forge SSH, ...)."""
+    p = (root or Path(__file__).resolve().parent.parent) / "instance.yaml"
+    return load_yaml(p) if p.exists() else {}
+
+
 def writable(root: Path, repo: str) -> bool:
     """May CI/CD write to this repo (tenants/_writable.yaml)? Only its own repos and the IaC repos that
     wrap apps; a developer's repo is read only, whatever the bot's access to it."""

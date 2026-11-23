@@ -16,7 +16,7 @@ env:
 
 jobs:
   test:
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     - uses: actions/checkout@v4
     - uses: ./actions/setup
@@ -28,7 +28,7 @@ jobs:
 
   deliver:
     needs: test
-    runs-on: ffwf-k8s
+    runs-on: cicd
     steps:
     - uses: actions/checkout@v4
     - uses: ./actions/setup
