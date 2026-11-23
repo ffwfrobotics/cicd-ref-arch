@@ -75,6 +75,9 @@ spec:
         - mountPath: /etc/dashboard-theme
           name: theme
           readOnly: true
+        - mountPath: /etc/ca-bundle
+          name: ca-bundle
+          readOnly: true
       enableServiceLinks: false
       securityContext:
         fsGroup: 65532
@@ -88,6 +91,10 @@ spec:
           name: dashboard-theme
           optional: true
         name: theme
+      - configMap:
+          name: ca-bundle
+          optional: true
+        name: ca-bundle
       - emptyDir:
           medium: Memory
           sizeLimit: 16Mi
