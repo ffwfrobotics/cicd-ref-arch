@@ -26,12 +26,12 @@ spec:
       automountServiceAccountToken: false
       containers:
       - env:
-        - name: FORGE_URL
-          value: https://forge.goblincorps.com
-        - name: STATE_REPO
-          value: ffwf/cicd-ref-arch
-        - name: CLUSTER
-          value: c-local
+        - name: DASHBOARD_THEME
+          value: /etc/dashboard-theme/theme.css
+        envFrom:
+        - configMapRef:
+            name: dashboard-instance
+            optional: true
         image: app-image
         livenessProbe:
           httpGet:
@@ -72,6 +72,9 @@ spec:
         - mountPath: /var/run/secrets/dashboard-factory
           name: factory
           readOnly: true
+        - mountPath: /etc/dashboard-theme
+          name: theme
+          readOnly: true
       enableServiceLinks: false
       securityContext:
         fsGroup: 65532
@@ -81,6 +84,10 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       volumes:
+      - configMap:
+          name: dashboard-theme
+          optional: true
+        name: theme
       - emptyDir:
           medium: Memory
           sizeLimit: 16Mi
