@@ -9,8 +9,8 @@ hosts:
 - fxc-b-dev.c-local.k.ffwf.net
 image: localhost:5000/fxc-b@sha256:3f166a6aebc268749d563fe74e99316e10f0f73b6f5b030e4db740680eeb0102
 repo: ffwf-iac/fx-mono-cfg
-commit: a642167198cd465fe50cc50d309aa5397385694d
-runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1385
+commit: e9a75bdd25072f518881a641177b3d8b8d169694
+runUrl: https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/1417
 sources:
 - path: svc-b
   repo: ffwf-fixtures/fx-svc-b
@@ -18,4 +18,4 @@ sources:
 - path: config
   repo: ffwf-iac/fx-config
   commit: 6e7d5344ff8162718305bae197eb80573194d991
-renderedAt: '2026-11-23T00:52:22Z'
+renderedAt: '2026-11-23T01:17:52Z'
