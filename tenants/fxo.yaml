@@ -1,0 +1,11 @@
+# e2e fixture
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata:
+  name: fxo
+spec:
+  tenant: ffwf
+  clusters:
+  - c-local
+  enrolled: '2026-11-22'
+  repo: ffwf-iac/fx-overlays
