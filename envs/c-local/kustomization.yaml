@@ -10,6 +10,7 @@ resources:
 - fxb/dev
 - fxc-a/dev
 - fxc-b/dev
+- fxm-b/dev
 - fxp/branch-bump-src-4553d97
 - fxp/dev
 - fxw/dev
