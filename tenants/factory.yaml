@@ -1,0 +1,25 @@
+# Enrolled by an admin with tools/enroll.py (docs/enroll.md).
+# Build-only: the factory's images are built, scanned and kept as evidence by digest. No environment:
+# the live factory is Flux's (fleet/apps/factory in the fleet repo), which takes the digests by a bump.
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Tenant
+metadata:
+  name: factory
+spec:
+  tenant: ffwf
+  repo: ffwf/cicd-factory
+  path: .
+  clusters:
+  - c-local
+  owners:
+  - john
+  enrolled: '2026-11-24'
+  mode: build-only
+  defaultBranch: main
+  builds:
+  - name: controller
+    context: .
+    dockerfile: Dockerfile
+  - name: harness
+    context: harness
+    dockerfile: harness/Dockerfile
