@@ -1,0 +1,30 @@
+{
+  "schema": "ci-result/v1",
+  "repo": "ffwf/cicd-ref-arch",
+  "sha": "c894fff2e39db39f3ff52cc6db3394d6fc9f4e5d",
+  "ref": "refs/heads/master",
+  "workflow": "pipeline",
+  "job": "security",
+  "status": "pass",
+  "started_at": "2026-11-24T19:04:20Z",
+  "duration_s": null,
+  "summary": {
+    "total": 18,
+    "failed": 0,
+    "passed": 18,
+    "skipped": 0
+  },
+  "failures": [],
+  "security": {
+    "env": "prod",
+    "mode": "enforce",
+    "blocking": 0,
+    "counts": {
+      "suppressed": 8,
+      "below-threshold": 10
+    },
+    "image": "localhost:5000/dashboard@sha256:436b6f06847b2565a3fa40ea31b947e1a99c2e7dc6a85adca371f6378b57f81b"
+  },
+  "external": [],
+  "run_url": "https://forge.goblincorps.com/ffwf/cicd-ref-arch/actions/runs/2001"
+}
