@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "hello",
  "env": "dev",
- "commit": "54a385744e80c5b7d0c2465798702979b75c3288",
- "image": "localhost:5000/hello@sha256:2827f69144aeb0eb03643b431e2309bf29631d18e84d9ead7ed51249e45d024c",
- "generated": "2026-11-24T05:21:08Z",
+ "commit": "82daf6e41465e86c69ee4abb0db4098e7309c881",
+ "image": "localhost:5000/hello@sha256:82b530052fff6e86347f132de1e410f745c356f632651ddeaedcec48c7ff4e92",
+ "generated": "2026-11-24T15:26:49Z",
  "counts": {
   "satisfied": 30,
   "not-satisfied": 10
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 54a385744e80, image pinned by digest"
+     "found": "commit 82daf6e41465, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 54a385744e80, image pinned by digest"
+     "found": "commit 82daf6e41465, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (9 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (9 h old)"
     }
    ]
   },
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (9 h old)"
     }
    ]
   },
@@ -387,7 +387,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (244/250 checks passed)"
+     "found": "security ran: warn (247/253 checks passed)"
     }
    ]
   },
@@ -428,7 +428,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (244/250 checks passed)"
+     "found": "security ran: warn (247/253 checks passed)"
     }
    ]
   },
@@ -449,7 +449,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (244/250 checks passed)"
+     "found": "security ran: warn (247/253 checks passed)"
     }
    ]
   },
@@ -549,7 +549,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: warn (244/250 checks passed)"
+     "found": "security ran: warn (247/253 checks passed)"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 54a385744e80, image pinned by digest"
+     "found": "commit 82daf6e41465, image pinned by digest"
     }
    ]
   },
@@ -667,7 +667,7 @@
    "id": "ia-5.7_obj",
    "control": "ia-5.7",
    "objective": "unencrypted static authenticators are not embedded in applications or other forms of static storage.",
-   "layer": "platform",
+   "layer": "instance",
    "coverage": "manual",
    "state": "satisfied",
    "reason": "gitleaks on every commit, and the forge refuses pushes that add a secret (pre-receive hook).",
@@ -689,7 +689,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/d288399724cb5c81/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/7afc788f3817acb6/hostexecutor/oscal/platform.yaml"
+  },
+  {
+   "layer": "instance",
+   "component": "ffwf-instance",
+   "path": "/runner/work/7afc788f3817acb6/hostexecutor/oscal/instance.yaml"
   }
  ]
 }
