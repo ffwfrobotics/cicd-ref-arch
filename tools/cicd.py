@@ -515,7 +515,9 @@ def assess_into(root: Path, app: str, env: str, evidence: Path, commit: str | No
     profile = comp / (cfg.get("profile") or "profiles/cicd-demo.json")
     catalog = comp / "catalogs" / "nist-800-53r5-excerpt.json"
     cmd = [sys.executable, str(here / "oscal.py"), "assess", "--catalog", str(catalog), "--profile", str(profile),
-           "--platform", str(root / "oscal" / "platform.yaml"), "--evidence", str(evidence),
+           "--platform", str(root / "oscal" / "platform.yaml"),
+           *(["--instance-layer", str(root / "oscal" / "instance.yaml")] if (root / "oscal" / "instance.yaml").exists() else []),
+           "--evidence", str(evidence),
            "--releases", str(comp / "releases"), "--app", app, "--env", env, "--out", str(evidence)]
     if (comp / "apps" / app / "component.yaml").exists():
         cmd += ["--sysadmin-layer", str(comp / "apps" / app / "component.yaml")]

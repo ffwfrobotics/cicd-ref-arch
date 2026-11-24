@@ -195,6 +195,31 @@ class Assessment(unittest.TestCase):
         f = ar["assessment-results"]["results"][0]["findings"]
         self.assertEqual({x["target"]["target-id"] for x in f}, {o["id"] for o in self.objs})
 
+    def test_the_instance_layer_comes_after_the_platform(self):
+        d = self.ev
+        (d / "catalog.json").write_text(json.dumps(mini_catalog()))
+        (d / "profile.json").write_text(json.dumps({"profile": {"imports": [{"include-controls": [{"with-ids": ["ra-5"]}]}]}}))
+        (d / "platform.yaml").write_text("component: p\nobjectives:\n  ra-5_obj.d: {statement: p, evidence: [{kind: gate}]}\n")
+        (d / "instance.yaml").write_text("component: i\nobjectives:\n  ra-5_obj.d:\n    statement: i\n    evidence:\n"
+                                         "    - {kind: attested, name: x, by: j, at: 2026-11-20, expires: 2099-01-01}\n")
+        out = d / "out"
+        out.mkdir()
+        subprocess.run([sys.executable, str(ROOT / "tools/oscal.py"), "assess", "--catalog", str(d / "catalog.json"),
+                        "--profile", str(d / "profile.json"), "--platform", str(d / "platform.yaml"),
+                        "--instance-layer", str(d / "instance.yaml"), "--evidence", str(d), "--app", "app",
+                        "--env", "dev", "--out", str(out)], check=True, capture_output=True)
+        s = json.loads((out / "assessment-summary.json").read_text())
+        rows = {r["id"]: r for r in s["objectives"]}
+        self.assertEqual(rows["ra-5_obj.d"]["layer"], "instance")
+        self.assertEqual([L["layer"] for L in s["layers"]], ["platform", "instance"])
+
+    def test_the_product_attests_nothing(self):
+        # an attestation is about one instance's forge or hosts: it belongs in that instance's oscal/instance.yaml
+        import yaml
+        plat = yaml.safe_load((ROOT / "oscal/platform.yaml").read_text())
+        kinds = {e["kind"] for o in plat["objectives"].values() for e in o.get("evidence") or []}
+        self.assertNotIn("attested", kinds)
+
 
 if __name__ == "__main__":
     unittest.main()

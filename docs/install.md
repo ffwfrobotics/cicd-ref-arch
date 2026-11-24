@@ -43,14 +43,26 @@ machine:
 - cert-manager;
 - a Forgejo.
 
-## Steps (the Johnopia trial, timed on midlife)
+## The instance's own files
+
+Each instance keeps two files with its own state, not with the product:
+- **`<name>.env`:** names, zone, forge, repos and bot.
+- **`<name>.seed.yaml`:** users, orgs, teams, tokens, the OAuth app and branch protection.
+
+`install/instances/example.env` and `example.seed.yaml` are the template. The Johnopia trial's files
+are in `instances/johnopia/` in ffwf's platform repo, which is outside the product paths, so they
+never ship.
+
+A product-only copy, for a release or a review, is `install/new-instance.sh --product-only <dir>`.
+
+## Steps (the Johnopia trial, timed on one 12-core host)
 
 | # | Step | Command | Time |
 |---|---|---|---|
 | 1 | Cluster | `NAME=c-johnopia DIR=/fast/k0s/c-johnopia install/lab-cluster.sh` | ~1 min |
-| 2 | Prerequisites and forge | `SECRETS=... install/bootstrap.sh install/instances/johnopia.env` | ~2 min |
-| 3 | Users, orgs, teams, bot token, OAuth app, branch protection | `install/seed.py install/instances/johnopia.env --api <forge>` | seconds |
-| 4 | The platform repo | `install/new-instance.sh install/instances/johnopia.env <dir>`, then push it to `<platform_repo>` on the new forge | seconds |
+| 2 | Prerequisites and forge | `SECRETS=... install/bootstrap.sh instances/johnopia.env` | ~2 min |
+| 3 | Users, orgs, teams, bot token, OAuth app, branch protection | `install/seed.py instances/johnopia.env --api <forge>` | seconds |
+| 4 | The platform repo | `install/new-instance.sh instances/johnopia.env <dir>`, then push it to `<platform_repo>` on the new forge | seconds |
 | 5 | Flux | a read-only deploy key on the platform repo, Secret `flux-system/platform-deploy-key` (identity, known_hosts), then `kubectl apply -f clusters/<cluster>/flux-entry.yaml` | ~3 min to a ready platform layer |
 | 6 | Runner | build `install/runner/Dockerfile` into the registry, register a runner (`forgejo forgejo-cli actions register --secret ... --labels cicd`), Secrets `ci/forgejo-runner` and `ci/actions-cache`, apply `install/lab/runner.yaml` | ~3 min |
 | 7 | Platform repo settings | secrets `CICD_BOT_TOKEN`, `CICD_HOOK_SECRET`, `CICD_RUNTIME_KUBECONFIG` (from Secret `cicd-runtime/reader-token`); variables `CICD_BOT_USER`, `CICD_CLUSTER` | seconds |

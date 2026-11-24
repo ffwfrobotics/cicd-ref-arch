@@ -1,0 +1,18 @@
+# The instance layer (tools/oscal.py): what ffwf's own forge and hosts add to the platform layer,
+# objective by objective. This instance's file: it is not a product path, so it never ships, and
+# another instance attests only what its own forge does.
+component: ffwf-instance
+title: ffwf instance (forge.goblincorps.com and its hosts)
+type: service
+objectives:
+  # IA-5(7) No embedded unencrypted static authenticators
+  ia-5.7_obj:
+    statement: gitleaks on every commit, and the forge refuses pushes that add a secret (pre-receive hook).
+    evidence:
+    - {kind: findings, category: secrets}
+    - kind: attested
+      name: forge-pre-receive-gitleaks
+      by: arecibo-ffwf-goblincorps-hosting, authorised by john
+      at: 2026-11-20
+      expires: 2027-05-20
+      note: gitleaks 8.30.1 in hooks/pre-receive.d of every enrolled repo on forge.goblincorps.com; smoke-tested

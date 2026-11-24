@@ -50,10 +50,10 @@ class Render(unittest.TestCase):
                                app_config_text=self.app_path.read_text())
 
     def test_hosts(self):
-        self.assertEqual(cicd.hosts_for(self.app, "dev", None, "c-local", "k.ffwf.net"),
-                         ["hello-dev.c-local.k.ffwf.net"])
-        self.assertEqual(cicd.hosts_for(self.app, "branch", "feat/x", "c-local", "k.ffwf.net"),
-                         ["hello-feat-x.c-local.k.ffwf.net"])
+        self.assertEqual(cicd.hosts_for(self.app, "dev", None, "c-local", "example.com"),
+                         ["hello-dev.c-local.example.com"])
+        self.assertEqual(cicd.hosts_for(self.app, "branch", "feat/x", "c-local", "example.com"),
+                         ["hello-feat-x.c-local.example.com"])
 
     def test_dev_replaces_the_pending_stand_in(self):
         standin = self.render("branch", "master")
@@ -71,7 +71,7 @@ class Render(unittest.TestCase):
         self.assertEqual(kinds, ["NetworkPolicy", "InterceptorRoute", "ScaledObject", "RoleBinding"])   # RoleBinding: the runtime check reads the env
         so = objs[2]["spec"]
         self.assertEqual((so["minReplicaCount"], so["cooldownPeriod"]), (0, 900))
-        self.assertEqual(objs[1]["spec"]["rules"][0]["hosts"], ["hello-feat-x.c-local.k.ffwf.net"])
+        self.assertEqual(objs[1]["spec"]["rules"][0]["hosts"], ["hello-feat-x.c-local.example.com"])
 
     def test_tag_is_refused(self):
         with self.assertRaises(SystemExit):
@@ -112,7 +112,7 @@ class Render(unittest.TestCase):
         self.assertFalse(list((self.root / "promotions/pending").glob("*")))
         meta = yaml.safe_load((self.root / "envs/c-local/hello/prod/cicd-env.yaml").read_text())
         self.assertEqual(meta["image"], "localhost:5000/hello@" + DIGEST)
-        self.assertEqual(meta["hosts"], ["hello.c-local.k.ffwf.net"])
+        self.assertEqual(meta["hosts"], ["hello.c-local.example.com"])
 
     def test_unapproved_promotion_is_applied_and_recorded(self):
         self.render("dev")

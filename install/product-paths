@@ -7,7 +7,7 @@ forge
 .gitignore
 images
 LICENSE
-oscal
+oscal/platform.yaml
 platform
 promotions/README.md
 README.md

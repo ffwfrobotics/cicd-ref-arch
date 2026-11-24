@@ -36,7 +36,7 @@ CI builds images and writes the desired state into git; Flux applies it; the KED
 | Traefik | ns `gateway-system` | The Gateway API controller: one Gateway `edge` covering `*.<cluster>.<zone>` on 80 and 443. |
 | KEDA + HTTP add-on | ns `keda` | The interceptor counts requests, holds them during a cold start, and drives a `ScaledObject` (min 0, `cooldownPeriod` = idle time). |
 | cert-manager | existing | A wildcard certificate for `*.<cluster>.<zone>` from the cluster's issuer. |
-| Exposure | `clusters/<c>/exposure/` | How people reach the Gateway. On c-local, a tailnet proxy whose address ExternalDNS publishes as `*.c-local.k.ffwf.net`. |
+| Exposure | `clusters/<c>/exposure/` | How people reach the Gateway. On c-local, a tailnet proxy whose address ExternalDNS publishes as `*.c-local.example.com`. |
 
 ## Environments
 

@@ -2,7 +2,7 @@
 # What tools/cicd.py and the CI actions need to know about this cluster.
 # Flux's copy of the same facts is cicd-vars.yaml (postBuild substitution).
 cluster: c-local
-zone: k.ffwf.net
+zone: example.com
 registry:
   push: registry.buildkit.svc.cluster.local:5000   # BuildKit pushes here (proxy to the node's registry)
   pull: localhost:5000            # what pods pull from (containerd mirror on the node)

@@ -49,11 +49,11 @@ Agents that turn CI results into pull requests are out of scope. They come next,
 
 ```sh
 # what URLs would this app get?
-tools/cicd.py hosts examples/hello/cicd.yaml --cluster local --zone k.ffwf.net --branch feat/Login-Page
+tools/cicd.py hosts examples/hello/cicd.yaml --cluster local --zone example.com --branch feat/Login-Page
 
 # render an environment locally (the same thing CI does)
 tools/cicd.py render examples/hello/cicd.yaml --env branch --branch feat/x \
-  --cluster local --zone k.ffwf.net --image localhost:5000/hello@sha256:... --out /tmp/envs
+  --cluster local --zone example.com --image localhost:5000/hello@sha256:... --out /tmp/envs
 
 # request a promotion (then open a PR with the file it writes)
 tools/cicd.py request-promotion --app hello --cluster local --from dev --not-before 2026-11-20T15:00:00Z

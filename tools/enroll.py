@@ -3,7 +3,7 @@
 
   FORGEJO_TOKEN=<admin token for the app repo> CICD_HOOK_SECRET=<the dashboard's webhook secret> \
     tools/enroll.py --tenant ffwf --repo ffwf/cicd-demo-app --app demo --cluster c-local --owner alice \
-      --hook-url https://dashboard.c-local.k.ffwf.net/hooks/forge
+      --hook-url https://dashboard.c-local.example.com/hooks/forge
 
 1. writes tenants/<app>.yaml here (commit and push it: the pipeline refuses unenrolled apps)
 2. adds a push webhook to the app repo: the dashboard turns each push into a run of this repo's

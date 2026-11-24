@@ -163,7 +163,13 @@ def v1_direct():
     check(rt == "success", "cicd/runtime: running")
 
 
-DEV_HOOK = os.environ.get("E2E_HOOK_URL", "https://dashboard-dev.c-local.k.ffwf.net/hooks/forge")
+def _zone() -> str:
+    """The cluster's zone, from the platform repo this runs in (clusters/<CLUSTER>/cicd-cluster.yaml)."""
+    p = HERE.parent.parent / "clusters" / CLUSTER / "cicd-cluster.yaml"
+    return (yaml.safe_load(p.read_text()) or {}).get("zone", "") if p.exists() else ""
+
+
+DEV_HOOK = os.environ.get("E2E_HOOK_URL") or f"https://dashboard-dev.{CLUSTER}.{_zone()}/hooks/forge"
 ROOT = HERE.parent.parent
 
 

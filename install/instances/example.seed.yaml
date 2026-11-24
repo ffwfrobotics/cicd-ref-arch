@@ -1,0 +1,29 @@
+# Who and what an example instance's forge starts with (seed.py reads <name>.seed.yaml next to
+# <name>.env). Passwords are generated and kept in the instance's secrets directory, never here.
+users:
+  delivery-bot: {full_name: "Example Delivery (CI/CD)", bot: true}
+  factory-bot:  {full_name: "Example Factory (agents)", bot: true}
+  dev:      {full_name: "A developer"}
+  approver: {full_name: "An approver"}
+orgs:
+  example:                  # the platform: CI/CD, compliance, dashboard, factory
+    teams:
+      delivery: {permission: write, members: [delivery-bot], all_repos: true}
+      factory:  {permission: write, members: [factory-bot], repos: [cicd-factory]}
+  example-iac:              # IaC repos that wrap developers' apps; CI/CD writes here
+    teams:
+      delivery:  {permission: write, members: [delivery-bot], all_repos: true}
+      approvers: {permission: read, members: [approver], all_repos: true}
+  shop:                     # a developer team's own org (a tenant)
+    teams:
+      developers: {permission: write, members: [dev], all_repos: true}
+      approvers:  {permission: read, members: [approver], all_repos: true}
+tokens:                     # long-lived tokens; the factory bot has none (its controller mints per session)
+  delivery-bot: [write:repository, write:issue, write:organization, read:user, read:misc]
+oauth_apps:
+  dashboard: ["https://dashboard.c-example.example.com/auth/callback", "https://dashboard-dev.c-example.example.com/auth/callback"]
+protections:                # enforcement before the merge (docs/promotion.md): only the platform's account
+  example/cicd-platform:    # pushes to master (environments) and merges promotions (an approver's Sign off)
+    branch: master
+    push: [delivery-bot]
+    merge: [delivery-bot]

@@ -4,17 +4,21 @@
 # clusters/<CLUSTER>/ (Flux entry, platform layer, environments). No other instance's state (tenants,
 # environments, promotions, stacks) comes along.
 #   new-instance.sh instances/<name>.env <out dir>
+#   new-instance.sh --product-only <out dir>     the product alone, no instance files (a release copy)
 # Upgrading later is the same drop: re-run into a checkout of the instance repo and commit; only
 # product paths change (instance.yaml records the product commit it came from).
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd); src=$(cd "$here/.." && pwd)
-# shellcheck disable=SC1090
-. "$1"; out=$2
+[ $# -eq 2 ] || { sed -n '2,9p' "$0"; exit 2; }
+out=$2
 mkdir -p "$out"
 rev=$(git -C "$src" rev-parse --short HEAD)
 git -C "$src" diff --quiet HEAD -- $(cat "$here/product-paths") || echo "warning: product paths have uncommitted changes; using HEAD ($rev)" >&2
 for p in $(cat "$here/product-paths"); do rm -rf "${out:?}/$p"; done
 git -C "$src" archive HEAD $(cat "$here/product-paths") | tar -x -C "$out"
+[ "$1" = --product-only ] && exit 0
+# shellcheck disable=SC1090
+. "$1"
 
 cat > "$out/instance.yaml" <<EOT
 # Who this platform instance is (tools/cicd.py instance()). Made by install/new-instance.sh.

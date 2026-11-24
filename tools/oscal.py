@@ -9,6 +9,8 @@
 
 Layers, merged objective by objective in this order (a later one replaces an earlier one):
   1. platform  oscal/platform.yaml here: what the pipeline implements for every app
+     instance  oscal/instance.yaml here, if the instance keeps one: what its own forge and hosts add
+               (attestations such as a pre-receive hook). The instance's file, never the product's.
   2. app       oscal/component.yaml in the app's repo, if its developers keep one (never required)
   3. sysadmin  apps/<app>/component.yaml in the compliance repo: the owner's sysadmins, for what
                the pipeline can't see, overrides, and legacy apps with nothing in their repo
@@ -45,7 +47,7 @@ def _instance() -> dict:
 NS = "https://ffwf.net/ns/cicd"
 OSCAL_VERSION = "1.2.3"
 UUID_NS = uuid.UUID("5d0f3c38-3f0e-4f43-9a8e-7b0c1c2d9e11")
-LAYERS = ("platform", "app", "sysadmin")
+LAYERS = ("platform", "instance", "app", "sysadmin")
 AUTOMATED = {"sbom", "scan", "findings", "ci-result", "gate", "vuln-db", "manifests", "config-control", "release"}
 
 
@@ -405,7 +407,8 @@ def cmd_assess(a) -> int:
     catalog = json.loads(Path(a.catalog).read_text())
     profile = json.loads(Path(a.profile).read_text())
     objs = objectives_for(catalog, profile_controls(profile))
-    layers = [L for L in (load_layer(a.platform, "platform"), load_layer(a.app_layer, "app"),
+    layers = [L for L in (load_layer(a.platform, "platform"), load_layer(a.instance_layer, "instance"),
+                          load_layer(a.app_layer, "app"),
                           load_layer(a.sysadmin_layer, "sysadmin")) if L]
     ev = Evidence(Path(a.evidence), Path(a.releases) if a.releases else None, a.app, commit=a.commit, image=a.image)
     rec = ev.record or {}
@@ -435,7 +438,8 @@ def cmd_ssp(a) -> int:
     profile = json.loads(Path(a.profile).read_text())
     cids = profile_controls(profile)
     objs = objectives_for(catalog, cids)
-    layers = [L for L in (load_layer(a.platform, "platform"), load_layer(a.app_layer, "app"),
+    layers = [L for L in (load_layer(a.platform, "platform"), load_layer(a.instance_layer, "instance"),
+                          load_layer(a.app_layer, "app"),
                           load_layer(a.sysadmin_layer, "sysadmin")) if L]
     stmts = merged(layers)
     this = uid("this-system", app["name"])
@@ -469,7 +473,7 @@ def cmd_ssp(a) -> int:
         "uuid": uid("ssp", app["name"]),
         "metadata": metadata(f"System security plan: {app.get('title', app['name'])}",
                              props=[prop("app", app["name"]), prop("tenant", app.get("tenant", ""))],
-                             remarks="Generated from the profile and the platform, app and sysadmin layers. "
+                             remarks="Generated from the profile and the platform, instance, app and sysadmin layers. "
                                      "Leveraged authorizations (a platform SSP) are a later step."),
         "import-profile": {"href": a.profile_href or a.profile},
         "system-characteristics": {
@@ -515,6 +519,7 @@ def main():
         s.add_argument("--catalog", required=True)
         s.add_argument("--profile", required=True)
         s.add_argument("--platform", required=True)
+        s.add_argument("--instance-layer")
         s.add_argument("--app-layer")
         s.add_argument("--sysadmin-layer")
         if name == "assess":

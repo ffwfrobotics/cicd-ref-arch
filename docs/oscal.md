@@ -21,7 +21,7 @@ The compliance repo is named in `clusters/<cluster>/cicd-cluster.yaml` (`complia
 
 ## Layers and evidence selectors
 
-Layers are merged objective by objective, in order (platform, app, sysadmin); a later layer replaces an earlier one for that objective, and the result records which layer said it. An objective is:
+Layers are merged objective by objective, in order (platform, instance, app, sysadmin). The instance layer, `oscal/instance.yaml` in the platform repo, is optional and belongs to the instance, not the product: it holds what only that instance's forge or hosts do, such as an attested pre-receive hook. A later layer replaces an earlier one for that objective, and the result records which layer said it. An objective is:
 - **automated** when all its evidence is from the pipeline;
 - **manual** when some is an attestation;
 - **not-applicable** with a reason;

@@ -60,7 +60,7 @@ From a checkout of this repo, with a token that is an admin of the app repo, and
 ```sh
 FORGEJO_TOKEN=<admin token> CICD_HOOK_SECRET=<webhook secret> \
   python3 tools/enroll.py --tenant ffwf --repo ffwf/cicd-demo-app --app demo --cluster c-local --owner alice \
-    --hook-url https://dashboard.c-local.k.ffwf.net/hooks/forge
+    --hook-url https://dashboard.c-local.example.com/hooks/forge
 git add tenants/demo.yaml && git commit -m "enroll demo" && git push
 ```
 

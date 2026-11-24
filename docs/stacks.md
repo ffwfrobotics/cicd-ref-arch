@@ -85,4 +85,4 @@ A stack's IaC root can hold app IaC roots as submodules (`sources`, docs/enrollm
 
 ## Capacity
 
-Nested clusters share the host. On midlife (12 cores, 125 GB) c-local idles at about 1.2 cores and 12 GB. One nested cluster with the platform on it needs about 1.5 cores and 4 GB while it runs. The stack workflow runs one lifecycle at a time (a concurrency group), with a timeout, and `down` on every exit.
+Nested clusters share the host. On the lab host (12 cores, 125 GB) c-local idles at about 1.2 cores and 12 GB. One nested cluster with the platform on it needs about 1.5 cores and 4 GB while it runs. The stack workflow runs one lifecycle at a time (a concurrency group), with a timeout, and `down` on every exit.

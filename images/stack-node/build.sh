@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build the stack-node image on a host with docker and push it to a cluster's registry.
-#   images/stack-node/build.sh [registry]      default 127.0.0.1:5003 (c-local's registry on midlife)
+#   images/stack-node/build.sh [registry]      default 127.0.0.1:5003 (c-local's registry on its host)
 # The airgap bundle is the k0s release's own image list (`k0s airgap list-images`), saved into the image.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
