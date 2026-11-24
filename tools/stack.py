@@ -527,6 +527,8 @@ def check(h: ClusterHandle, a) -> dict:
 
 
 def main():
+    import cicd  # instance.yaml's names (forge_url)
+
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("step", choices=["lifecycle", "down"])
     ap.add_argument("--name", required=True)
@@ -539,7 +541,7 @@ def main():
     ap.add_argument("--sha", help="its commit")
     ap.add_argument("--path", default="cluster", help="the Flux tree in the IaC repo (without --definition)")
     ap.add_argument("--definition", help="the stack's definition dir: base/, k0s/config.yaml, providers/<provider>/")
-    ap.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
+    ap.add_argument("--server", default=cicd.forge_url(), help="the forge (default: instance.yaml forge_url)")
     ap.add_argument("--timeout", type=int, default=900)
     ap.add_argument("--min-kustomizations", type=int, default=2)
     ap.add_argument("--needs", nargs="*", default=[], help="capabilities the stack's checks need")

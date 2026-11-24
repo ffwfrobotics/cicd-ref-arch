@@ -266,6 +266,22 @@ class Tenants(unittest.TestCase):
             cicd.check_tenant(self.root, app, "ffwf/x", "c-local")
 
 
+
+class ForgeUrl(unittest.TestCase):
+    def test_env_then_instance_then_compliance_host(self):
+        root = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, root)
+        keep = {k: os.environ.pop(k) for k in ("FORGEJO_URL", "GITHUB_SERVER_URL") if k in os.environ}
+        self.addCleanup(os.environ.update, keep)
+        self.assertEqual(cicd.forge_url(root), "")                       # no instance: no forge, never ffwf's
+        (root / "instance.yaml").write_text("compliance_url: https://forge.example.com/acme/cicd-compliance\n")
+        self.assertEqual(cicd.forge_url(root), "https://forge.example.com")
+        (root / "instance.yaml").write_text("forge_url: https://git.example.com/\ncompliance_url: https://x.example.com/a/b\n")
+        self.assertEqual(cicd.forge_url(root), "https://git.example.com")
+        os.environ["FORGEJO_URL"] = "https://other.example.com"
+        self.addCleanup(os.environ.pop, "FORGEJO_URL", None)
+        self.assertEqual(cicd.forge_url(root), "https://other.example.com")
+
 if __name__ == "__main__":
     unittest.main()
 

@@ -45,6 +45,9 @@ def api(method: str, url: str, token: str, body=None):
 
 
 def main():
+    sys.path.insert(0, str(ROOT / "tools"))
+    import cicd  # instance.yaml's names (forge_url), tenants/_writable.yaml
+
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--repo", required=True, help="owner/name of the app repo on this forge")
     ap.add_argument("--app", required=True, help="the app's name (metadata.name in its cicd.yaml)")
@@ -55,7 +58,7 @@ def main():
     ap.add_argument("--branch", help="branch an old-model workflow is removed from (default: the repo's default)")
     ap.add_argument("--hook-url", default=os.environ.get("CICD_HOOK_URL", ""),
                     help="the dashboard's webhook endpoint, https://<dashboard>/hooks/forge")
-    ap.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
+    ap.add_argument("--server", default=cicd.forge_url(), help="the forge (default: instance.yaml forge_url)")
     a = ap.parse_args()
 
     token = os.environ.get("FORGEJO_TOKEN") or sys.exit("FORGEJO_TOKEN (admin on the app repo) is not set")
@@ -69,8 +72,6 @@ def main():
         sys.exit(f"cannot read {a.repo}: {code} {repo}")
     if not repo.get("permissions", {}).get("admin"):
         sys.exit(f"the token is not an admin of {a.repo}: enrolling adds its webhook")
-    sys.path.insert(0, str(ROOT / "tools"))
-    import cicd
     if not cicd.writable(ROOT, a.repo):
         sys.exit(f"{a.repo} is a developer's repo: direct mode is for CI/CD's own repos (tenants/_writable.yaml). "
                  f"Wrap it: tools/wrap.py --app {a.app} --source {a.repo}")

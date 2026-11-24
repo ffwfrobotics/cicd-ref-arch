@@ -339,7 +339,7 @@ def main():
     ap.add_argument("--hook-url", default=os.environ.get("CICD_HOOK_URL", ""))
     ap.add_argument("--requested-by", default="")
     ap.add_argument("--approved", action="store_true", help="enroll as approved (an admin running this); default pending")
-    ap.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
+    ap.add_argument("--server", default=cicd.forge_url(), help="the forge (default: instance.yaml forge_url)")
     ap.add_argument("--root", default=str(ROOT), help="the platform repo checkout to write tenants/<app>.yaml into")
     a = ap.parse_args()
     inst = cicd.instance(Path(a.root))

@@ -314,6 +314,8 @@ def post_status(v: dict, server: str, repo: str, sha: str, target: str, token: s
 
 
 def main():
+    import cicd  # instance.yaml's names (forge_url)
+
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     w = sub.add_parser("watch")
@@ -331,7 +333,7 @@ def main():
     st.add_argument("runtime_json")
     st.add_argument("--repo", required=True)
     st.add_argument("--sha", required=True)
-    st.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
+    st.add_argument("--server", default=cicd.forge_url(), help="the forge (default: instance.yaml forge_url)")
     st.add_argument("--target-url", default="")
     a = ap.parse_args()
 

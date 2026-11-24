@@ -25,7 +25,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent.parent / "tools"))
 import cicd  # noqa: E402
 
-SERVER = os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com")
+SERVER = cicd.forge_url()
 STATE = os.environ.get("STATE_REPO", "ffwf/cicd-ref-arch")
 CLUSTER = os.environ.get("CLUSTER", "c-local")
 TOKEN = os.environ.get("FORGEJO_TOKEN", "")

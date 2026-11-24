@@ -15,7 +15,7 @@ The product and the instance are kept apart:
 - the platform repo;
 - the IaC org;
 - the default tenant;
-- the forge's SSH URL;
+- the forge's web address (`forge_url`, the tools' `--server` default) and its SSH URL;
 - the compliance link.
 
 Nothing else in the product names an organisation. The `cicd.ffwf.net` API group, its labels and

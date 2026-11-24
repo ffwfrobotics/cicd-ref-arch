@@ -919,6 +919,17 @@ def instance(root: Path = None) -> dict:
     return load_yaml(p) if p.exists() else {}
 
 
+def forge_url(root: Path = None) -> str:
+    """The forge the tools talk to when a command doesn't name one: FORGEJO_URL, the runner's
+    GITHUB_SERVER_URL, instance.yaml's forge_url, or the host of its compliance_url."""
+    url = os.environ.get("FORGEJO_URL") or os.environ.get("GITHUB_SERVER_URL")
+    if not url:
+        i = instance(root)
+        m = re.match(r"https?://[^/]+", i.get("compliance_url") or "")
+        url = i.get("forge_url") or (m.group(0) if m else "")
+    return url.rstrip("/")
+
+
 def writable(root: Path, repo: str) -> bool:
     """May CI/CD write to this repo (tenants/_writable.yaml)? Only its own repos and the IaC repos that
     wrap apps; a developer's repo is read only, whatever the bot's access to it."""
@@ -1306,7 +1317,7 @@ def main():
     r.add_argument("--sources", default="", help="JSON list of {path, repo, commit}: the source commits this build is from")
 
     ci = sub.add_parser("check-images", help="prebuilt apps: follow their image tags (commit or PR the new digest)")
-    ci.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
+    ci.add_argument("--server", default=forge_url(), help="the forge (default: instance.yaml forge_url)")
 
     tn = sub.add_parser("tenant", help="print an enrolled app's normalized tenant spec (JSON), or key=value lines")
     tn.add_argument("app")
@@ -1318,7 +1329,7 @@ def main():
     bp.add_argument("--branch", required=True)
     bp.add_argument("--sha", required=True)
     bp.add_argument("--actor", default="")
-    bp.add_argument("--server", default=os.environ.get("FORGEJO_URL", "https://forge.goblincorps.com"))
+    bp.add_argument("--server", default=forge_url(), help="the forge (default: instance.yaml forge_url)")
 
     i = sub.add_parser("index")
     i.add_argument("--cluster", required=True)
