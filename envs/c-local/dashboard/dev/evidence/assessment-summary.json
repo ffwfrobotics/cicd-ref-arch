@@ -3,9 +3,9 @@
  "kind": "self-assessment",
  "app": "dashboard",
  "env": "dev",
- "commit": "92ee6b4d1055c0fae81911d680ddb7cfadbc514c",
- "image": "localhost:5000/dashboard@sha256:25bbbffaa64be3f192d2b747e666aa0e363cc7588cc8541783f96147048fa3f1",
- "generated": "2026-11-24T05:19:12Z",
+ "commit": "55112ae8d0761717fcb5eb475e680ba7c0967b02",
+ "image": "localhost:5000/dashboard@sha256:436b6f06847b2565a3fa40ea31b947e1a99c2e7dc6a85adca371f6378b57f81b",
+ "generated": "2026-11-24T18:12:27Z",
  "counts": {
   "satisfied": 34,
   "not-satisfied": 6
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 92ee6b4d1055, image pinned by digest"
+     "found": "commit 55112ae8d076, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 92ee6b4d1055, image pinned by digest"
+     "found": "commit 55112ae8d076, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (12 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (12 h old)"
     }
    ]
   },
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (12 h old)"
     }
    ]
   },
@@ -387,7 +387,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -423,12 +423,12 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (63/64 checks passed)"
+     "found": "test ran: pass (67/68 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -444,12 +444,12 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (63/64 checks passed)"
+     "found": "test ran: pass (67/68 checks passed)"
     },
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -465,7 +465,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (63/64 checks passed)"
+     "found": "test ran: pass (67/68 checks passed)"
     },
     {
      "selector": "gate",
@@ -549,7 +549,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -581,7 +581,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (63/64 checks passed)"
+     "found": "test ran: pass (67/68 checks passed)"
     }
    ]
   },
@@ -597,7 +597,7 @@
     {
      "selector": "ci-result:job=test",
      "holds": true,
-     "found": "test ran: pass (63/64 checks passed)"
+     "found": "test ran: pass (67/68 checks passed)"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 92ee6b4d1055, image pinned by digest"
+     "found": "commit 55112ae8d076, image pinned by digest"
     }
    ]
   },
@@ -667,7 +667,7 @@
    "id": "ia-5.7_obj",
    "control": "ia-5.7",
    "objective": "unencrypted static authenticators are not embedded in applications or other forms of static storage.",
-   "layer": "platform",
+   "layer": "instance",
    "coverage": "manual",
    "state": "satisfied",
    "reason": "gitleaks on every commit, and the forge refuses pushes that add a secret (pre-receive hook).",
@@ -689,7 +689,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/d288399724cb5c81/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/583be53ee269a74b/hostexecutor/.cicd/oscal/platform.yaml"
+  },
+  {
+   "layer": "instance",
+   "component": "ffwf-instance",
+   "path": "/runner/work/583be53ee269a74b/hostexecutor/.cicd/oscal/instance.yaml"
   }
  ]
 }
