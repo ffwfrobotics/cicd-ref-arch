@@ -1,0 +1,12 @@
+apiVersion: cicd.ffwf.net/v1alpha1
+kind: Promotion
+id: dashboard-prod-20261124T190310Z
+app: dashboard
+cluster: c-local
+from: dev
+to: prod
+image: localhost:5000/dashboard@sha256:436b6f06847b2565a3fa40ea31b947e1a99c2e7dc6a85adca371f6378b57f81b
+commit: 55112ae8d0761717fcb5eb475e680ba7c0967b02
+notBefore: '2026-11-24T19:03:10Z'
+requestedBy: john
+reason: '0.15.5: build-only apps in the dashboard (approved by John)'
