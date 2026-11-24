@@ -10,3 +10,15 @@ commit: 55112ae8d0761717fcb5eb475e680ba7c0967b02
 notBefore: '2026-11-24T19:03:10Z'
 requestedBy: john
 reason: '0.15.5: build-only apps in the dashboard (approved by John)'
+appliedAt: '2026-11-24T19:06:58Z'
+approval: 'PR #18 merged by john: no second person (requested by john)'
+approvalRecord:
+  requestedBy: john
+  pr: 18
+  author: ffwfbot
+  approvedBy: []
+  mergedBy: john
+  separated: false
+  summary: 'PR #18 merged by john: no second person (requested by john)'
+security: security gate pass (below-threshold 10, suppressed 8); self-assessment 29/40
+  satisfied

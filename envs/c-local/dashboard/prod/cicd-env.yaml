@@ -7,11 +7,11 @@ namespace: dashboard
 branch: null
 hosts:
 - dashboard.c-local.k.ffwf.net
-image: localhost:5000/dashboard@sha256:02207071530458a5c628d6383a00552a6d52d5d575f83f9b939657d79e041a63
-commit: 3954ab89bfd5731415069c37908305bee5172201
-promotion: dashboard-prod-20261122T153026Z
-approval: 'PR #16 merged by john: no second person (requested by john)'
+image: localhost:5000/dashboard@sha256:436b6f06847b2565a3fa40ea31b947e1a99c2e7dc6a85adca371f6378b57f81b
+commit: 55112ae8d0761717fcb5eb475e680ba7c0967b02
+promotion: dashboard-prod-20261124T190310Z
+approval: 'PR #18 merged by john: no second person (requested by john)'
 separated: false
-security: security gate pass (below-threshold 8, suppressed 8); self-assessment 34/40
+security: security gate pass (below-threshold 10, suppressed 8); self-assessment 29/40
   satisfied
-renderedAt: '2026-11-22T15:34:56Z'
+renderedAt: '2026-11-24T19:06:58Z'

@@ -5,7 +5,7 @@
  "env": "prod",
  "commit": "55112ae8d0761717fcb5eb475e680ba7c0967b02",
  "image": "localhost:5000/dashboard@sha256:436b6f06847b2565a3fa40ea31b947e1a99c2e7dc6a85adca371f6378b57f81b",
- "generated": "2026-11-24T19:04:20Z",
+ "generated": "2026-11-24T19:06:58Z",
  "counts": {
   "satisfied": 29,
   "not-satisfied": 11
@@ -689,12 +689,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/tmp/tmp.C7tQseupuA/oscal/platform.yaml"
+   "path": "/runner/work/9a923862827a25b0/hostexecutor/oscal/platform.yaml"
   },
   {
    "layer": "instance",
    "component": "ffwf-instance",
-   "path": "/tmp/tmp.C7tQseupuA/oscal/instance.yaml"
+   "path": "/runner/work/9a923862827a25b0/hostexecutor/oscal/instance.yaml"
   }
  ]
 }

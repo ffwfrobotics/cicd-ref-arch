@@ -1,0 +1,10 @@
+{
+  "requestedBy": "john",
+  "pr": 18,
+  "author": "ffwfbot",
+  "approvedBy": [],
+  "mergedBy": "john",
+  "separated": false,
+  "summary": "PR #18 merged by john: no second person (requested by john)",
+  "promotion": "dashboard-prod-20261124T190310Z"
+}

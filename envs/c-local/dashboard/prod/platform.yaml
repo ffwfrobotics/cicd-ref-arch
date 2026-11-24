@@ -45,6 +45,13 @@ spec:
     ports:
     - protocol: TCP
       port: 443
+  - to:
+    - ipBlock:
+        cidr: 10.244.0.0/16
+        except: []
+    ports:
+    - protocol: TCP
+      port: 8080
 ---
 apiVersion: http.keda.sh/v1beta1
 kind: InterceptorRoute

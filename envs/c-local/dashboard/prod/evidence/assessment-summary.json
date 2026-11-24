@@ -3,12 +3,12 @@
  "kind": "self-assessment",
  "app": "dashboard",
  "env": "prod",
- "commit": "3954ab89bfd5731415069c37908305bee5172201",
- "image": "localhost:5000/dashboard@sha256:02207071530458a5c628d6383a00552a6d52d5d575f83f9b939657d79e041a63",
- "generated": "2026-11-24T05:19:17Z",
+ "commit": "55112ae8d0761717fcb5eb475e680ba7c0967b02",
+ "image": "localhost:5000/dashboard@sha256:436b6f06847b2565a3fa40ea31b947e1a99c2e7dc6a85adca371f6378b57f81b",
+ "generated": "2026-11-24T19:06:58Z",
  "counts": {
-  "satisfied": 34,
-  "not-satisfied": 6
+  "satisfied": 29,
+  "not-satisfied": 11
  },
  "coverage": {
   "automated": 31,
@@ -45,7 +45,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 3954ab89bfd5, image pinned by digest"
+     "found": "commit 55112ae8d076, image pinned by digest"
     }
    ]
   },
@@ -81,7 +81,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 3954ab89bfd5, image pinned by digest"
+     "found": "commit 55112ae8d076, image pinned by digest"
     },
     {
      "selector": "manifests",
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (13 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (13 h old)"
     }
    ]
   },
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (13 h old)"
     }
    ]
   },
@@ -387,7 +387,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -417,18 +417,18 @@
    "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to perform [sa-11_odp.01] testing/evaluation [sa-11_odp.02] ",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "Unit tests and static, configuration, secret and vulnerability scans on every commit.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": true,
-     "found": "test ran: pass (56/57 checks passed)"
+     "holds": false,
+     "found": "no ci-result for test"
     },
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -438,18 +438,18 @@
    "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to produce evidence of the execution of the assessment plan;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "Each job writes a ci-result/v1 record; the run log is kept by the forge.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": true,
-     "found": "test ran: pass (56/57 checks passed)"
+     "holds": false,
+     "found": "no ci-result for test"
     },
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -459,13 +459,13 @@
    "objective": "the developer of the system, system component, or system service is required at all post-design stages of the system development life cycle to produce the results of the testing and evaluation;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "Results are recorded per commit next to the environment they produced.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": true,
-     "found": "test ran: pass (56/57 checks passed)"
+     "holds": false,
+     "found": "no ci-result for test"
     },
     {
      "selector": "gate",
@@ -549,7 +549,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -575,13 +575,13 @@
    "objective": "software updates related to flaw remediation are tested for effectiveness before installation;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "A fix is a commit; it is tested before it is deployed anywhere.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": true,
-     "found": "test ran: pass (56/57 checks passed)"
+     "holds": false,
+     "found": "no ci-result for test"
     }
    ]
   },
@@ -591,13 +591,13 @@
    "objective": "software updates related to flaw remediation are tested for potential side effects before installation;",
    "layer": "platform",
    "coverage": "automated",
-   "state": "satisfied",
+   "state": "not-satisfied",
    "reason": "The same tests run on the fix, in a dev or branch environment before prod.",
    "evidence": [
     {
      "selector": "ci-result:job=test",
-     "holds": true,
-     "found": "test ran: pass (56/57 checks passed)"
+     "holds": false,
+     "found": "no ci-result for test"
     }
    ]
   },
@@ -659,7 +659,7 @@
     {
      "selector": "config-control",
      "holds": true,
-     "found": "commit 3954ab89bfd5, image pinned by digest"
+     "found": "commit 55112ae8d076, image pinned by digest"
     }
    ]
   },
@@ -667,7 +667,7 @@
    "id": "ia-5.7_obj",
    "control": "ia-5.7",
    "objective": "unencrypted static authenticators are not embedded in applications or other forms of static storage.",
-   "layer": "platform",
+   "layer": "instance",
    "coverage": "manual",
    "state": "satisfied",
    "reason": "gitleaks on every commit, and the forge refuses pushes that add a secret (pre-receive hook).",
@@ -689,7 +689,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/d288399724cb5c81/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/9a923862827a25b0/hostexecutor/oscal/platform.yaml"
+  },
+  {
+   "layer": "instance",
+   "component": "ffwf-instance",
+   "path": "/runner/work/9a923862827a25b0/hostexecutor/oscal/instance.yaml"
   }
  ]
 }

@@ -24,3 +24,6 @@ spec:
   egress:
   - {cidr: 100.64.0.2/32, ports: [443]}
   - {cidr: 0.0.0.0/0, except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16, 127.0.0.0/8], ports: [443]}
+  # the software factory's controller (namespace factory, :8080; its own NetworkPolicy lets in only
+  # the dashboard's namespaces): pod addresses, that port only
+  - {cidr: 10.244.0.0/16, ports: [8080]}
