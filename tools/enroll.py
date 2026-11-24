@@ -10,6 +10,12 @@
    pipeline (.forgejo/workflows/pipeline.yaml). Without the webhook, the environments workflow
    still starts it within 5 minutes.
 
+Build-only (--build, repeatable): the repo's images are built, scanned and kept as evidence by digest, with
+no environment at all; whoever runs them (another GitOps repo) takes the digests (tools/evidence.py builds):
+
+  tools/enroll.py --tenant ffwf --repo ffwf/cicd-factory --app factory --cluster c-local --owner john \
+    --build controller:.:Dockerfile --build harness:harness:harness/Dockerfile
+
 Direct mode is for CI/CD's own repos only (tenants/_writable.yaml): the IaC root is written to (bumps,
 statuses), and CI/CD never writes to a developer's repo. A developer's repo is wrapped: tools/wrap.py.
 
@@ -55,6 +61,8 @@ def main():
     ap.add_argument("--cluster", action="append", required=True)
     ap.add_argument("--owner", action="append", default=[], help="people responsible for the app")
     ap.add_argument("--tenant", required=True, help="the tenant (team or organisation) the app belongs to")
+    ap.add_argument("--build", action="append", default=[], metavar="NAME:CONTEXT[:DOCKERFILE]",
+                    help="build-only: an image to build (image <app>-<NAME>), paths from --path; repeatable")
     ap.add_argument("--branch", help="branch an old-model workflow is removed from (default: the repo's default)")
     ap.add_argument("--hook-url", default=os.environ.get("CICD_HOOK_URL", ""),
                     help="the dashboard's webhook endpoint, https://<dashboard>/hooks/forge")
@@ -80,6 +88,18 @@ def main():
     tenant = {"apiVersion": "cicd.ffwf.net/v1alpha1", "kind": "Tenant", "metadata": {"name": a.app},
               "spec": {"tenant": a.tenant, "repo": a.repo, "path": a.path, "clusters": a.cluster, "owners": a.owner,
                        "enrolled": dt.date.today().isoformat()}}
+    if a.build:     # build-only: no environment; the dashboard reads the default branch from here (no cicd.yaml)
+        builds = []
+        for b in a.build:
+            n, _, rest = b.partition(":")
+            ctx, _, df = rest.partition(":")
+            builds.append({"name": n, "context": ctx or ".", **({"dockerfile": df} if df else {})})
+        tenant["spec"] = {**tenant["spec"], "mode": "build-only", "defaultBranch": repo.get("default_branch") or "main",
+                          "builds": builds}
+        try:
+            cicd.tenant_spec(tenant)
+        except ValueError as e:
+            sys.exit(str(e))
     path = ROOT / "tenants" / f"{a.app}.yaml"
     path.parent.mkdir(exist_ok=True)
     if path.exists():   # re-enrolling keeps the original date

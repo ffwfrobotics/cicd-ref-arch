@@ -16,6 +16,10 @@ days: D; a version still named by an environment or a pending promotion is alway
   evidence.py fetch    DIR [--name sbom.cdx.json ...]       download (and verify) what DIR/evidence.json lists
   evidence.py prune    --cluster C [--root .]               apply retention to every environment
   evidence.py backfill --cluster C [--root .]               move inline evidence of envs/ and promotions/ out
+  evidence.py builds   --cluster C --app A [--branch B]     build-only apps: the newest build of each target (JSON)
+
+A build-only app (tenants/<app>.yaml mode: build-only) has no environment: each target's scans and its
+build.json (image digest, commit, gate) are one release, tag <cluster>/<app>/build-<target>/<digest>.
 
 FORGEJO_TOKEN is the bot's token; the server is FORGEJO_SERVER or GITHUB_SERVER_URL."""
 import argparse
@@ -249,7 +253,10 @@ def doomed(releases: list[dict], keep_refs: set[str], live: set[tuple[str, str, 
         if pol is None:
             continue
         rels.sort(key=lambda r: r.get("created_at") or "", reverse=True)
-        keep_n = int(pol.get("keep") or 0) if (cluster, app, env) in live else 0
+        # a build-only app's builds (build-<target>) have no environment directory: they are live while
+        # the app is enrolled (live holds (cluster, app, "build-*")), and the newest `keep` of each target stay
+        is_live = (cluster, app, env) in live or (env.startswith(BUILD_PREFIX) and (cluster, app, BUILD_PREFIX + "*") in live)
+        keep_n = int(pol.get("keep") or 0) if is_live else 0
         days = pol.get("days")
         for i, r in enumerate(rels):
             t = r["tag_name"]
@@ -268,6 +275,7 @@ def prune(root: Path, cluster: str, forge: Forge) -> list[str]:
     repos = ({base["repo"]} if base else set()) | {p["repo"] for a in [t.stem for t in (root / "tenants").glob("*.yaml")]
                                                    if (p := policy(root, cluster, a))}
     live = {(cluster, m.parent.parent.name, m.parent.name) for m in root.glob(f"envs/{cluster}/*/*/cicd-env.yaml")}
+    live |= {(cluster, app, BUILD_PREFIX + "*") for app in build_only_apps(root, cluster)}
     refs = referenced(root)
     gone = []
     for repo in sorted(repos):
@@ -277,6 +285,54 @@ def prune(root: Path, cluster: str, forge: Forge) -> list[str]:
             forge.delete(repo, t)
             gone.append(f"{repo} {t}")
     return gone
+
+
+# ---------------------------------------------------------------- build-only apps
+
+
+BUILD_PREFIX = "build-"
+BUILD_RECORD = "build.json"
+
+
+def build_only_apps(root: Path, cluster: str) -> list[str]:
+    """Build-only apps enrolled on this cluster (tenants/<app>.yaml mode: build-only)."""
+    out = []
+    for p in sorted((root / "tenants").glob("*.yaml")):
+        if p.name.startswith("_"):
+            continue
+        t = load_yaml(p)
+        spec = t.get("spec") or {}
+        clusters = spec.get("clusters") or []
+        if spec.get("mode") == "build-only" and cluster in ([clusters] if isinstance(clusters, str) else clusters):
+            out.append((t.get("metadata") or {}).get("name") or p.stem)
+    return out
+
+
+def latest_builds(forge: Forge, repo: str, cluster: str, app: str, branch: str | None = None) -> dict[str, dict]:
+    """The newest build of each target of a build-only app: {target: build.json + release}. Read from
+    the evidence repo's releases <cluster>/<app>/build-<target>/..., each build.json checked against
+    the size the release lists. `branch` keeps only builds of that branch."""
+    prefix = f"{cluster}/{app}/{BUILD_PREFIX}"
+    rels = sorted((r for r in forge.releases(repo) if r["tag_name"].startswith(prefix)),
+                  key=lambda r: r.get("created_at") or "", reverse=True)
+    out: dict[str, dict] = {}
+    for r in rels:
+        target = r["tag_name"].split("/")[2][len(BUILD_PREFIX):]
+        if target in out:
+            continue
+        asset = next((a for a in r.get("assets") or [] if a["name"] == BUILD_RECORD), None)
+        if asset is None:
+            continue
+        raw = forge.download(asset["browser_download_url"])
+        if asset.get("size") is not None and asset["size"] != len(raw):
+            raise RuntimeError(f"{repo} {r['tag_name']}/{BUILD_RECORD}: size differs from the release's")
+        rec = json.loads(raw)
+        if rec.get("target") != target or rec.get("app") != app:
+            raise RuntimeError(f"{repo} {r['tag_name']}/{BUILD_RECORD} is for {rec.get('app')}/{rec.get('target')}")
+        if branch and rec.get("branch") != branch:
+            continue
+        out[target] = {**rec, "release": r.get("html_url"), "tag": r["tag_name"], "sha256": sha256(raw)}
+    return out
 
 
 # ---------------------------------------------------------------- moving what's inline today
@@ -323,6 +379,12 @@ def main():
     p.add_argument("dir")
     for k in ("--cluster", "--app", "--env"):
         p.add_argument(k, required=True)
+    p.add_argument("--meta", action="append", default=[], help="key=value, shown on the release (repeatable)")
+    b = sub.add_parser("builds", help="build-only apps: the newest build of each target (JSON), read from the evidence repo")
+    b.add_argument("--cluster", required=True)
+    b.add_argument("--app", required=True)
+    b.add_argument("--branch", help="only builds of this branch")
+    b.add_argument("--repo", help="the evidence repo (default: the cluster's, or the tenant's spec.evidence)")
     f = sub.add_parser("fetch")
     f.add_argument("dir")
     f.add_argument("--name", action="append")
@@ -335,13 +397,22 @@ def main():
     if a.cmd == "fetch":
         print("\n".join(fetch(Path(a.dir), Forge(), a.name)))
         return
+    if a.cmd == "builds":       # a read: any token that can read the evidence repo
+        repo = a.repo or (policy(root, a.cluster, a.app) or {}).get("repo")
+        if not repo:
+            sys.exit(f"no evidence repo for {a.app} on {a.cluster}: pass --repo")
+        if not os.environ.get("FORGEJO_TOKEN") or not server():
+            sys.exit("FORGEJO_TOKEN and FORGEJO_SERVER (or GITHUB_SERVER_URL) are needed")
+        print(json.dumps(latest_builds(Forge(), repo, a.cluster, a.app, a.branch), indent=2))
+        return
     if not os.environ.get("FORGEJO_TOKEN") or not server():
         sys.exit("FORGEJO_TOKEN and FORGEJO_SERVER (or GITHUB_SERVER_URL) are needed")
     if a.cmd == "publish":
         pol = active(root, a.cluster, a.app)
         if pol is None:
             sys.exit(f"no evidence repo for {a.app} on {a.cluster} (cicd-cluster.yaml or the tenant's spec.evidence)")
-        m = publish(Path(a.dir), a.cluster, a.app, a.env, pol, Forge())
+        meta = dict(kv.split("=", 1) for kv in a.meta if "=" in kv)
+        m = publish(Path(a.dir), a.cluster, a.app, a.env, pol, Forge(), meta or None)
         print(m["tag"] if m else "nothing to publish")
     elif a.cmd == "prune":
         print("\n".join(prune(root, a.cluster, Forge())) or "nothing to prune")

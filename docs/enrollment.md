@@ -11,6 +11,7 @@ Where the IaC root sits is the only difference between the modes. The pipeline d
 | **monorepo** | the monorepo, `apps/<project>`: a CI/CD repo holding several apps' IaC roots | submodules of the monorepo | the monorepo's owners |
 | **monorepo with a config repo** | the monorepo, `<config>/apps/<project>`: both CI/CD repos | sibling submodules of the monorepo | the config repo's owners |
 | **prebuilt** | `ffwf-iac/<app>`, `.`: `cicd.yaml` names an existing image (`spec.image`: repository, tag, digest) and the deploy base | none: nothing is built | the platform's owners. The image comes from elsewhere |
+| **build-only** | the repo, `.`: one of CI/CD's own repos | the same repo, one Dockerfile per build | its owners for the images; whoever runs them (another GitOps repo) for everything else. No environment |
 
 `cicd.yaml` says where the code is: `spec.build.context` is relative to the IaC root, for example `src` or `../../services/api`. A source's `path` in the tenant record is its submodule path in the IaC *repo*, so in a monorepo enrolled at `apps/api` the source `services/api` is built with context `../../services/api`. `spec.build.dockerfile` names the IaC root's Dockerfile. The test command runs in the IaC root, so it can test the code in `src/` with tests the owners wrote.
 
@@ -30,7 +31,7 @@ kind: Tenant
 metadata: {name: mabel}
 spec:
   kind: App                         # App (default) | Stack (docs/stacks.md)
-  mode: wrapped                     # direct (default) | wrapped | monorepo
+  mode: wrapped                     # direct (default) | wrapped | monorepo | prebuilt | build-only
   tenant: ffwf
   repo: ffwf-iac/mabel              # the IaC root's repo
   path: .                           # the IaC root inside it
@@ -68,6 +69,31 @@ The tenant record says `mode: prebuilt` and `image: {update: follow | pin}`. Eve
 The commit carries `Image-Repo`, `Image-Tag`, `Image-Digest` and `Previous-Digest` trailers. That push then deploys like any other.
 
 `tools/wrap.py --mode prebuilt --image <repository>:<tag>` creates the IaC repo. The digest, port and user are read from the image's config (`crane`).
+
+## Build-only
+
+A **build-only** app's images are built, scanned and kept as evidence by digest, and nothing else. There is no `cicd.yaml`, no environment, no namespace, no promotion and no bump. It is for software that something else runs: the factory, whose live copy is Flux's (`fleet/apps/factory` in the fleet repo), where a second copy in a dev environment would interfere with the first.
+
+```yaml
+spec:
+  mode: build-only
+  repo: ffwf/cicd-factory
+  path: .
+  defaultBranch: main               # the dashboard's dev branch (there is no cicd.yaml to say it)
+  builds:                           # one image each: <app>-<name> in the cluster registry
+  - {name: controller, context: ., dockerfile: Dockerfile}
+  - {name: harness, context: harness}          # dockerfile defaults to <context>/Dockerfile
+```
+
+Paths are from `spec.path`. Every push runs the pipeline's `image <name>` job once per build: the build, the source and image scans, the gate under the **prod** policy (these images go to production), and the OSCAL self-assessment. A failing gate turns the job red but the result is still recorded, with the gate's verdict next to the digest. For the default branch, each image's scans and `build.json` (the image by digest, the commit, the gate) become one release on the evidence repo, tag `<cluster>/<app>/build-<name>/<digest>`. Retention keeps the newest `keep` per image. Other branches are built and scanned, and their evidence stays in the run's artifacts.
+
+Whoever runs the images takes the digests from there:
+
+```sh
+FORGEJO_TOKEN=... FORGEJO_SERVER=https://forge... tools/evidence.py builds --cluster c-local --app factory --branch main
+```
+
+prints the newest build of each image (JSON: `image`, `digest`, `commit`, `gate`, `release`). Rendering, promoting, pausing or removing an environment of a build-only app is refused (`cicd.py`, and the pipeline's route). Enroll with `tools/enroll.py ... --build controller:.:Dockerfile --build harness:harness`.
 
 ## What intake does with the source's own files
 

@@ -14,6 +14,7 @@ Subcommands:
   reassess          re-gate and re-assess environments from their kept evidence, without a rebuild
                     (after IT Security's findings or an advisory change, and daily)
   gc                remove branch environments whose branch no longer exists
+  build-record      build-only apps: what one target's build made (image digest, commit, gate)
 
 Needs Python 3.10+ and PyYAML (actions/setup installs it).
 """
@@ -362,7 +363,15 @@ def parse_time(s: str) -> dt.datetime:
     return t
 
 
+def refuse_build_only(root: Path, name: str, what: str):
+    """A build-only app has no environments: nothing renders, promotes or manages one for it."""
+    t = load_tenants(root).get(name) if (root / "tenants").is_dir() else None
+    if t is not None and build_only(t.get("spec") or {}):
+        sys.exit(f"app {name!r} is build-only: no environments, so no {what} (its digests are taken by whoever runs it)")
+
+
 def request_promotion(root: Path, args) -> Path:
+    refuse_build_only(root, args.app, "promotion")
     src = root / "envs" / args.cluster / args.app / args.source
     meta_path = src / "cicd-env.yaml"
     if not meta_path.exists():
@@ -938,9 +947,41 @@ def writable(root: Path, repo: str) -> bool:
     return repo.split("/")[0] in (w.get("owners") or []) or repo in (w.get("repos") or [])
 
 
-MODES = ("direct", "wrapped", "monorepo", "prebuilt")
+MODES = ("direct", "wrapped", "monorepo", "prebuilt", "build-only")
 KINDS = ("App", "Stack")
 UPDATES = ("follow", "pin")
+TARGET_NAME = re.compile(r"[a-z0-9][a-z0-9-]{0,30}")
+
+
+def build_only(spec: dict) -> bool:
+    """A build-only app (docs/enrollment.md): its images are built, scanned and kept as evidence by
+    digest, and that's all. No environment, no namespace, no promotion, no bump: whoever runs the
+    images (another GitOps repo) takes the digests itself."""
+    return spec.get("mode") == "build-only"
+
+
+def build_targets(name: str, spec: dict) -> list[dict]:
+    """A build-only app's images: [{name, context, dockerfile, image}], paths from the repo's spec.path.
+    The image is <app>-<target> in the cluster registry."""
+    raw = spec.get("builds") or []
+    if not isinstance(raw, list) or not raw:
+        raise ValueError(f"{name}: a build-only app lists its builds (name, context, dockerfile)")
+    out, seen = [], set()
+    for b in raw:
+        b = dict(b or {})
+        n = str(b.get("name") or "")
+        if not TARGET_NAME.fullmatch(n):
+            raise ValueError(f"{name}: build name {n!r} must be lowercase letters, digits and -")
+        if n in seen:
+            raise ValueError(f"{name}: build {n!r} is listed twice")
+        seen.add(n)
+        ctx = os.path.normpath(str(b.get("context") or "."))
+        df = os.path.normpath(str(b.get("dockerfile") or os.path.join(ctx, "Dockerfile")))
+        for k, v in (("context", ctx), ("dockerfile", df)):
+            if v.startswith(("/", "..")):
+                raise ValueError(f"{name}: build {n}: {k} {v!r} is a path in the repo (no .., not absolute)")
+        out.append({"name": n, "context": ctx, "dockerfile": df, "image": f"{name}-{n}"})
+    return out
 
 
 def tenant_spec(t: dict) -> dict:
@@ -956,8 +997,16 @@ def tenant_spec(t: dict) -> dict:
         raise ValueError(f"{name}: kind must be one of {', '.join(KINDS)}")
     if spec["mode"] not in MODES:
         raise ValueError(f"{name}: mode must be one of {', '.join(MODES)}")
-    if spec["mode"] in ("direct", "prebuilt") and spec["sources"]:
+    if spec["mode"] in ("direct", "prebuilt", "build-only") and spec["sources"]:
         raise ValueError(f"{name}: a {spec['mode']} app has no sources")
+    if build_only(spec):
+        if spec["kind"] != "App":
+            raise ValueError(f"{name}: build-only is a mode of apps, not of a {spec['kind']}")
+        if spec.get("image"):
+            raise ValueError(f"{name}: a build-only app builds its images: no spec.image")
+        spec["builds"] = build_targets(name, spec)
+    elif spec.get("builds"):
+        raise ValueError(f"{name}: builds are for build-only apps (mode: build-only)")
     if spec["mode"] == "prebuilt":
         spec["image"] = {"update": "follow", **(spec.get("image") or {})}
         if spec["image"]["update"] not in UPDATES:
@@ -1176,6 +1225,38 @@ def check_images(root: Path, args) -> list[str]:
     return done
 
 
+BUILD_SCHEMA = "cicd-build/v1"
+
+
+def build_record(root: Path, args) -> dict:
+    """What a build-only run made of one target (docs/enrollment.md): the image by digest, the commit
+    it is from, and the security gate's verdict. Kept with the scans as build.json, so the digest and
+    its evidence are one release on the evidence repo (tag <cluster>/<app>/build-<target>/...)."""
+    t = load_tenants(root).get(args.app)
+    if t is None:
+        sys.exit(f"{args.app} is not enrolled")
+    spec = tenant_spec(t)
+    if not build_only(spec):
+        sys.exit(f"{args.app} is not build-only")
+    target = next((b for b in spec["builds"] if b["name"] == args.target), None)
+    if target is None:
+        sys.exit(f"{args.target} is not a build of {args.app}")
+    if "@sha256:" not in args.image:
+        sys.exit("--image must be pinned by digest (<registry>/<name>@sha256:...)")
+    gate = {}
+    if args.security and Path(args.security).exists():
+        g = json.loads(Path(args.security).read_text()).get("gate") or {}
+        gate = {k: g.get(k) for k in ("env", "mode", "status", "blocking", "counts")}
+    repository, digest = args.image.split("@", 1)
+    rec = {"schema": BUILD_SCHEMA, "app": args.app, "target": target["name"], "cluster": args.cluster,
+           "image": args.image, "repository": repository, "digest": digest,
+           "context": target["context"], "dockerfile": target["dockerfile"],
+           "repo": spec["repo"], "branch": args.branch, "commit": args.commit, "runUrl": args.run_url,
+           "builtAt": now_utc().isoformat().replace("+00:00", "Z"), "gate": gate or None}
+    write(Path(args.out), json.dumps(rec, indent=2) + "\n")
+    return rec
+
+
 def approved(t: dict) -> bool:
     """An app enrolled through the dashboard is pending until an admin approves it: until then every
     branch, its dev branch too, gets a branch environment only (no dev host, no promotion).
@@ -1208,6 +1289,8 @@ def route(root: Path, app: dict, branch: str, cluster: str) -> str:
     name = app["metadata"]["name"]
     tenants = load_tenants(root)
     t = tenants.get(name)
+    if t is not None and build_only(t.get("spec") or {}):
+        return "skip"           # no environments, whatever a cicd.yaml in its repo says
     dev = branch == app["spec"]["environments"]["dev"]["branch"]
     if dev and (t is None or approved(t)):
         return "dev"
@@ -1228,6 +1311,7 @@ def route(root: Path, app: dict, branch: str, cluster: str) -> str:
 
 def manage(root: Path, args) -> str:
     """Self-service changes to an app's environments, made on behalf of a user with write on its repo."""
+    refuse_build_only(root, args.app, args.action)
     app = load_app(args.app_config) if args.app_config else None
     name = args.app
     env_dir = None
@@ -1268,6 +1352,8 @@ def check_tenant(root: Path, app: dict, repo: str, cluster: str):
     if t is None:
         sys.exit(f"app {name!r} is not enrolled: an admin adds tenants/{name}.yaml (docs/enroll.md)")
     spec = t["spec"]
+    if build_only(spec):
+        sys.exit(f"app {name!r} is build-only: it has no environments to render")
     if repo and spec["repo"] != repo:
         sys.exit(f"app {name!r} is enrolled for {spec['repo']}, not {repo}")
     if cluster not in spec.get("clusters", [cluster]):
@@ -1322,6 +1408,17 @@ def main():
     tn = sub.add_parser("tenant", help="print an enrolled app's normalized tenant spec (JSON), or key=value lines")
     tn.add_argument("app")
     tn.add_argument("--github-output", action="store_true")
+
+    br = sub.add_parser("build-record", help="build-only apps: write build.json for one built target")
+    br.add_argument("--app", required=True)
+    br.add_argument("--target", required=True)
+    br.add_argument("--cluster", required=True)
+    br.add_argument("--image", required=True, help="<pull registry>/<name>@sha256:...")
+    br.add_argument("--commit", required=True)
+    br.add_argument("--branch", required=True)
+    br.add_argument("--run-url", default="")
+    br.add_argument("--security", help="actions/security's security.json (its gate is recorded)")
+    br.add_argument("--out", required=True)
 
     bp = sub.add_parser("bump", help="move a source submodule of an app's IaC root to a pushed commit")
     bp.add_argument("--app", required=True)
@@ -1408,10 +1505,14 @@ def main():
             print(f"status={spec.get('status', 'approved')}")
             print(f"writable={'true' if writable(root, spec['repo']) else 'false'}")
             print(f"sources={json.dumps(spec['sources'], separators=(',', ':'))}")
+            print(f"builds={json.dumps(spec.get('builds') or [], separators=(',', ':'))}")
         else:
             print(json.dumps(spec, indent=2))
     elif args.cmd == "bump":
         print(bump(root, args))
+    elif args.cmd == "build-record":
+        rec = build_record(root, args)
+        print(f"{rec['target']}: {rec['image']} (gate {(rec['gate'] or {}).get('status', 'none')})")
     elif args.cmd == "render":
         app = load_app(args.app)
         cl = load_cluster(root, args.cluster)

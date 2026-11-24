@@ -19,6 +19,10 @@ inputs:
   token: {description: "a token that can read the compliance repo (it may be private)", default: ""}
   user: {description: "the token's user", default: ""}
   commit: {description: "the app commit (default: the commit this run is for)", default: ""}
+  # a build-only app's target (actions/build's target-* inputs): no cicd.yaml and no deploy base
+  target-image: {description: "build-only: the image name (<app>-<target>): its ledger and assessment name", default: ""}
+  target-context: {default: "."}
+  target-dockerfile: {default: "Dockerfile"}
 outputs:
   status: {description: "pass, warn or fail", value: "${{ steps.gate.outputs.status }}"}
 runs:
@@ -30,14 +34,21 @@ runs:
       CTOKEN: ${{ inputs.token }}
       CUSER: ${{ inputs.user }}
       COMMIT: ${{ inputs.commit }}
+      TARGET_IMAGE: ${{ inputs.target-image }}
+      TARGET_CONTEXT: ${{ inputs.target-context }}
+      TARGET_DOCKERFILE: ${{ inputs.target-dockerfile }}
     run: |
       set -u
       cicd=$(cd '${{ github.action_path }}/../..' && pwd)
       app='${{ inputs.app }}'; out='${{ inputs.out }}'; mkdir -p "$out"
       # the Dockerfile is named from the IaC root (as actions/build reads it); the build context may lie outside it
       # (a monorepo app built from ../../svc-a, docs/enrollment.md): then the context is scanned too
-      read -r dockerfile context < <(python3 -c "import yaml,sys;b=yaml.safe_load(open(sys.argv[1]))['spec'].get('build',{});print(b.get('dockerfile','Dockerfile'), b.get('context','.'))" "$app/cicd.yaml")
-      name=$(python3 -c "import yaml,sys;print(yaml.safe_load(open(sys.argv[1]))['metadata']['name'])" "$app/cicd.yaml")
+      if [ -n "$TARGET_IMAGE" ]; then
+        dockerfile=$TARGET_DOCKERFILE; context=$TARGET_CONTEXT; name=$TARGET_IMAGE
+      else
+        read -r dockerfile context < <(python3 -c "import yaml,sys;b=yaml.safe_load(open(sys.argv[1]))['spec'].get('build',{});print(b.get('dockerfile','Dockerfile'), b.get('context','.'))" "$app/cicd.yaml")
+        name=$(python3 -c "import yaml,sys;print(yaml.safe_load(open(sys.argv[1]))['metadata']['name'])" "$app/cicd.yaml")
+      fi
 
       # the owner's compliance repo (may be private: read with the bot token): IT Security's findings, advisories, OSCAL content
       comp="${RUNNER_TEMP:-/tmp}/compliance"; rm -rf "$comp"
@@ -86,7 +97,7 @@ runs:
       if [ -n "$comp" ]; then
         if [ -f '${{ inputs.test-result }}' ]; then cp '${{ inputs.test-result }}' "$out/ci-result-test.json"; fi
         if [ -f "$app/oscal/component.yaml" ]; then cp "$app/oscal/component.yaml" "$out/app-component.yaml"; fi
-        cp '${{ inputs.manifests }}' "$out/app.yaml"
+        if [ -f '${{ inputs.manifests }}' ]; then cp '${{ inputs.manifests }}' "$out/app.yaml"; fi   # none for a build-only target
         { echo '### Self-assessment'; echo '```'
           CICD_COMPLIANCE_DIR="$comp" python3 "$cicd/tools/cicd.py" --root "$cicd" assess-evidence --app "$name" \
             --env '${{ inputs.env }}' --evidence "$out" --commit "${COMMIT:-$GITHUB_SHA}" --image '${{ inputs.image }}' 2>&1 \

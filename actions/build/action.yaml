@@ -7,6 +7,11 @@ inputs:
   app: {description: path to the app's directory (holds cicd.yaml), required: true}
   cluster: {description: cluster name (clusters/<cluster>/cicd-cluster.yaml), required: true}
   out: {description: output directory, default: build}
+  # a build-only app's target (tenants/<app>.yaml builds, docs/enrollment.md): the image only, named here,
+  # with no cicd.yaml and no deploy/ base. Paths are from `app`.
+  target-image: {description: "build-only: the image name (<app>-<target>)", default: ""}
+  target-context: {description: "build-only: the build context", default: "."}
+  target-dockerfile: {description: "build-only: the Dockerfile", default: "Dockerfile"}
 outputs:
   digest: {description: "sha256:...", value: "${{ steps.build.outputs.digest }}"}
   image: {description: "<pull registry>/<app>@sha256:... (what the cluster runs)", value: "${{ steps.build.outputs.image }}"}
@@ -16,13 +21,23 @@ runs:
   steps:
   - id: build
     shell: bash
+    env:
+      TARGET_IMAGE: ${{ inputs.target-image }}
+      TARGET_CONTEXT: ${{ inputs.target-context }}
+      TARGET_DOCKERFILE: ${{ inputs.target-dockerfile }}
     run: |
       set -eu
       root=$GITHUB_WORKSPACE; app="$root/${{ inputs.app }}"; out="$root/${{ inputs.out }}"; mkdir -p "$out"
       cicd=$(cd '${{ github.action_path }}/../..' && pwd)   # this repo: tools/ and clusters/
       eval "$(python3 - "$cicd/clusters/${{ inputs.cluster }}/cicd-cluster.yaml" "$app/cicd.yaml" <<'PY'
-      import sys, yaml, shlex
-      cl = yaml.safe_load(open(sys.argv[1])); app = yaml.safe_load(open(sys.argv[2]))
+      import os, sys, yaml, shlex
+      cl = yaml.safe_load(open(sys.argv[1]))
+      if os.environ.get("TARGET_IMAGE"):     # build-only: no cicd.yaml, no deploy base
+          app = {"metadata": {"name": os.environ["TARGET_IMAGE"]},
+                 "spec": {"build": {"context": os.environ.get("TARGET_CONTEXT") or ".",
+                                    "dockerfile": os.environ.get("TARGET_DOCKERFILE") or "Dockerfile"}, "deploy": {"path": ""}}}
+      else:
+          app = yaml.safe_load(open(sys.argv[2]))
       b = app["spec"].get("build", {})
       for k, v in {"NAME": app["metadata"]["name"], "PUSH": cl["registry"]["push"], "PULL": cl["registry"]["pull"],
                    "BUILDKIT": cl["buildkit"], "CONTEXT": b.get("context", "."), "DOCKERFILE": b.get("dockerfile", "Dockerfile"),
@@ -33,14 +48,16 @@ runs:
       PY
       )"
       sha7=$(git -C "$app" rev-parse --short=7 HEAD)
-      kustomize build "$app/$DEPLOY" > "$out/app.yaml"
-      kubeconform -strict -summary -ignore-missing-schemas "$out/app.yaml"
-      # per-environment overlays (docs/enrollment.md): every one is built and validated on every push
-      for e in dev branch prod; do
-        [ -f "$app/deploy-$e/kustomization.yaml" ] || continue
-        kustomize build "$app/deploy-$e" > "$out/app-$e.yaml"
-        kubeconform -strict -summary -ignore-missing-schemas "$out/app-$e.yaml"
-      done
+      if [ -z "$TARGET_IMAGE" ]; then
+        kustomize build "$app/$DEPLOY" > "$out/app.yaml"
+        kubeconform -strict -summary -ignore-missing-schemas "$out/app.yaml"
+        # per-environment overlays (docs/enrollment.md): every one is built and validated on every push
+        for e in dev branch prod; do
+          [ -f "$app/deploy-$e/kustomization.yaml" ] || continue
+          kustomize build "$app/deploy-$e" > "$out/app-$e.yaml"
+          kubeconform -strict -summary -ignore-missing-schemas "$out/app-$e.yaml"
+        done
+      fi
       # one build, two outputs: pushed to the cluster registry, and an OCI tarball for sbom/scan
       if [ -n "$PREBUILT" ]; then
         # prebuilt (docs/enrollment.md): the image exists; copy it here by digest (unchanged), and pull it

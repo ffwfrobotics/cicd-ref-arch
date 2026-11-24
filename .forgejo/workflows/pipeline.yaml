@@ -37,10 +37,11 @@ jobs:
       env: ${{ steps.route.outputs.env || steps.app.outputs.env }}
       repo: ${{ steps.app.outputs.repo }}
       path: ${{ steps.app.outputs.path }}
-      sha: ${{ steps.route.outputs.sha }}
+      sha: ${{ steps.route.outputs.sha || steps.images.outputs.sha }}
       sources: ${{ steps.app.outputs.sources }}
+      builds: ${{ steps.app.outputs.builds }}
       writable: ${{ steps.app.outputs.writable }}
-      dev_branch: ${{ steps.intake.outputs.dev_branch }}
+      dev_branch: ${{ steps.intake.outputs.dev_branch || steps.images.outputs.dev_branch }}
     steps:
     - uses: actions/checkout@v4
       with: {path: .cicd, persist-credentials: false}
@@ -60,6 +61,12 @@ jobs:
         if grep -q '^kind=Stack$' "$GITHUB_OUTPUT" && [ "$ACTION" = deploy ]; then
           echo "env=stack" >> "$GITHUB_OUTPUT"; exit 0
         fi
+        # build-only (docs/enrollment.md): images built, scanned and kept as evidence by digest; no environment,
+        # so nothing to pause, remove, promote or bump
+        if grep -q '^mode=build-only$' "$GITHUB_OUTPUT"; then
+          [ "$ACTION" = deploy ] || { echo "::error::$APP_NAME is build-only: it has no environments, so no $ACTION"; exit 1; }
+          echo "env=build-only" >> "$GITHUB_OUTPUT"; exit 0
+        fi
         if [ "$ACTION" = bump ]; then
           [[ "$SOURCE" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || { echo "::error::bump needs source=owner/name"; exit 1; }
           [ -n "$SHA" ] || { echo "::error::bump needs the pushed sha"; exit 1; }
@@ -76,7 +83,7 @@ jobs:
     # what to fix as commit statuses on the IaC root, when it's CI/CD's own (tenants/_writable.yaml; never
     # on a developer's repo). Never fails; nothing to run stops the run here.
     - id: intake
-      if: inputs.action != 'bump' && steps.app.outputs.env != 'stack'
+      if: inputs.action != 'bump' && steps.app.outputs.env != 'stack' && steps.app.outputs.env != 'build-only'
       env: {APP_NAME: "${{ inputs.app }}", REPO: "${{ steps.app.outputs.repo }}", APP: "app/${{ steps.app.outputs.path }}",
             ACTION: "${{ inputs.action }}", TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", SERVER: "${{ github.server_url }}",
             WRITABLE: "${{ steps.app.outputs.writable }}"}
@@ -89,7 +96,7 @@ jobs:
             --server "$SERVER" --target-url "$SERVER/${{ github.repository }}/actions/runs/${{ github.run_number }}"
         fi
     - id: route
-      if: inputs.action != 'bump' && steps.app.outputs.env != 'stack'
+      if: inputs.action != 'bump' && steps.app.outputs.env != 'stack' && steps.app.outputs.env != 'build-only'
       env: {BRANCH: "${{ inputs.branch }}", APP: "app/${{ steps.app.outputs.path }}", ACTION: "${{ inputs.action }}", ACTOR: "${{ inputs.actor }}",
             RUNNABLE: "${{ steps.intake.outputs.runnable }}"}
       run: |
@@ -105,10 +112,20 @@ jobs:
           skip)        echo "::notice::branch $BRANCH is excluded in cicd.yaml" ;;
           branch)      if [ "${{ steps.app.outputs.status }}" = pending ]; then echo "::notice::the app is pending approval: a branch environment only"; fi ;;
         esac
+    - id: images        # build-only: the commit, and whether it is the repo's default branch (only those builds are kept)
+      if: steps.app.outputs.env == 'build-only'
+      env: {REPO: "${{ steps.app.outputs.repo }}", TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", SERVER: "${{ github.server_url }}",
+            BRANCH: "${{ inputs.branch }}"}
+      run: |
+        set -eu
+        dev=$(curl -fsS -H "Authorization: token $TOKEN" "$SERVER/api/v1/repos/$REPO" | jq -r '.default_branch // "main"')
+        echo "dev_branch=$dev" >> "$GITHUB_OUTPUT"
+        echo "sha=$(git -C app rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        echo "$REPO $BRANCH $(git -C app rev-parse --short HEAD): build-only (images, scans and evidence; no environment)"
 
   test:
     needs: route
-    if: needs.route.outputs.env != 'manage' && needs.route.outputs.env != 'bump' && needs.route.outputs.env != 'stack' && !startsWith(needs.route.outputs.env, 'skip')
+    if: needs.route.outputs.env != 'manage' && needs.route.outputs.env != 'bump' && needs.route.outputs.env != 'stack' && needs.route.outputs.env != 'build-only' && !startsWith(needs.route.outputs.env, 'skip')
     runs-on: cicd
     steps:
     - uses: actions/checkout@v4
@@ -205,6 +222,69 @@ jobs:
     - if: always()
       uses: actions/upload-artifact@v3
       with: {name: deliver, path: "build/security/\nbuild/app*.yaml\nbuild/build-metadata.json"}
+
+  # a build-only app (docs/enrollment.md): each of its builds (tenants/<app>.yaml builds) is built, scanned and
+  # gated under the prod policy, as an image for production. Its scans and build.json (the digest, the commit,
+  # the gate) are one release on the evidence repo, for the default branch's builds: whoever runs the images
+  # takes the digest from there (tools/evidence.py builds). Nothing is rendered, deployed, promoted or bumped.
+  images:
+    name: image ${{ matrix.build.name }}    # the dashboard reads "image <target>" as the build stage
+    needs: route
+    if: needs.route.outputs.env == 'build-only'
+    runs-on: cicd
+    strategy:
+      fail-fast: false
+      matrix:
+        build: ${{ fromJSON(needs.route.outputs.builds) }}
+    env:
+      APP: app/${{ needs.route.outputs.path }}
+    steps:
+    - uses: actions/checkout@v4
+      with: {path: .cicd, persist-credentials: false}
+    - uses: actions/checkout@v4
+      with: {repository: "${{ needs.route.outputs.repo }}", ref: "${{ needs.route.outputs.sha }}", path: app, submodules: recursive,
+             token: "${{ secrets.CICD_BOT_TOKEN }}", persist-credentials: false}
+    - uses: ./.cicd/actions/setup
+    - id: build
+      uses: ./.cicd/actions/build
+      with: {app: "${{ env.APP }}", cluster: "${{ env.CLUSTER }}", target-image: "${{ matrix.build.image }}",
+             target-context: "${{ matrix.build.context }}", target-dockerfile: "${{ matrix.build.dockerfile }}"}
+    - id: security
+      continue-on-error: true      # the verdict is recorded with the digest; the job goes red below
+      uses: ./.cicd/actions/security
+      with: {app: "${{ env.APP }}", env: prod, cluster: "${{ env.CLUSTER }}", image: "${{ steps.build.outputs.image }}",
+             token: "${{ secrets.CICD_BOT_TOKEN }}", user: "${{ vars.CICD_BOT_USER }}", commit: "${{ needs.route.outputs.sha }}",
+             target-image: "${{ matrix.build.image }}", target-context: "${{ matrix.build.context }}",
+             target-dockerfile: "${{ matrix.build.dockerfile }}"}
+    - uses: ./.cicd/actions/sign
+      with: {image: "${{ steps.build.outputs.image }}", out: build/security}
+    - id: record
+      env: {FORGEJO_TOKEN: "${{ secrets.CICD_BOT_TOKEN }}", NAME: "${{ inputs.app }}", TARGET: "${{ matrix.build.name }}",
+            IMAGE: "${{ steps.build.outputs.image }}", SHA: "${{ needs.route.outputs.sha }}", BRANCH: "${{ inputs.branch }}",
+            DEV: "${{ needs.route.outputs.dev_branch }}"}
+      run: |
+        set -eu
+        url='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_number }}'
+        python3 .cicd/tools/cicd.py --root .cicd build-record --app "$NAME" --target "$TARGET" --cluster "$CLUSTER" \
+          --image "$IMAGE" --commit "$SHA" --branch "$BRANCH" --run-url "$url" --security build/security/security.json \
+          --out build/security/build.json
+        { echo "### $TARGET: \`$IMAGE\`"; echo "commit $SHA on $BRANCH, gate $(jq -r '.gate.status // "none"' build/security/build.json)"; } \
+          >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+        if [ "$BRANCH" != "$DEV" ]; then
+          echo "::notice::$BRANCH is not $DEV: built and scanned, evidence not kept (only the default branch's builds are taken)"; exit 0
+        fi
+        cp -r build/security build/evidence
+        FORGEJO_SERVER='${{ github.server_url }}' python3 .cicd/tools/evidence.py --root .cicd publish build/evidence \
+          --cluster "$CLUSTER" --app "$NAME" --env "build-$TARGET" \
+          --meta "image=$IMAGE" --meta "commit=$SHA" --meta "branch=$BRANCH" --meta "run=$url"
+        rel=$(jq -r .release build/evidence/evidence.json)
+        echo "evidence: $rel" | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
+    - if: always()
+      uses: actions/upload-artifact@v3
+      with: {name: "image-${{ matrix.build.name }}", path: "build/security/\nbuild/build-metadata.json"}
+    - if: steps.security.outcome != 'success'
+      run: |
+        echo "::error::the security gate (prod policy) failed for ${{ matrix.build.image }}: see build.json and the scans"; exit 1
 
   # after the deploy: is it running? (tools/runtime.py, contract.yaml `runtime`) One word as the commit
   # status cicd/runtime; the pod states, events and last log lines it decided from as the artifact
