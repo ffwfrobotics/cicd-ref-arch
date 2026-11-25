@@ -3,7 +3,7 @@
   "app": "demo",
   "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
   "commit": "6714eaf7d3d2518d2bf6f889b0be45e7470a1459",
-  "generated": "2026-11-24T05:19:40Z",
+  "generated": "2026-11-25T05:19:43Z",
   "scans": {
     "source": {
       "generated": "2026-11-20T04:52:03Z",
@@ -30,18 +30,18 @@
       }
     },
     "image": {
-      "generated": "2026-11-24T05:19:38Z",
-      "commit": "5cc5e985dc5ce3d60fbe5b9e1f6fda491245ca87",
+      "generated": "2026-11-25T05:19:33Z",
+      "commit": "f5ecd7c40fee829b2acd4ef93649e328f75e6564",
       "image": "localhost:5000/demo@sha256:830ed79075895f0e3348bf3cc438ffe8d3737dafd6cacce9e43082669215ec2e",
       "tools": {
         "syft": "(SBOM kept from the build)",
         "grype": "6",
-        "grype-db": "2026-11-23T06:28:32Z"
+        "grype-db": "2026-11-24T06:22:05Z"
       },
       "evidence": {
         "grype": {
           "file": "grype.json",
-          "sha256": "fe6e457eaa7f89ab5bd6cbdfb7a140e0b1c0135c00e81f52dcf1cb051db2b564"
+          "sha256": "1455be16f32054c790fb322146d5b0c2a1331bf557fcdae1b4ce0f333d354c8f"
         }
       }
     }
@@ -53,7 +53,7 @@
     "blocking": 0,
     "counts": {
       "suppressed": 8,
-      "below-threshold": 8
+      "below-threshold": 10
     },
     "notes": []
   },

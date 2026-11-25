@@ -5,7 +5,7 @@
  "env": "prod",
  "commit": "f9bdd2d8ad5259712615061127f7478ac38d577a",
  "image": "localhost:5000/fxo@sha256:0ee8f95418b976002cd5807f4eaffc0582feec4f0d0f6ed12f4b48ae601ff606",
- "generated": "2026-11-24T05:20:34Z",
+ "generated": "2026-11-25T05:20:35Z",
  "counts": {
   "satisfied": 30,
   "not-satisfied": 10
@@ -187,7 +187,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (23 h old)"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (23 h old)"
     }
    ]
   },
@@ -319,7 +319,7 @@
     {
      "selector": "findings:category=vuln",
      "holds": false,
-     "found": "176 vuln findings would block prod: CVE-2026-102633, CVE-2026-103111, CVE-2026-10536, CVE-2026-107891"
+     "found": "184 vuln findings would block prod: CVE-2026-102633, CVE-2026-103111, CVE-2026-10536, CVE-2026-107496"
     },
     {
      "selector": "findings:category=external",
@@ -356,7 +356,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (23 h old)"
     }
    ]
   },
@@ -387,7 +387,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: fail (127/307 checks passed)"
+     "found": "security ran: fail (119/307 checks passed)"
     }
    ]
   },
@@ -428,7 +428,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: fail (127/307 checks passed)"
+     "found": "security ran: fail (119/307 checks passed)"
     }
    ]
   },
@@ -449,7 +449,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: fail (127/307 checks passed)"
+     "found": "security ran: fail (119/307 checks passed)"
     }
    ]
   },
@@ -502,7 +502,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "180 findings would block prod: CKV_K8S_11, CKV_K8S_22, CKV_K8S_40, CKV_K8S_8"
+     "found": "188 findings would block prod: CKV_K8S_11, CKV_K8S_22, CKV_K8S_40, CKV_K8S_8"
     }
    ]
   },
@@ -549,7 +549,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: fail (127/307 checks passed)"
+     "found": "security ran: fail (119/307 checks passed)"
     }
    ]
   },
@@ -565,7 +565,7 @@
     {
      "selector": "findings:category=all",
      "holds": false,
-     "found": "180 findings would block prod: CKV_K8S_11, CKV_K8S_22, CKV_K8S_40, CKV_K8S_8"
+     "found": "188 findings would block prod: CKV_K8S_11, CKV_K8S_22, CKV_K8S_40, CKV_K8S_8"
     }
    ]
   },
@@ -633,7 +633,7 @@
     {
      "selector": "findings:category=vuln",
      "holds": false,
-     "found": "176 vuln findings would block prod: CVE-2026-102633, CVE-2026-103111, CVE-2026-10536, CVE-2026-107891"
+     "found": "184 vuln findings would block prod: CVE-2026-102633, CVE-2026-103111, CVE-2026-10536, CVE-2026-107496"
     }
    ]
   },
@@ -667,7 +667,7 @@
    "id": "ia-5.7_obj",
    "control": "ia-5.7",
    "objective": "unencrypted static authenticators are not embedded in applications or other forms of static storage.",
-   "layer": "platform",
+   "layer": "instance",
    "coverage": "manual",
    "state": "satisfied",
    "reason": "gitleaks on every commit, and the forge refuses pushes that add a secret (pre-receive hook).",
@@ -689,7 +689,12 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/d288399724cb5c81/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/fcf961feaa7c36c3/hostexecutor/oscal/platform.yaml"
+  },
+  {
+   "layer": "instance",
+   "component": "ffwf-instance",
+   "path": "/runner/work/fcf961feaa7c36c3/hostexecutor/oscal/instance.yaml"
   }
  ]
 }

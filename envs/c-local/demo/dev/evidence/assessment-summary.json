@@ -5,7 +5,7 @@
  "env": "dev",
  "commit": "7692958684566252f39a302d82b0bb62f294d985",
  "image": "localhost:5000/demo@sha256:2410c183a9c2b581516026af88e8c73afa156d060590da72768237f859b5685a",
- "generated": "2026-11-24T05:19:33Z",
+ "generated": "2026-11-25T05:19:27Z",
  "counts": {
   "satisfied": 38,
   "not-satisfied": 2
@@ -199,7 +199,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (23 h old)"
     }
    ]
   },
@@ -215,7 +215,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (23 h old)"
     }
    ]
   },
@@ -368,7 +368,7 @@
     {
      "selector": "vuln-db:max_age_h=48",
      "holds": true,
-     "found": "grype database built 2026-11-23T06:28:32Z (23 h old)"
+     "found": "grype database built 2026-11-24T06:22:05Z (23 h old)"
     }
    ]
   },
@@ -405,7 +405,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -446,7 +446,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -467,7 +467,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -567,7 +567,7 @@
     {
      "selector": "ci-result:job=security",
      "holds": true,
-     "found": "security ran: pass (16/16 checks passed)"
+     "found": "security ran: pass (18/18 checks passed)"
     }
    ]
   },
@@ -685,7 +685,7 @@
    "id": "ia-5.7_obj",
    "control": "ia-5.7",
    "objective": "unencrypted static authenticators are not embedded in applications or other forms of static storage.",
-   "layer": "platform",
+   "layer": "instance",
    "coverage": "manual",
    "state": "satisfied",
    "reason": "gitleaks on every commit, and the forge refuses pushes that add a secret (pre-receive hook).",
@@ -707,12 +707,17 @@
   {
    "layer": "platform",
    "component": "cicd-ref-arch",
-   "path": "/runner/work/d288399724cb5c81/hostexecutor/oscal/platform.yaml"
+   "path": "/runner/work/fcf961feaa7c36c3/hostexecutor/oscal/platform.yaml"
+  },
+  {
+   "layer": "instance",
+   "component": "ffwf-instance",
+   "path": "/runner/work/fcf961feaa7c36c3/hostexecutor/oscal/instance.yaml"
   },
   {
    "layer": "sysadmin",
    "component": "demo-owner",
-   "path": "/runner/work/d288399724cb5c81/hostexecutor/.compliance/apps/demo/component.yaml"
+   "path": "/runner/work/fcf961feaa7c36c3/hostexecutor/.compliance/apps/demo/component.yaml"
   }
  ]
 }
